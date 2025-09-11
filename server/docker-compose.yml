@@ -1,0 +1,59 @@
+version: "3.9"
+services:
+  angular-client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - node-backend
+      - django-ai
+
+  node-backend:
+    build:
+      context: .
+      dockerfile: server/nodejs/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URL=mongodb://mongo:27017/neoverify
+    depends_on:
+      - mongo
+
+  django-ai:
+    build:
+      context: .
+      dockerfile: server/python/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=neoverify.settings
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/neoverify
+    depends_on:
+      - postgres
+
+  mongo:
+    image: mongo:6
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: neoverify
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  mongo_data:
+  postgres_data:
