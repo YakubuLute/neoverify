@@ -1,0 +1,47 @@
+# Global ignores
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Root-level node
+node_modules/
+.env
+.env.*
+
+# Logs
+*.log
+
+# Python/Django (in server/python/)
+server/python/*.pyc
+server/python/*.pyo
+server/python/*.pyd
+server/python/__pycache__/
+server/python/db.sqlite3
+server/python/*.sqlite3
+server/python/.env
+server/python/.env.*
+server/python/*.log
+server/python/media/
+server/python/staticfiles/
+server/python/local_settings.py
+server/python/venv/
+
+# Node.js (in server/nodejs/)
+server/nodejs/node_modules/
+server/nodejs/npm-debug.log*
+server/nodejs/yarn-debug.log*
+server/nodejs/yarn-error.log*
+server/nodejs/package-lock.json
+server/nodejs/.env
+server/nodejs/dist/
+server/nodejs/build/
+
+# Angular (in client/)
+client/.angular/
+client/dist/
+client/node_modules/
+client/out-tsc/
+client/coverage/
+client/*.tsbuildinfo
