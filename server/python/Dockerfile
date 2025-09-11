@@ -1,8 +1,12 @@
-FROM python:3.11
+FROM python:3.11-slim-bullseye
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /usr/src/app
+
+# Update system packages to fix vulnerabilities
+RUN apt-get update && apt-get upgrade -y && apt-get clean
 
 # Install dependencies
 COPY server/python/requirements.txt ./

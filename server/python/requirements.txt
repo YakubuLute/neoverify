@@ -1,0 +1,7 @@
+Django>=5.0,<6.0
+djangorestframework>=3.14
+psycopg2-binary>=2.9        # Postgres adapter
+gunicorn>=21.2              # For production WSGI server
+django-cors-headers>=4.3    # Handle CORS (useful with Angular/Node)
+python-dotenv>=1.0          # For environment variable management
+Pillow>=10.0                # If you’ll deal with images

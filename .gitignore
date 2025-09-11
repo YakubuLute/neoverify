@@ -2,8 +2,6 @@
 .DS_Store
 Thumbs.db
 
-# VSCode
-.vscode/
 
 # Root-level node
 node_modules/
@@ -45,3 +43,55 @@ client/node_modules/
 client/out-tsc/
 client/coverage/
 client/*.tsbuildinfo
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.so
+*.dll
+
+# Virtual environments (keep venv out of repo!)
+venv/
+ENV/
+env/
+.venv/
+
+# SQLite (dev only, don’t commit DB)
+db.sqlite3
+
+# Django stuff
+*.log
+local_settings.py
+media/
+staticfiles/
+
+
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Docker
+*.pid
+*.seed
+*.cover
+*.py,cover
+coverage/
+htmlcov/
+*.coveragerc
+celerybeat-schedule
+celerybeat.pid
+
+# Byte-compiled/misc
+*.mo
+*.pot
+*.orig
+*.rej
+*.swp
+*.swo
+*~
