@@ -1,0 +1,65 @@
+<!-- src/app/features/verification/verification.component.html -->
+<div class="verification-container">
+  <mat-card class="upload-card">
+    <mat-card-header>
+      <mat-card-title>Document Verification</mat-card-title>
+      <mat-card-subtitle
+        >Upload a document to verify its authenticity</mat-card-subtitle
+      >
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="file-upload-section">
+        <input
+          type="file"
+          (change)="onFileSelected($event)"
+          accept=".pdf,.jpg,.jpeg,.png"
+          #fileInput
+          style="display: none"
+        />
+
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="fileInput.click()"
+          [disabled]="isLoading"
+        >
+          <mat-icon>upload_file</mat-icon>
+          Choose Document
+        </button>
+
+        <div class="selected-file" *ngIf="selectedFile">
+          <mat-icon>description</mat-icon>
+          <span>{{ selectedFile.name }}</span>
+        </div>
+      </div>
+
+      <div class="actions" *ngIf="selectedFile">
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="verifyDocument()"
+          [disabled]="isLoading"
+        >
+          <mat-icon>verified</mat-icon>
+          Verify Document
+        </button>
+      </div>
+
+      <div class="loading" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+        <p>Analyzing document...</p>
+      </div>
+
+      <div class="error" *ngIf="error">
+        <mat-error>{{ error }}</mat-error>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <app-verification-result
+    *ngIf="verificationResult"
+    [result]="verificationResult"
+  >
+  </app-verification-result>
+</div>
