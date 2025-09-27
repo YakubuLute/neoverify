@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+html {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-variation-settings: normal;
+  font-weight: 400;
+}
+
+body {
+  background-color: var(--p-surface-50);
+  min-height: 100vh;
+}
+
+.animate-fadeout {
+  animation: fadeout 0.15s linear;
+}
+
+.animate-scalein {
+  animation: scalein 0.15s linear;
+}
+
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scalein {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.8);
+    transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1),
+      opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
