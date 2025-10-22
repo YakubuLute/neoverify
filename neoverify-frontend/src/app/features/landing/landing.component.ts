@@ -40,45 +40,42 @@ interface ActionCard {
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="min-h-screen bg-slate-50">
+    <div class="min-h-screen bg-gray-900">
       <!-- Navigation Header -->
-      <nav class="bg-white/98 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+      <nav class="bg-gray-900/95 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between items-center h-18">
+          <div class="flex justify-between items-center h-16">
             <!-- Logo -->
-            <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
-                <i class="pi pi-shield text-white text-xl"></i>
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                <i class="pi pi-shield text-gray-900 text-lg"></i>
               </div>
-              <div class="flex flex-col">
-                <span class="text-2xl font-black tracking-tight text-slate-900">
-                  NeoVerify
-                </span>
-                <span class="text-xs font-medium text-slate-500 -mt-1">Anti-Counterfeit Platform</span>
-              </div>
+              <span class="text-xl font-semibold text-white">
+                NeoVerify
+              </span>
             </div>
 
             <!-- Navigation Links -->
-            <div class="hidden lg:flex items-center space-x-10">
-              <a href="#features" class="text-slate-700 hover:text-blue-600 font-semibold text-sm tracking-wide transition-all duration-200 hover:scale-105">FEATURES</a>
-              <a href="#solutions" class="text-slate-700 hover:text-blue-600 font-semibold text-sm tracking-wide transition-all duration-200 hover:scale-105">SOLUTIONS</a>
-              <a href="#testimonials" class="text-slate-700 hover:text-blue-600 font-semibold text-sm tracking-wide transition-all duration-200 hover:scale-105">SUCCESS STORIES</a>
-              <a href="#pricing" class="text-slate-700 hover:text-blue-600 font-semibold text-sm tracking-wide transition-all duration-200 hover:scale-105">PRICING</a>
+            <div class="hidden lg:flex items-center space-x-8">
+              <a href="#features" class="text-gray-300 hover:text-cyan-400 font-normal text-sm transition-colors">Features</a>
+              <a href="#solutions" class="text-gray-300 hover:text-cyan-400 font-normal text-sm transition-colors">Solutions</a>
+              <a href="#testimonials" class="text-gray-300 hover:text-cyan-400 font-normal text-sm transition-colors">Testimonials</a>
+              <a href="#pricing" class="text-gray-300 hover:text-cyan-400 font-normal text-sm transition-colors">Pricing</a>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center space-x-4">
               <button 
                 (click)="navigate('/auth/login')"
-                class="text-slate-700 hover:text-blue-600 font-semibold text-sm tracking-wide transition-all duration-200"
+                class="text-gray-300 hover:text-cyan-400 font-normal text-sm transition-colors"
               >
-                SIGN IN
+                Sign In
               </button>
               <button 
                 (click)="navigate('/auth/signup')"
-                class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white px-8 py-3 rounded-xl font-bold text-sm tracking-wide transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl border border-blue-500"
+                class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-lg shadow-cyan-500/25"
               >
-                START FREE TRIAL
+                Get Started
               </button>
             </div>
           </div>
@@ -86,80 +83,64 @@ interface ActionCard {
       </nav>
 
       <!-- Hero Section -->
-      <section class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-20 pb-32">
+      <section class="relative overflow-hidden bg-gray-900 pt-20 pb-24">
         <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-5">
-          <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div class="absolute top-40 right-10 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-          <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-20 left-10 w-96 h-96 bg-cyan-500 rounded-full filter blur-3xl animate-pulse"></div>
+          <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl animate-pulse animation-delay-2000"></div>
         </div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center">
             <!-- Hero Badge -->
-            <div class="inline-flex items-center px-6 py-3 bg-white/90 backdrop-blur-sm rounded-full border border-blue-200 mb-10 shadow-sm">
-              <div class="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-              <span class="text-sm font-bold text-slate-700 tracking-wide">LIVE: 50,000+ DOCUMENTS VERIFIED TODAY</span>
+            <div class="inline-flex items-center px-4 py-2 bg-gray-800/80 backdrop-blur-sm rounded-full border border-cyan-500/30 mb-8">
+              <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3 animate-pulse"></div>
+              <span class="text-sm font-normal text-cyan-400">Live: 50,000+ documents verified today</span>
             </div>
 
-            <!-- Hero Title -->
-            <h1 class="text-6xl md:text-8xl font-black text-slate-900 mb-8 leading-none tracking-tight">
-              ELIMINATE
+            <!-- Hero Title - Only large fonts here -->
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+              Stop Counterfeits
               <br>
-              <span class="bg-gradient-to-r from-red-600 via-orange-500 to-red-700 bg-clip-text text-transparent">
-                COUNTERFEITS
+              <span class="text-cyan-400">
+                Protect Your Brand
               </span>
-              <br>
-              <span class="text-5xl md:text-6xl text-slate-700">FOREVER</span>
             </h1>
 
             <!-- Hero Subtitle -->
-            <p class="text-2xl md:text-3xl text-slate-600 mb-12 max-w-5xl mx-auto leading-relaxed font-medium">
-              Deploy military-grade AI forensics and blockchain verification to 
-              <span class="text-blue-600 font-bold">instantly detect counterfeits</span>, 
-              protect your revenue, and safeguard customer trust.
+            <p class="text-xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-normal">
+              Advanced AI-powered document verification and blockchain technology to combat counterfeiting. 
+              Verify authenticity in seconds and build unshakeable customer trust.
             </p>
 
-            <!-- Urgency Indicator -->
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-6 mb-12 max-w-4xl mx-auto">
-              <div class="flex items-center justify-center mb-4">
-                <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-3"></i>
-                <span class="text-lg font-bold text-red-700">COUNTERFEIT CRISIS ALERT</span>
-              </div>
-              <p class="text-red-600 font-semibold text-lg">
-                $4.2 TRILLION lost annually to counterfeiting worldwide. 
-                <span class="text-red-800 font-black">Your brand could be next.</span>
-              </p>
-            </div>
-
             <!-- Hero CTA -->
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <button 
                 (click)="navigate('/auth/signup')"
-                class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-800 text-white px-12 py-5 rounded-2xl font-black text-xl tracking-wide transition-all duration-200 transform hover:scale-105 shadow-2xl hover:shadow-3xl border border-blue-500 flex items-center"
+                class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-lg shadow-cyan-500/25 flex items-center"
               >
-                <i class="pi pi-shield mr-4 text-2xl"></i>
-                PROTECT MY BRAND NOW
+                <i class="pi pi-shield mr-3"></i>
+                Start Protecting Now
               </button>
               <button 
                 (click)="navigate('/documents/verify')"
-                class="bg-white hover:bg-slate-50 text-slate-800 px-12 py-5 rounded-2xl font-bold text-xl border-3 border-slate-300 hover:border-blue-400 transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center"
+                class="bg-transparent hover:bg-gray-800 text-white px-8 py-4 rounded-lg font-normal text-lg border border-gray-700 hover:border-cyan-500 transition-all duration-200 flex items-center"
               >
-                <i class="pi pi-search mr-4 text-2xl text-blue-600"></i>
-                VERIFY DOCUMENT FREE
+                <i class="pi pi-search mr-3"></i>
+                Verify Document Free
               </button>
             </div>
 
             <!-- Trust Indicators -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               @for (stat of statistics; track stat.label) {
-                <div class="text-center bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg">
-                    <i [class]="stat.icon + ' text-white text-2xl'"></i>
+                <div class="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
+                  <div class="inline-flex items-center justify-center w-12 h-12 bg-cyan-500/20 rounded-lg mb-4">
+                    <i [class]="stat.icon + ' text-cyan-400 text-xl'"></i>
                   </div>
-                  <div class="text-4xl font-black text-slate-900 mb-2">{{ stat.value }}</div>
-                  <div class="text-sm font-bold text-slate-600 tracking-wide uppercase">{{ stat.label }}</div>
-                  <div class="text-xs text-green-600 font-semibold mt-1">{{ stat.trend }}</div>
+                  <div class="text-2xl font-semibold text-white mb-1">{{ stat.value }}</div>
+                  <div class="text-sm font-normal text-gray-400">{{ stat.label }}</div>
+                  <div class="text-xs text-cyan-400 font-normal mt-1">{{ stat.trend }}</div>
                 </div>
               }
             </div>
@@ -330,40 +311,53 @@ interface ActionCard {
       </section>
 
       <!-- Testimonials Section -->
-      <section id="testimonials" class="py-24 bg-white">
+      <section id="testimonials" class="py-32 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Section Header -->
-          <div class="text-center mb-20">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Trusted by Industry Leaders
+          <div class="text-center mb-24">
+            <div class="inline-block bg-green-100 text-green-800 px-6 py-2 rounded-full font-bold text-sm tracking-wide mb-6">
+              SUCCESS STORIES
+            </div>
+            <h2 class="text-5xl md:text-6xl font-black text-slate-900 mb-8 leading-tight">
+              REAL RESULTS FROM
+              <br>
+              <span class="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                REAL COMPANIES
+              </span>
             </h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-              See what our customers say about protecting their brands with NeoVerify
+            <p class="text-2xl text-slate-600 max-w-4xl mx-auto font-medium leading-relaxed">
+              See how industry leaders eliminated counterfeits, protected revenue, 
+              and restored customer trust with NeoVerify.
             </p>
           </div>
 
           <!-- Testimonials Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @for (testimonial of testimonials; track testimonial.name) {
-              <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-2xl border border-purple-100">
-                <div class="flex items-center mb-6">
-                  <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mr-4">
-                    <span class="text-white font-bold text-lg">{{ testimonial.avatar }}</span>
+              <div class="bg-gradient-to-br from-slate-50 to-blue-50 p-10 rounded-3xl border-2 border-slate-200 hover:border-blue-300 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div class="flex items-center mb-8">
+                  <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                    <span class="text-white font-black text-xl">{{ testimonial.avatar }}</span>
                   </div>
                   <div>
-                    <div class="font-bold text-gray-900">{{ testimonial.name }}</div>
-                    <div class="text-sm text-gray-600">{{ testimonial.role }}, {{ testimonial.company }}</div>
+                    <div class="font-black text-slate-900 text-lg">{{ testimonial.name }}</div>
+                    <div class="text-sm font-bold text-slate-600">{{ testimonial.role }}</div>
+                    <div class="text-sm text-blue-600 font-semibold">{{ testimonial.company }}</div>
+                    <div class="text-xs text-slate-500 font-medium">{{ testimonial.industry }}</div>
                   </div>
                 </div>
-                <p class="text-gray-700 leading-relaxed italic">
+                <p class="text-slate-700 leading-relaxed text-lg font-medium mb-6">
                   "{{ testimonial.content }}"
                 </p>
-                <div class="flex text-yellow-400 mt-4">
-                  <i class="pi pi-star-fill"></i>
-                  <i class="pi pi-star-fill"></i>
-                  <i class="pi pi-star-fill"></i>
-                  <i class="pi pi-star-fill"></i>
-                  <i class="pi pi-star-fill"></i>
+                <div class="flex text-yellow-500 mb-4">
+                  <i class="pi pi-star-fill text-lg"></i>
+                  <i class="pi pi-star-fill text-lg"></i>
+                  <i class="pi pi-star-fill text-lg"></i>
+                  <i class="pi pi-star-fill text-lg"></i>
+                  <i class="pi pi-star-fill text-lg"></i>
+                </div>
+                <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold text-center">
+                  VERIFIED SUCCESS
                 </div>
               </div>
             }
@@ -371,89 +365,132 @@ interface ActionCard {
         </div>
       </section>
 
-      <!-- CTA Section -->
-      <section class="py-24 bg-gradient-to-r from-purple-600 to-blue-600">
+      <!-- Final CTA Section -->
+      <section class="py-32 bg-gradient-to-br from-red-600 via-orange-600 to-red-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Protect Your Brand?
+          <!-- Urgency Timer -->
+          <div class="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-6 mb-12 max-w-2xl mx-auto">
+            <div class="flex items-center justify-center mb-4">
+              <i class="pi pi-clock text-white text-2xl mr-3"></i>
+              <span class="text-lg font-black text-white tracking-wide">LIMITED TIME OFFER</span>
+            </div>
+            <p class="text-white font-bold text-xl">
+              Start your free trial today and get 90 days of premium protection
+            </p>
+          </div>
+
+          <h2 class="text-6xl md:text-8xl font-black text-white mb-8 leading-none tracking-tight">
+            DON'T LET
+            <br>
+            COUNTERFEITS
+            <br>
+            <span class="text-yellow-300">DESTROY</span>
+            <br>
+            YOUR BUSINESS
           </h2>
-          <p class="text-xl text-purple-100 mb-12 max-w-3xl mx-auto">
-            Join thousands of organizations already using NeoVerify to combat counterfeiting and build customer trust.
+          <p class="text-2xl text-red-100 mb-16 max-w-4xl mx-auto font-medium leading-relaxed">
+            Every minute you delay, counterfeiters are stealing your customers, damaging your reputation, 
+            and costing you millions. Take action now before it's too late.
           </p>
           
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div class="flex flex-col sm:flex-row gap-8 justify-center items-center mb-12">
             <button 
               (click)="navigate('/auth/signup')"
-              class="bg-white hover:bg-gray-100 text-purple-600 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-xl flex items-center"
+              class="bg-white hover:bg-yellow-100 text-red-700 px-16 py-6 rounded-2xl font-black text-2xl tracking-wide transition-all duration-200 transform hover:scale-105 shadow-2xl flex items-center border-4 border-yellow-300"
             >
-              <i class="pi pi-shield mr-3"></i>
-              Start Free Trial
+              <i class="pi pi-shield mr-4 text-3xl"></i>
+              START FREE TRIAL NOW
             </button>
             <button 
               (click)="navigate('/documents/verify')"
-              class="bg-transparent hover:bg-white/10 text-white px-8 py-4 rounded-xl font-semibold text-lg border-2 border-white/30 hover:border-white transition-all duration-200 flex items-center"
+              class="bg-transparent hover:bg-white/10 text-white px-16 py-6 rounded-2xl font-black text-2xl border-4 border-white hover:border-yellow-300 transition-all duration-200 transform hover:scale-105 flex items-center"
             >
-              <i class="pi pi-search mr-3"></i>
-              Verify Document Now
+              <i class="pi pi-search mr-4 text-3xl"></i>
+              VERIFY DOCUMENT FREE
             </button>
+          </div>
+
+          <!-- Risk-Free Guarantee -->
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 max-w-4xl mx-auto">
+            <div class="flex items-center justify-center mb-4">
+              <i class="pi pi-check-circle text-green-300 text-3xl mr-4"></i>
+              <span class="text-2xl font-black text-white">100% RISK-FREE GUARANTEE</span>
+            </div>
+            <p class="text-white text-lg font-semibold">
+              Try NeoVerify for 90 days. If you don't catch at least one counterfeit or save money, 
+              we'll refund every penny. No questions asked.
+            </p>
           </div>
         </div>
       </section>
 
       <!-- Footer -->
-      <footer class="bg-gray-900 text-white py-16">
+      <footer class="bg-slate-900 text-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
             <!-- Company Info -->
             <div class="col-span-1 md:col-span-2">
-              <div class="flex items-center space-x-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
-                  <i class="pi pi-shield text-white text-lg"></i>
+              <div class="flex items-center space-x-4 mb-8">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg">
+                  <i class="pi pi-shield text-white text-2xl"></i>
                 </div>
-                <span class="text-2xl font-bold">NeoVerify</span>
+                <div>
+                  <span class="text-3xl font-black tracking-tight">NeoVerify</span>
+                  <div class="text-sm font-bold text-slate-400 -mt-1">Anti-Counterfeit Platform</div>
+                </div>
               </div>
-              <p class="text-gray-400 mb-6 max-w-md">
-                Leading the fight against counterfeiting with advanced AI and blockchain technology. 
-                Protecting brands and building trust worldwide.
+              <p class="text-slate-400 mb-8 max-w-md text-lg font-medium leading-relaxed">
+                The world's most advanced anti-counterfeit platform. Protecting brands, 
+                securing revenue, and building customer trust through military-grade technology.
               </p>
               <div class="flex space-x-4">
-                <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors">
-                  <i class="pi pi-twitter text-sm"></i>
+                <a href="#" class="w-12 h-12 bg-slate-800 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-200 transform hover:scale-110">
+                  <i class="pi pi-twitter text-lg"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors">
-                  <i class="pi pi-linkedin text-sm"></i>
+                <a href="#" class="w-12 h-12 bg-slate-800 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-200 transform hover:scale-110">
+                  <i class="pi pi-linkedin text-lg"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors">
-                  <i class="pi pi-github text-sm"></i>
+                <a href="#" class="w-12 h-12 bg-slate-800 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-200 transform hover:scale-110">
+                  <i class="pi pi-github text-lg"></i>
                 </a>
               </div>
             </div>
 
             <!-- Quick Links -->
             <div>
-              <h3 class="font-bold text-lg mb-4">Product</h3>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">API</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Integrations</a></li>
+              <h3 class="font-black text-xl mb-6 tracking-wide">PRODUCT</h3>
+              <ul class="space-y-4 text-slate-400">
+                <li><a href="#features" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">FEATURES</a></li>
+                <li><a href="#solutions" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">SOLUTIONS</a></li>
+                <li><a href="#pricing" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">PRICING</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">API DOCS</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">INTEGRATIONS</a></li>
               </ul>
             </div>
 
             <!-- Support -->
             <div>
-              <h3 class="font-bold text-lg mb-4">Support</h3>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+              <h3 class="font-black text-xl mb-6 tracking-wide">SUPPORT</h3>
+              <ul class="space-y-4 text-slate-400">
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">HELP CENTER</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">CONTACT US</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">LIVE CHAT</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">PRIVACY POLICY</a></li>
+                <li><a href="#" class="hover:text-white transition-colors font-semibold text-sm tracking-wide hover:translate-x-2 transform duration-200 block">TERMS OF SERVICE</a></li>
               </ul>
             </div>
           </div>
 
-          <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 NeoVerify. All rights reserved. Protecting authenticity worldwide.</p>
+          <div class="border-t border-slate-800 mt-16 pt-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+              <p class="text-slate-400 font-semibold">&copy; 2024 NeoVerify. All rights reserved. Eliminating counterfeits worldwide.</p>
+              <div class="flex items-center space-x-6 mt-4 md:mt-0">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span class="text-slate-400 font-semibold text-sm">SYSTEM STATUS: OPERATIONAL</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
@@ -462,6 +499,7 @@ interface ActionCard {
   styles: [`
     :host {
       display: block;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
     .animation-delay-2000 {
@@ -475,53 +513,153 @@ interface ActionCard {
     html {
       scroll-behavior: smooth;
     }
+    
+    /* Professional typography enhancements */
+    h1, h2, h3 {
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+    }
+    
+    /* Enhanced button hover effects */
+    button {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Professional shadow system */
+    .shadow-3xl {
+      box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Border width utilities */
+    .border-3 {
+      border-width: 3px;
+    }
+    
+    .border-4 {
+      border-width: 4px;
+    }
+    
+    /* Professional gradient overlays */
+    .bg-gradient-overlay {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+    }
+    
+    /* Enhanced animations */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-slide-in-up {
+      animation: slideInUp 0.6s ease-out;
+    }
+    
+    /* Professional focus states */
+    button:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    /* Enhanced text gradients */
+    .text-gradient-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .text-gradient-danger {
+      background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #dc2626 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   `]
 })
 export class LandingComponent {
   readonly features: Feature[] = [
     {
       icon: 'pi pi-eye',
-      title: 'AI Forensics Detection',
-      description: 'Advanced machine learning algorithms detect document tampering, alterations, and forgeries with 99.9% accuracy.',
-      color: 'bg-gradient-to-r from-purple-500 to-pink-500'
+      title: 'MILITARY-GRADE AI FORENSICS',
+      description: 'Deploy the same AI technology used by defense agencies to detect even the most sophisticated counterfeits. 99.9% accuracy guaranteed or your money back.',
+      color: 'bg-gradient-to-br from-red-600 to-orange-600',
+      actionText: 'DEPLOY AI NOW'
     },
     {
       icon: 'pi pi-lock',
-      title: 'Blockchain Security',
-      description: 'Immutable verification records stored on blockchain ensure tamper-proof authenticity certificates.',
-      color: 'bg-gradient-to-r from-blue-500 to-cyan-500'
+      title: 'UNBREAKABLE BLOCKCHAIN',
+      description: 'Create tamper-proof verification records that even nation-states cannot forge. Your documents become mathematically impossible to counterfeit.',
+      color: 'bg-gradient-to-br from-blue-600 to-indigo-700',
+      actionText: 'SECURE DOCUMENTS'
     },
     {
       icon: 'pi pi-bolt',
-      title: 'Instant Verification',
-      description: 'Get verification results in under 3 seconds with real-time processing and immediate feedback.',
-      color: 'bg-gradient-to-r from-yellow-500 to-orange-500'
+      title: 'LIGHTNING-FAST RESULTS',
+      description: 'Get verification results in under 2.3 seconds. Stop counterfeits before they reach your customers and damage your reputation.',
+      color: 'bg-gradient-to-br from-yellow-500 to-orange-600',
+      actionText: 'VERIFY INSTANTLY'
     },
     {
       icon: 'pi pi-qrcode',
-      title: 'QR Code Integration',
-      description: 'Generate secure QR codes for easy document sharing and verification by customers and partners.',
-      color: 'bg-gradient-to-r from-green-500 to-teal-500'
+      title: 'SMART QR PROTECTION',
+      description: 'Generate quantum-encrypted QR codes that customers can scan to instantly verify authenticity. Turn every customer into a counterfeit detector.',
+      color: 'bg-gradient-to-br from-green-600 to-emerald-600',
+      actionText: 'CREATE QR CODES'
     },
     {
       icon: 'pi pi-chart-line',
-      title: 'Analytics Dashboard',
-      description: 'Comprehensive insights into verification patterns, fraud attempts, and document authenticity trends.',
-      color: 'bg-gradient-to-r from-indigo-500 to-purple-500'
+      title: 'THREAT INTELLIGENCE',
+      description: 'Real-time analytics reveal counterfeit patterns, fraud attempts, and emerging threats. Stay ahead of criminals targeting your brand.',
+      color: 'bg-gradient-to-br from-purple-600 to-pink-600',
+      actionText: 'VIEW ANALYTICS'
     },
     {
       icon: 'pi pi-mobile',
-      title: 'Mobile-First Design',
-      description: 'Seamless experience across all devices with responsive design and native mobile app support.',
-      color: 'bg-gradient-to-r from-red-500 to-pink-500'
+      title: 'MOBILE COMMAND CENTER',
+      description: 'Verify documents anywhere, anytime with our mobile-first platform. Your anti-counterfeit protection never sleeps.',
+      color: 'bg-gradient-to-br from-indigo-600 to-purple-700',
+      actionText: 'GO MOBILE'
     }
   ];
 
   readonly statistics: Statistic[] = [
-    { value: '99.9%', label: 'Accuracy Rate', icon: 'pi pi-check-circle' },
-    { value: '10K+', label: 'Organizations', icon: 'pi pi-building' },
-    { value: '1M+', label: 'Documents Verified', icon: 'pi pi-file' },
-    { value: '<3s', label: 'Verification Time', icon: 'pi pi-clock' }
+    { value: '99.9%', label: 'Detection Accuracy', icon: 'pi pi-check-circle', trend: '↑ 15% this month' },
+    { value: '50K+', label: 'Protected Brands', icon: 'pi pi-building', trend: '↑ 2,500 new this week' },
+    { value: '10M+', label: 'Counterfeits Stopped', icon: 'pi pi-shield', trend: '↑ 50K blocked today' },
+    { value: '2.3s', label: 'Average Response', icon: 'pi pi-clock', trend: '↓ 0.7s faster' }
+  ];
+
+  readonly actionCards: ActionCard[] = [
+    {
+      title: 'STOP REVENUE THEFT',
+      description: 'Counterfeits are stealing $2.3M from your company every month. Deploy NeoVerify and reclaim your profits immediately.',
+      icon: 'pi pi-dollar',
+      buttonText: 'PROTECT REVENUE NOW',
+      route: '/auth/signup',
+      color: 'bg-gradient-to-br from-red-600/90 to-orange-600/90 border-red-400/50'
+    },
+    {
+      title: 'SAVE YOUR REPUTATION',
+      description: 'One counterfeit scandal can destroy decades of brand building. Prevent reputation damage before it happens.',
+      icon: 'pi pi-heart',
+      buttonText: 'PROTECT BRAND NOW',
+      route: '/auth/signup',
+      color: 'bg-gradient-to-br from-blue-600/90 to-indigo-600/90 border-blue-400/50'
+    },
+    {
+      title: 'VERIFY INSTANTLY',
+      description: 'Suspicious document? Get instant verification results and protect your customers from fraud in seconds.',
+      icon: 'pi pi-search',
+      buttonText: 'VERIFY NOW - FREE',
+      route: '/documents/verify',
+      color: 'bg-gradient-to-br from-green-600/90 to-emerald-600/90 border-green-400/50'
+    }
   ];
 
   readonly testimonials: Testimonial[] = [
@@ -529,21 +667,24 @@ export class LandingComponent {
       name: 'Sarah Chen',
       role: 'Chief Security Officer',
       company: 'TechCorp Industries',
-      content: 'NeoVerify has revolutionized how we handle document verification. The AI detection caught forgeries our previous system missed entirely.',
+      industry: 'Technology',
+      content: 'NeoVerify saved us $12M in the first year by stopping counterfeit components. The ROI was immediate and the peace of mind is priceless.',
       avatar: 'SC'
     },
     {
       name: 'Michael Rodriguez',
       role: 'Compliance Director',
       company: 'Global Finance Ltd',
-      content: 'The blockchain integration gives us complete confidence in our verification process. Our audit compliance improved dramatically.',
+      industry: 'Financial Services',
+      content: 'We went from 47 fraud incidents per month to zero. Our customers trust us completely now, and our insurance premiums dropped 60%.',
       avatar: 'MR'
     },
     {
       name: 'Dr. Emily Watson',
       role: 'Academic Registrar',
       company: 'University of Excellence',
-      content: 'Protecting our academic credentials has never been easier. Students and employers trust our verified documents completely.',
+      industry: 'Education',
+      content: 'Fake diplomas were destroying our reputation. NeoVerify eliminated the problem overnight. Now employers trust our graduates completely.',
       avatar: 'EW'
     }
   ];
