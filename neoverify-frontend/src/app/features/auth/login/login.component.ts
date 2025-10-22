@@ -61,8 +61,8 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
               </label>
               <div class="">
              
-                <p-password
-                
+                <p-password     
+                        
                   id="password"
                   formControlName="password"
                   placeholder="Enter your password"
