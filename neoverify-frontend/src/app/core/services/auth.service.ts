@@ -4,25 +4,16 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  avatar?: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  token: string;
-  refreshToken: string;
-}
+import { 
+  User, 
+  Organization, 
+  LoginRequest, 
+  SignUpRequest, 
+  MfaVerificationRequest, 
+  AuthResponse, 
+  UserRole,
+  InviteUserRequest 
+} from '../../shared/models/auth.models';
 
 @Injectable({
   providedIn: 'root'
@@ -34,17 +25,23 @@ export class AuthService {
 
   // Reactive state
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  private readonly currentOrganizationSubject = new BehaviorSubject<Organization | null>(null);
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+  private readonly mfaRequiredSubject = new BehaviorSubject<boolean>(false);
 
   // Public observables
   readonly currentUser$ = this.currentUserSubject.asObservable();
+  readonly currentOrganization$ = this.currentOrganizationSubject.asObservable();
   readonly isAuthenticated$ = this.currentUser$.pipe(map(user => !!user));
   readonly loading$ = this.loadingSubject.asObservable();
+  readonly mfaRequired$ = this.mfaRequiredSubject.asObservable();
 
   // Signals for modern reactive patterns
   readonly currentUser = signal<User | null>(null);
+  readonly currentOrganization = signal<Organization | null>(null);
   readonly isAuthenticated = computed(() => !!this.currentUser());
   readonly loading = signal<boolean>(false);
+  readonly mfaRequired = signal<boolean>(false);
 
   constructor() {
     this.initializeAuth();
@@ -61,20 +58,66 @@ export class AuthService {
   }
 
   /**
+   * Sign up new organization and admin user
+   */
+  signUp(request: SignUpRequest): Observable<{ message: string }> {
+    this.setLoading(true);
+    
+    return this.apiService.post<{ message: string }>('auth/signup', request).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Account created! Please check your email to verify your account.');
+      }),
+      catchError(error => {
+        this.notificationService.error('Sign up failed. Please try again.');
+        return throwError(() => error);
+      }),
+      tap(() => this.setLoading(false))
+    );
+  }
+
+  /**
    * Login with email and password
    */
-  login(credentials: LoginCredentials): Observable<AuthResponse> {
+  login(credentials: LoginRequest): Observable<AuthResponse> {
     this.setLoading(true);
     
     return this.apiService.post<AuthResponse>('auth/login', credentials).pipe(
       map(response => response.data),
       tap(authData => {
+        if (authData.requiresMfa) {
+          this.setMfaRequired(true, authData.sessionToken);
+          this.notificationService.info('Please enter your MFA code to complete login.');
+        } else {
+          this.setAuthData(authData);
+          this.notificationService.success('Login successful!');
+          this.router.navigate(['/dashboard']);
+        }
+      }),
+      catchError(error => {
+        this.notificationService.error('Login failed. Please check your credentials.');
+        return throwError(() => error);
+      }),
+      tap(() => this.setLoading(false))
+    );
+  }
+
+  /**
+   * Verify MFA code
+   */
+  verifyMfa(request: MfaVerificationRequest): Observable<AuthResponse> {
+    this.setLoading(true);
+    
+    return this.apiService.post<AuthResponse>('auth/mfa/verify', request).pipe(
+      map(response => response.data),
+      tap(authData => {
         this.setAuthData(authData);
+        this.setMfaRequired(false);
         this.notificationService.success('Login successful!');
         this.router.navigate(['/dashboard']);
       }),
       catchError(error => {
-        this.notificationService.error('Login failed. Please check your credentials.');
+        this.notificationService.error('Invalid MFA code. Please try again.');
         return throwError(() => error);
       }),
       tap(() => this.setLoading(false))
@@ -122,9 +165,40 @@ export class AuthService {
   /**
    * Check if user has specific role
    */
-  hasRole(role: string): boolean {
+  hasRole(role: UserRole): boolean {
     const user = this.getCurrentUser();
     return user?.role === role;
+  }
+
+  /**
+   * Check if user has any of the specified roles
+   */
+  hasAnyRole(roles: UserRole[]): boolean {
+    const user = this.getCurrentUser();
+    return user ? roles.includes(user.role) : false;
+  }
+
+  /**
+   * Get current organization
+   */
+  getCurrentOrganization(): Organization | null {
+    return this.currentOrganization();
+  }
+
+  /**
+   * Invite user to organization
+   */
+  inviteUser(request: InviteUserRequest): Observable<{ message: string }> {
+    return this.apiService.post<{ message: string }>('auth/invite', request).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success(`Invitation sent to ${request.email}`);
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to send invitation. Please try again.');
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
