@@ -1,1 +1,0 @@
-# NEOVERIFY frontend 
