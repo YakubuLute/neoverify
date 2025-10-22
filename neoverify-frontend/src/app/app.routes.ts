@@ -8,7 +8,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
-  
+
   // Authentication routes (only for non-authenticated users)
   {
     path: 'auth',
@@ -37,6 +37,10 @@ export const routes: Routes = [
   // Public verification (no auth required)
   {
     path: 'verify',
+    loadComponent: () => import('./features/documents/verify/document-verify.component').then(m => m.DocumentVerifyComponent)
+  },
+  {
+    path: 'documents/verify',
     loadComponent: () => import('./features/documents/verify/document-verify.component').then(m => m.DocumentVerifyComponent)
   },
 
