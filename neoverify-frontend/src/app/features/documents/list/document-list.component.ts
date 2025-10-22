@@ -327,7 +327,7 @@ export class DocumentListComponent implements OnInit {
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(doc =>
-        doc.metadata.title.toLowerCase().includes(term) ||
+        (doc.metadata.title || '').toLowerCase().includes(term) ||
         doc.documentType.toLowerCase().includes(term) ||
         doc.verificationId.toLowerCase().includes(term)
       );
@@ -363,9 +363,9 @@ export class DocumentListComponent implements OnInit {
     this.documentService.downloadDocument(document.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = window.document.createElement('a');
         a.href = url;
-        a.download = `${document.metadata.title}.pdf`;
+        a.download = `${document.metadata.title || 'document'}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
       },
@@ -392,7 +392,7 @@ export class DocumentListComponent implements OnInit {
     const doc = this.selectedDocument();
     if (!doc) return;
 
-    const link = document.createElement('a');
+    const link = window.document.createElement('a');
     link.href = this.qrCodeUrl();
     link.download = `qr-code-${doc.verificationId}.png`;
     link.click();

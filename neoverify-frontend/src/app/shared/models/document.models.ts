@@ -27,11 +27,10 @@ export enum DocumentType {
 }
 
 export enum DocumentStatus {
-  UPLOADED = 'uploaded',
-  CANONICALIZED = 'canonicalized',
-  REGISTERED = 'registered',
-  REGISTRATION_FAILED = 'registration_failed',
-  REVOKED = 'revoked'
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  REVOKED = 'revoked',
+  EXPIRED = 'expired'
 }
 
 export interface DocumentMetadata {

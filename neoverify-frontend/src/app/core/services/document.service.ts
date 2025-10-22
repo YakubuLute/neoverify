@@ -221,4 +221,41 @@ export class DocumentService {
       })
     );
   }
+}  /**
+ 
+  * Download document file
+   */
+  downloadDocument(documentId: string): Observable<Blob> {
+    return this.apiService.get(`documents/${documentId}/download`, {}, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        this.notificationService.error('Failed to download document');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Download verification receipt
+   */
+  downloadVerificationReceipt(verificationId: string): Observable<Blob> {
+    return this.apiService.get(`documents/verify/${verificationId}/receipt`, {}, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        this.notificationService.error('Failed to download verification receipt');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get all documents (simplified version for list component)
+   */
+  getDocuments(): Observable<Document[]> {
+    return this.apiService.get<PaginatedResponse<Document>>('documents').pipe(
+      map(response => response.data.items || []),
+      catchError(error => {
+        this.notificationService.error('Failed to load documents');
+        return throwError(() => error);
+      })
+    );
+  }
 }

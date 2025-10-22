@@ -8,6 +8,12 @@ import { CardModule } from 'primeng/card';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { DropdownModule } from 'primeng/dropdown';
+import { CalendarModule } from 'primeng/calendar';
+import { TagModule } from 'primeng/tag';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
@@ -66,6 +72,12 @@ const PRIMENG_MODULES = [
   ToolbarModule,
   InputTextModule,
   SelectModule,
+  DropdownModule,
+  CalendarModule,
+  TagModule,
+  InputSwitchModule,
+  InputNumberModule,
+  ProgressBarModule,
   TableModule,
   DialogModule,
   ToastModule,
