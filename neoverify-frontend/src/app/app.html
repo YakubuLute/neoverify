@@ -1,130 +1,23 @@
 <!-- Main Application Layout -->
 <div class="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-950">
-  <!-- Header/Toolbar -->
-  <p-toolbar class="border-b border-surface-200 dark:border-surface-700">
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center space-x-4">
-        <h1 class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-          {{ title() }}
-        </h1>
-      </div>
-      
-      <div class="flex items-center space-x-2">
-        <p-button 
-          label="Dashboard" 
-          icon="pi pi-home" 
-          [text]="true"
-          class="mr-2">
-        </p-button>
-        
-        <p-button 
-          label="Settings" 
-          icon="pi pi-cog" 
-          [text]="true">
-        </p-button>
-      </div>
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Global Loading Indicator -->
+  @if (isLoading()) {
+    <div class="fixed top-0 left-0 w-full h-1 bg-primary-200 dark:bg-primary-800 z-50">
+      <div class="h-full bg-primary-500 animate-pulse"></div>
     </div>
-  </p-toolbar>
+  }
 
   <!-- Main Content Area -->
-  <main class="container mx-auto px-4 py-8">
-    <!-- Welcome Card -->
-    <div class="max-w-4xl mx-auto">
-      <p-card class="mb-8">
-        <ng-template pTemplate="header">
-          <div class="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-6 rounded-t-lg">
-            <h2 class="text-3xl font-bold mb-2">Welcome to NeoVerify</h2>
-            <p class="text-primary-100">Modern Angular application with Tailwind CSS and PrimeNG</p>
-          </div>
-        </ng-template>
-        
-        <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <!-- Feature Cards -->
-            <div class="card p-4 text-center">
-              <i class="pi pi-bolt text-4xl text-primary-500 mb-3"></i>
-              <h3 class="text-lg font-semibold mb-2">Fast & Modern</h3>
-              <p class="text-surface-600 dark:text-surface-400">Built with Angular 20 and zoneless change detection</p>
-            </div>
-            
-            <div class="card p-4 text-center">
-              <i class="pi pi-palette text-4xl text-primary-500 mb-3"></i>
-              <h3 class="text-lg font-semibold mb-2">Beautiful UI</h3>
-              <p class="text-surface-600 dark:text-surface-400">Tailwind CSS with PrimeNG components</p>
-            </div>
-            
-            <div class="card p-4 text-center">
-              <i class="pi pi-shield text-4xl text-primary-500 mb-3"></i>
-              <h3 class="text-lg font-semibold mb-2">Type Safe</h3>
-              <p class="text-surface-600 dark:text-surface-400">Full TypeScript support with strict mode</p>
-            </div>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="flex flex-wrap gap-4 justify-center">
-            <p-button 
-              label="Get Started" 
-              icon="pi pi-arrow-right" 
-              class="btn-primary">
-            </p-button>
-            
-            <p-button 
-              label="View Documentation" 
-              icon="pi pi-book" 
-              [outlined]="true">
-            </p-button>
-            
-            <p-button 
-              label="GitHub Repository" 
-              icon="pi pi-github" 
-              [text]="true">
-            </p-button>
-          </div>
-        </div>
-      </p-card>
-      
-      <!-- Technology Stack -->
-      <p-card>
-        <ng-template pTemplate="header">
-          <div class="p-4 border-b border-surface-200 dark:border-surface-700">
-            <h3 class="text-xl font-semibold">Technology Stack</h3>
-          </div>
-        </ng-template>
-        
-        <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 rounded-lg bg-surface-100 dark:bg-surface-800">
-              <div class="text-2xl font-bold text-red-500 mb-2">Angular</div>
-              <div class="text-sm text-surface-600 dark:text-surface-400">v20</div>
-            </div>
-            
-            <div class="text-center p-4 rounded-lg bg-surface-100 dark:bg-surface-800">
-              <div class="text-2xl font-bold text-blue-500 mb-2">TypeScript</div>
-              <div class="text-sm text-surface-600 dark:text-surface-400">v5.8</div>
-            </div>
-            
-            <div class="text-center p-4 rounded-lg bg-surface-100 dark:bg-surface-800">
-              <div class="text-2xl font-bold text-cyan-500 mb-2">Tailwind</div>
-              <div class="text-sm text-surface-600 dark:text-surface-400">v3.4</div>
-            </div>
-            
-            <div class="text-center p-4 rounded-lg bg-surface-100 dark:bg-surface-800">
-              <div class="text-2xl font-bold text-blue-600 mb-2">PrimeNG</div>
-              <div class="text-sm text-surface-600 dark:text-surface-400">v20</div>
-            </div>
-          </div>
-        </div>
-      </p-card>
-    </div>
-    
-    <!-- Router Outlet for additional pages -->
+  <main class="min-h-[calc(100vh-4rem)]">
     <router-outlet></router-outlet>
   </main>
+
+  <!-- Global Toast Messages -->
+  <p-toast position="top-right" [life]="5000"></p-toast>
   
-  <!-- Footer -->
-  <footer class="bg-surface-800 dark:bg-surface-950 text-surface-200 py-8 mt-16">
-    <div class="container mx-auto px-4 text-center">
-      <p>&copy; 2025 NeoVerify Frontend. Built with ❤️ using Angular, Tailwind CSS, and PrimeNG.</p>
-    </div>
-  </footer>
+  <!-- Global Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
 </div>
