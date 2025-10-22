@@ -33,9 +33,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                 Email Address
               </label>
               <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <i class="pi pi-envelope text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
-                </div>
+            
                 <input
                   id="email"
                   type="email"
@@ -61,11 +59,10 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
               <label for="password" class="block text-sm font-semibold text-gray-700">
                 Password
               </label>
-              <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-                  <i class="pi pi-lock text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
-                </div>
+              <div class="">
+             
                 <p-password
+                
                   id="password"
                   formControlName="password"
                   placeholder="Enter your password"
@@ -110,7 +107,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
             <button
               type="submit"
               [disabled]="loginForm.invalid || loading()"
-              class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
+              class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
             >
               @if (loading()) {
                 <i class="pi pi-spin pi-spinner text-lg"></i>
@@ -136,7 +133,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
           <button
             type="button"
             routerLink="/auth/signup"
-            class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-200 border-2 border-gray-200 hover:border-gray-300 flex items-center justify-center space-x-3"
+            class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border-2 border-gray-200 hover:border-gray-300 flex items-center justify-center space-x-3"
           >
             <i class="pi pi-user-plus text-lg"></i>
             <span class="text-lg">Create New Account</span>
