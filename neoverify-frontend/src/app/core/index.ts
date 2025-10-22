@@ -3,9 +3,12 @@ export * from './services/api.service';
 export * from './services/auth.service';
 export * from './services/notification.service';
 export * from './services/loading.service';
+export * from './services/document.service';
 
 // Guards
 export * from './guards/auth.guard';
+export * from './guards/role.guard';
+export * from './guards/guest.guard';
 
 // Interceptors
 export * from './interceptors/auth.interceptor';
