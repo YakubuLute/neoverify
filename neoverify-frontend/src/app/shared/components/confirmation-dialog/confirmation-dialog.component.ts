@@ -38,7 +38,7 @@ export class ConfirmationDialogComponent {
   @Input() title = 'Confirm Action';
   @Input() message = 'Are you sure you want to proceed?';
   @Input() confirmLabel = 'Confirm';
-  @Input() severity: 'success' | 'info' | 'warning' | 'danger' = 'info';
+  @Input() severity: 'success' | 'info' | 'warn' | 'danger' = 'info';
   
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() confirm = new EventEmitter<void>();

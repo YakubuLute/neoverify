@@ -261,8 +261,8 @@ export class DocumentUploadComponent {
   constructor() {
     // Watch document type changes to show/hide recipient field
     this.uploadForm.get('documentType')?.valueChanges.subscribe(type => {
-      const showRecipient = type && [DocumentType.DEGREE, DocumentType.CERTIFICATE, DocumentType.TRANSCRIPT].includes(type);
-      this.showRecipientField.set(showRecipient);
+      const showRecipient = type && [DocumentType.DEGREE, DocumentType.CERTIFICATE, DocumentType.TRANSCRIPT].includes(type as DocumentType);
+      this.showRecipientField.set(!!showRecipient);
       
       if (showRecipient) {
         this.uploadForm.get('recipientName')?.setValidators([Validators.required]);

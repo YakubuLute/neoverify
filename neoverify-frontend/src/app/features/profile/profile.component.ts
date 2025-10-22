@@ -232,7 +232,7 @@ import { FormUtils } from '../../shared/utils/form.utils';
                   <span class="text-sm font-medium">MFA Enabled</span>
                   <p-tag 
                     [value]="currentUser()?.mfaEnabled ? 'Yes' : 'No'" 
-                    [severity]="currentUser()?.mfaEnabled ? 'success' : 'warning'"
+                    [severity]="currentUser()?.mfaEnabled ? 'success' : 'warn'"
                   ></p-tag>
                 </div>
 
@@ -240,7 +240,7 @@ import { FormUtils } from '../../shared/utils/form.utils';
                   <span class="text-sm font-medium">Email Verified</span>
                   <p-tag 
                     [value]="currentUser()?.emailVerified ? 'Yes' : 'No'" 
-                    [severity]="currentUser()?.emailVerified ? 'success' : 'warning'"
+                    [severity]="currentUser()?.emailVerified ? 'success' : 'warn'"
                   ></p-tag>
                 </div>
 
@@ -295,7 +295,7 @@ import { FormUtils } from '../../shared/utils/form.utils';
                     </div>
                     <p-button
                       label="Verify"
-                      severity="warning"
+                      severity="warn"
                       [outlined]="true"
                       size="small"
                       (onClick)="sendVerificationEmail()"
