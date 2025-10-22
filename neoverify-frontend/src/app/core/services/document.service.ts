@@ -4,7 +4,7 @@ import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 import { 
-  Document, 
+  Document as DocumentModel, 
   VerificationRequest, 
   VerificationResult, 
   BulkIssuanceRequest, 
@@ -24,13 +24,13 @@ export class DocumentService {
   /**
    * Upload and register a document
    */
-  uploadDocument(file: File, metadata: DocumentMetadata, documentType: DocumentType): Observable<Document> {
+  uploadDocument(file: File, metadata: DocumentMetadata, documentType: DocumentType): Observable<DocumentModel> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('metadata', JSON.stringify(metadata));
     formData.append('documentType', documentType);
 
-    return this.apiService.post<Document>('documents/upload', formData).pipe(
+    return this.apiService.post<DocumentModel>('documents/upload', formData).pipe(
       map(response => response.data),
       tap(document => {
         this.notificationService.success(`Document "${document.originalFileName}" uploaded successfully`);
@@ -221,26 +221,14 @@ export class DocumentService {
       })
     );
   }
-}  /**
- 
-  * Download document file
+  /**
+   * Download document file
    */
   downloadDocument(documentId: string): Observable<Blob> {
-    return this.apiService.get(`documents/${documentId}/download`, {}, { responseType: 'blob' }).pipe(
+    return this.apiService.get(`documents/${documentId}/download`, {}, { responseType: 'blob' } as any).pipe(
+      map(response => response.data),
       catchError(error => {
         this.notificationService.error('Failed to download document');
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Download verification receipt
-   */
-  downloadVerificationReceipt(verificationId: string): Observable<Blob> {
-    return this.apiService.get(`documents/verify/${verificationId}/receipt`, {}, { responseType: 'blob' }).pipe(
-      catchError(error => {
-        this.notificationService.error('Failed to download verification receipt');
         return throwError(() => error);
       })
     );

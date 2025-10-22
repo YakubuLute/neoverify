@@ -8,10 +8,10 @@ import { CardModule } from 'primeng/card';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TagModule } from 'primeng/tag';
-import { InputSwitchModule } from 'primeng/inputswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TableModule } from 'primeng/table';
@@ -72,10 +72,9 @@ const PRIMENG_MODULES = [
   ToolbarModule,
   InputTextModule,
   SelectModule,
-  DropdownModule,
-  CalendarModule,
+  DatePickerModule,
   TagModule,
-  InputSwitchModule,
+  ToggleSwitchModule,
   InputNumberModule,
   ProgressBarModule,
   TableModule,
@@ -126,16 +125,15 @@ const SHARED_COMPONENTS = [
   ConfirmationDialogComponent
 ];
 
+// Export all modules for standalone components
+export const SHARED_IMPORTS = [
+  ...ANGULAR_MODULES,
+  ...PRIMENG_MODULES,
+  ...SHARED_COMPONENTS
+];
+
 @NgModule({
-  imports: [
-    ...ANGULAR_MODULES,
-    ...PRIMENG_MODULES,
-    ...SHARED_COMPONENTS
-  ],
-  exports: [
-    ...ANGULAR_MODULES,
-    ...PRIMENG_MODULES,
-    ...SHARED_COMPONENTS
-  ]
+  imports: SHARED_IMPORTS,
+  exports: SHARED_IMPORTS
 })
 export class SharedModule { }
