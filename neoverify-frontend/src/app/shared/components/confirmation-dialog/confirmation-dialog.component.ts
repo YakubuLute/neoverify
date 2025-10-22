@@ -1,51 +1,58 @@
-import { Component, inject, input, output } from '@angular/core';
-import { ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-
-export interface ConfirmationConfig {
-  message: string;
-  header?: string;
-  icon?: string;
-  acceptLabel?: string;
-  rejectLabel?: string;
-  acceptButtonStyleClass?: string;
-  rejectButtonStyleClass?: string;
-}
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { SHARED_IMPORTS } from '../../index';
 
 @Component({
   selector: 'app-confirmation-dialog',
   standalone: true,
-  imports: [ConfirmDialogModule],
-  template: `<p-confirmDialog></p-confirmDialog>`,
-  providers: [ConfirmationService]
+  imports: SHARED_IMPORTS,
+  template: `
+    <p-dialog
+      [(visible)]="visible"
+      [header]="title"
+      [modal]="true"
+      [closable]="true"
+      [style]="{ width: '400px' }"
+      (onHide)="onCancel()"
+    >
+      <div class="mb-4">
+        <p>{{ message }}</p>
+      </div>
+      
+      <div class="flex justify-end gap-2">
+        <p-button
+          label="Cancel"
+          [outlined]="true"
+          (onClick)="onCancel()"
+        ></p-button>
+        <p-button
+          [label]="confirmLabel"
+          [severity]="severity"
+          (onClick)="onConfirm()"
+        ></p-button>
+      </div>
+    </p-dialog>
+  `
 })
 export class ConfirmationDialogComponent {
-  private readonly confirmationService = inject(ConfirmationService);
+  @Input() visible = false;
+  @Input() title = 'Confirm Action';
+  @Input() message = 'Are you sure you want to proceed?';
+  @Input() confirmLabel = 'Confirm';
+  @Input() severity: 'success' | 'info' | 'warning' | 'danger' = 'info';
+  
+  @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() confirm = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
 
-  readonly config = input<ConfirmationConfig>();
-  readonly confirmed = output<void>();
-  readonly rejected = output<void>();
+  onConfirm(): void {
+    this.confirm.emit();
+    this.visible = false;
+    this.visibleChange.emit(false);
+  }
 
-  /**
-   * Show confirmation dialog
-   */
-  confirm(config?: ConfirmationConfig): void {
-    const dialogConfig = config || this.config();
-    
-    if (!dialogConfig) {
-      throw new Error('Confirmation config is required');
-    }
-
-    this.confirmationService.confirm({
-      message: dialogConfig.message,
-      header: dialogConfig.header || 'Confirmation',
-      icon: dialogConfig.icon || 'pi pi-exclamation-triangle',
-      acceptLabel: dialogConfig.acceptLabel || 'Yes',
-      rejectLabel: dialogConfig.rejectLabel || 'No',
-      acceptButtonStyleClass: dialogConfig.acceptButtonStyleClass || 'p-button-danger',
-      rejectButtonStyleClass: dialogConfig.rejectButtonStyleClass || 'p-button-text',
-      accept: () => this.confirmed.emit(),
-      reject: () => this.rejected.emit()
-    });
+  onCancel(): void {
+    this.cancel.emit();
+    this.visible = false;
+    this.visibleChange.emit(false);
   }
 }

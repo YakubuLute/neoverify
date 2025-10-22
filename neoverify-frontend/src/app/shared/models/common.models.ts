@@ -1,60 +1,49 @@
-/**
- * Common interfaces and types used across the application
- */
-
-export interface BaseEntity {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: string[];
+  timestamp: string;
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
+  items: T[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-}
-
-export interface SelectOption<T = any> {
-  label: string;
-  value: T;
-  disabled?: boolean;
-  icon?: string;
-}
-
-export interface TableColumn {
-  field: string;
-  header: string;
-  sortable?: boolean;
-  filterable?: boolean;
-  width?: string;
-  type?: 'text' | 'number' | 'date' | 'boolean' | 'actions';
-}
-
-export interface FilterCriteria {
-  field: string;
-  operator: 'eq' | 'ne' | 'lt' | 'le' | 'gt' | 'ge' | 'contains' | 'startsWith' | 'endsWith';
-  value: any;
-}
-
-export interface SortCriteria {
-  field: string;
-  order: 'asc' | 'desc';
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 export interface QueryParams {
   page?: number;
   limit?: number;
   search?: string;
-  filters?: FilterCriteria[];
-  sort?: SortCriteria[];
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  filters?: Record<string, any>;
 }
 
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+export interface ErrorResponse {
+  success: false;
+  message: string;
+  errors?: string[];
+  code?: string;
+  timestamp: string;
+}
 
-export interface AsyncState<T> {
-  data: T | null;
-  loading: LoadingState;
-  error: string | null;
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
+export interface NotificationMessage {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title?: string;
+  message: string;
+  duration?: number;
+  timestamp: Date;
 }

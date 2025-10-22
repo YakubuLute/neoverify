@@ -5,7 +5,7 @@ import { SHARED_IMPORTS } from '../../index';
 @Component({
   selector: 'app-error',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-900">
       <div class="max-w-md w-full text-center">

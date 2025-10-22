@@ -2,10 +2,15 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
   role: UserRole;
   organizationId: string;
+  organizationName?: string;
   avatar?: string;
   mfaEnabled: boolean;
+  emailVerified: boolean;
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;

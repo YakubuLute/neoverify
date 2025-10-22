@@ -195,55 +195,26 @@ export class DocumentService {
   }
 
   /**
-   * Download QR code for document
+   * Download document file
    */
-  downloadQRCode(documentId: string, format: 'png' | 'svg' = 'png'): Observable<Blob> {
-    return this.apiService.get<Blob>(`documents/${documentId}/qr?format=${format}`, undefined, {
-      responseType: 'blob'
-    } as any).pipe(
-      catchError(error => {
-        this.notificationService.error('Failed to download QR code');
-        return throwError(() => error);
-      })
-    );
+  downloadDocument(documentId: string): Observable<Blob> {
+    // Mock implementation - return a simple blob
+    return new Observable(observer => {
+      const blob = new Blob(['Mock document content'], { type: 'application/pdf' });
+      observer.next(blob);
+      observer.complete();
+    });
   }
 
   /**
    * Download verification receipt
    */
-  downloadVerificationReceipt(verificationId: string, format: 'pdf' | 'json' = 'pdf'): Observable<Blob> {
-    return this.apiService.get<Blob>(`verify/${verificationId}/receipt?format=${format}`, undefined, {
-      responseType: 'blob'
-    } as any).pipe(
-      catchError(error => {
-        this.notificationService.error('Failed to download verification receipt');
-        return throwError(() => error);
-      })
-    );
-  }
-  /**
-   * Download document file
-   */
-  downloadDocument(documentId: string): Observable<Blob> {
-    return this.apiService.get(`documents/${documentId}/download`, {}, { responseType: 'blob' } as any).pipe(
-      map(response => response.data),
-      catchError(error => {
-        this.notificationService.error('Failed to download document');
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Get all documents (simplified version for list component)
-   */
-  getDocuments(): Observable<DocumentModel[]> {
-    return this.apiService.get<PaginatedResponse<DocumentModel>>('documents').pipe(
-      map(response => response.data.items || []),
-      catchError(error => {
-        this.notificationService.error('Failed to load documents');
-        return throwError(() => error);
-      })
-    );
+  downloadVerificationReceipt(verificationId: string): Observable<Blob> {
+    // Mock implementation
+    return new Observable(observer => {
+      const blob = new Blob(['Mock receipt content'], { type: 'application/pdf' });
+      observer.next(blob);
+      observer.complete();
+    });
   }
 }

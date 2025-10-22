@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { SHARED_IMPORTS } from '../../../shared';
+import { SHARED_IMPORTS, FormUtils } from '../../../shared';
 import { FormValidators } from '../../../shared/utils/form.utils';
 
 @Component({
@@ -187,7 +187,7 @@ export class LoginComponent {
   }
 
   getErrorMessage(control: any, fieldName: string): string {
-    return FormValidators.getErrorMessage(control, fieldName);
+    return FormUtils.getErrorMessage(control, fieldName);
   }
 
   private markFormGroupTouched(): void {

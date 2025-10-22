@@ -156,9 +156,9 @@ export class MfaComponent implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state;
     
-    if (state?.email && state?.sessionToken) {
-      this.email.set(state.email);
-      this.sessionToken.set(state.sessionToken);
+    if (state?.['email'] && state?.['sessionToken']) {
+      this.email.set(state['email']);
+      this.sessionToken.set(state['sessionToken']);
     } else {
       // Try to get from session storage as fallback
       const storedSessionToken = sessionStorage.getItem('mfaSessionToken');

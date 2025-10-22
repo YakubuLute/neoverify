@@ -24,23 +24,3 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-/**
- * Guard to redirect authenticated users away from auth pages
- */
-export const guestGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  return authService.isAuthenticated$.pipe(
-    take(1),
-    map(isAuthenticated => {
-      if (!isAuthenticated) {
-        return true;
-      }
-      
-      // Redirect to dashboard if already authenticated
-      router.navigate(['/dashboard']);
-      return false;
-    })
-  );
-};
