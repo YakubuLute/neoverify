@@ -7,12 +7,12 @@ import { SHARED_IMPORTS } from '../../shared';
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-950">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <!-- Header -->
-      <div class="bg-white dark:bg-surface-800 shadow-sm border-b border-surface-200 dark:border-surface-700 p-4">
+      <div class="bg-white shadow-sm border-b border-gray-200 p-4">
         <div class="container mx-auto flex items-center justify-between">
-          <h1 class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-            NeoVerify Frontend
+          <h1 class="text-2xl font-bold text-blue-600">
+            NeoVerify
           </h1>
           <p-button 
             label="Get Started" 
@@ -25,28 +25,28 @@ import { SHARED_IMPORTS } from '../../shared';
       <!-- Main Content -->
       <div class="container mx-auto px-4 py-16">
         <div class="max-w-4xl mx-auto text-center">
-          <h2 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-6">
+          <h2 class="text-4xl font-bold text-gray-900 mb-6">
             Welcome to NeoVerify
           </h2>
-          <p class="text-xl text-surface-600 dark:text-surface-400 mb-12">
-            Modern Angular application with Tailwind CSS and PrimeNG
+          <p class="text-xl text-gray-600 mb-12">
+            Secure Document Verification Platform
           </p>
 
           <!-- Feature Cards -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div class="bg-white dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-              <i class="pi pi-bolt text-4xl text-primary-500 mb-4"></i>
-              <h3 class="text-xl font-semibold mb-3">Fast & Modern</h3>
-              <p class="text-surface-600 dark:text-surface-400">
-                Built with Angular 20 and zoneless change detection for optimal performance
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <i class="pi pi-shield text-4xl text-blue-500 mb-4"></i>
+              <h3 class="text-xl font-semibold mb-3 text-gray-900">Secure & Trusted</h3>
+              <p class="text-gray-600">
+                Blockchain-based document verification with advanced security features
               </p>
             </div>
 
-            <div class="bg-white dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-              <i class="pi pi-palette text-4xl text-primary-500 mb-4"></i>
-              <h3 class="text-xl font-semibold mb-3">Beautiful UI</h3>
-              <p class="text-surface-600 dark:text-surface-400">
-                Tailwind CSS with PrimeNG components for stunning interfaces
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <i class="pi pi-verified text-4xl text-green-500 mb-4"></i>
+              <h3 class="text-xl font-semibold mb-3 text-gray-900">Instant Verification</h3>
+              <p class="text-gray-600">
+                Verify document authenticity in seconds with our advanced AI technology
               </p>
             </div>
 

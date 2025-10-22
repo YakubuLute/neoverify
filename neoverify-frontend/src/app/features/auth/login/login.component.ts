@@ -3,129 +3,162 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SHARED_IMPORTS, FormUtils } from '../../../shared';
-import { FormValidators } from '../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-surface-900 dark:to-surface-950 p-4">
-      <div class="w-full max-w-md">
-        <!-- Logo and Title -->
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full">
+        <!-- Logo and Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">
-            NeoVerify
-          </h1>
-          <p class="text-surface-600 dark:text-surface-400">
-            Sign in to your account
+          <div class="mx-auto h-20 w-20 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <i class="pi pi-shield text-white text-3xl"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">
+            Welcome Back
+          </h2>
+          <p class="text-gray-600 text-lg">
+            Sign in to your NeoVerify account
           </p>
         </div>
 
-        <!-- Login Form -->
-        <p-card class="shadow-lg">
+        <!-- Login Form Card -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
             <!-- Email Field -->
-            <div class="field">
-              <label for="email" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+            <div class="space-y-2">
+              <label for="email" class="block text-sm font-semibold text-gray-700">
                 Email Address
               </label>
-              <input
-                id="email"
-                type="email"
-                pInputText
-                formControlName="email"
-                placeholder="Enter your email"
-                class="w-full"
-                [class.ng-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-              />
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="pi pi-envelope text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  pInputText
+                  formControlName="email"
+                  placeholder="Enter your email address"
+                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  [class.border-red-300]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                  [class.focus:ring-red-100]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                  [class.focus:border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                />
+              </div>
               @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-                <small class="p-error block mt-1">
+                <p class="text-red-500 text-sm mt-1 flex items-center">
+                  <i class="pi pi-exclamation-circle mr-1"></i>
                   {{ getErrorMessage(loginForm.get('email'), 'Email') }}
-                </small>
+                </p>
               }
             </div>
 
             <!-- Password Field -->
-            <div class="field">
-              <label for="password" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+            <div class="space-y-2">
+              <label for="password" class="block text-sm font-semibold text-gray-700">
                 Password
               </label>
-              <p-password
-                id="password"
-                formControlName="password"
-                placeholder="Enter your password"
-                [toggleMask]="true"
-                [feedback]="false"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-                [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-              ></p-password>
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                  <i class="pi pi-lock text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                </div>
+                <p-password
+                  id="password"
+                  formControlName="password"
+                  placeholder="Enter your password"
+                  [toggleMask]="true"
+                  [feedback]="false"
+                  styleClass="w-full"
+                  inputStyleClass="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                ></p-password>
+              </div>
               @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-                <small class="p-error block mt-1">
+                <p class="text-red-500 text-sm mt-1 flex items-center">
+                  <i class="pi pi-exclamation-circle mr-1"></i>
                   {{ getErrorMessage(loginForm.get('password'), 'Password') }}
-                </small>
+                </p>
               }
             </div>
 
-            <!-- Remember Me -->
+            <!-- Remember Me & Forgot Password -->
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <p-checkbox
                   formControlName="rememberMe"
                   inputId="rememberMe"
                   [binary]="true"
+                  class="mr-3"
                 ></p-checkbox>
-                <label for="rememberMe" class="ml-2 text-sm text-surface-600 dark:text-surface-400">
+                <label for="rememberMe" class="text-sm text-gray-600 font-medium">
                   Remember me
                 </label>
               </div>
-              
-              <a 
-                href="#" 
-                class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400"
-                (click)="$event.preventDefault(); forgotPassword()"
+              <button
+                type="button"
+                class="text-sm text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200"
+                (click)="forgotPassword()"
               >
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             <!-- Submit Button -->
-            <p-button
+            <button
               type="submit"
-              label="Sign In"
-              icon="pi pi-sign-in"
-              [loading]="loading()"
-              [disabled]="loginForm.invalid"
-              styleClass="w-full"
-            ></p-button>
-
-            <!-- Divider -->
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-surface-200 dark:border-surface-700"></div>
-              </div>
-              <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-surface-800 text-surface-500">
-                  Don't have an account?
-                </span>
-              </div>
-            </div>
-
-            <!-- Sign Up Link -->
-            <p-button
-              label="Create Account"
-              icon="pi pi-user-plus"
-              [outlined]="true"
-              styleClass="w-full"
-              (onClick)="navigateToSignUp()"
-            ></p-button>
+              [disabled]="loginForm.invalid || loading()"
+              class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
+            >
+              @if (loading()) {
+                <i class="pi pi-spin pi-spinner text-lg"></i>
+                <span class="text-lg">Signing in...</span>
+              } @else {
+                <i class="pi pi-sign-in text-lg"></i>
+                <span class="text-lg">Sign In</span>
+              }
+            </button>
           </form>
-        </p-card>
+
+          <!-- Divider -->
+          <div class="relative my-8">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-200"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-4 bg-white text-gray-500 font-medium">New to NeoVerify?</span>
+            </div>
+          </div>
+
+          <!-- Sign Up Link -->
+          <button
+            type="button"
+            routerLink="/auth/signup"
+            class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-200 border-2 border-gray-200 hover:border-gray-300 flex items-center justify-center space-x-3"
+          >
+            <i class="pi pi-user-plus text-lg"></i>
+            <span class="text-lg">Create New Account</span>
+          </button>
+        </div>
 
         <!-- Footer -->
-        <div class="text-center mt-8 text-sm text-surface-500">
-          <p>&copy; 2025 NeoVerify. All rights reserved.</p>
+        <div class="text-center mt-8">
+          <p class="text-sm text-gray-500 flex items-center justify-center space-x-4">
+            <span class="flex items-center">
+              <i class="pi pi-shield mr-1"></i>
+              Secure
+            </span>
+            <span class="flex items-center">
+              <i class="pi pi-verified mr-1"></i>
+              Trusted
+            </span>
+            <span class="flex items-center">
+              <i class="pi pi-check-circle mr-1"></i>
+              Verified
+            </span>
+          </p>
         </div>
       </div>
     </div>
@@ -134,10 +167,6 @@ import { FormValidators } from '../../../shared/utils/form.utils';
     :host {
       display: block;
     }
-    
-    .field {
-      margin-bottom: 1rem;
-    }
   `]
 })
 export class LoginComponent {
@@ -145,40 +174,30 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly loading = this.authService.loading;
+  readonly loading = signal<boolean>(false);
 
   readonly loginForm = this.fb.group({
-    email: ['', [Validators.required, FormValidators.email()]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     rememberMe: [false]
   });
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      
-      this.authService.login({
-        email: email!,
-        password: password!
-      }).subscribe({
-        next: (response) => {
-          if (response.requiresMfa) {
-            this.router.navigate(['/auth/mfa'], {
-              state: { email, sessionToken: response.sessionToken }
-            });
-          }
-        },
-        error: (error) => {
-          console.error('Login failed:', error);
-        }
-      });
-    } else {
+    if (this.loginForm.invalid) {
       this.markFormGroupTouched();
+      return;
     }
-  }
 
-  navigateToSignUp(): void {
-    this.router.navigate(['/auth/signup']);
+    this.loading.set(true);
+    const { email, password, rememberMe } = this.loginForm.value;
+
+    // Mock login - replace with actual authentication
+    setTimeout(() => {
+      console.log('Login attempt:', { email, password, rememberMe });
+      this.loading.set(false);
+      // Navigate to dashboard on successful login
+      this.router.navigate(['/dashboard']);
+    }, 1500);
   }
 
   forgotPassword(): void {

@@ -8,11 +8,11 @@ import { SHARED_IMPORTS } from '../../shared';
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <p-toolbar class="border-b border-surface-200 dark:border-surface-700">
+    <p-toolbar class="border-b border-gray-200 bg-white shadow-sm">
       <div class="flex items-center justify-between w-full">
         <!-- Logo and Navigation -->
         <div class="flex items-center space-x-4">
-          <h1 class="text-2xl font-bold text-primary-600 dark:text-primary-400 cursor-pointer"
+          <h1 class="text-2xl font-bold text-blue-600 cursor-pointer"
               (click)="navigateHome()">
             NeoVerify
           </h1>

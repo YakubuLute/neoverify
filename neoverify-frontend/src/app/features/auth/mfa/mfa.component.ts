@@ -1,123 +1,147 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { SHARED_IMPORTS } from '../../../shared';
-import { FormUtils } from '../../../shared/utils/form.utils';
+import { SHARED_IMPORTS, FormUtils } from '../../../shared';
 
 @Component({
   selector: 'app-mfa',
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-surface-900 dark:to-surface-950 p-4">
-      <div class="w-full max-w-md">
-        <!-- Logo and Title -->
+    <div class="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-teal-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full">
+        <!-- Logo and Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">
-            NeoVerify
-          </h1>
-          <p class="text-surface-600 dark:text-surface-400">
+          <div class="mx-auto h-20 w-20 bg-gradient-to-r from-green-600 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <i class="pi pi-shield text-white text-3xl"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">
             Two-Factor Authentication
+          </h2>
+          <p class="text-gray-600 text-lg">
+            Enter the 6-digit code from your authenticator app
           </p>
         </div>
 
-        <!-- MFA Form -->
-        <p-card class="shadow-lg">
-          <div class="text-center mb-6">
-            <i class="pi pi-shield text-4xl text-primary-500 mb-4"></i>
-            <h2 class="text-xl font-semibold text-surface-900 dark:text-surface-0 mb-2">
-              Enter Verification Code
-            </h2>
-            <p class="text-surface-600 dark:text-surface-400">
-              Please enter the 6-digit code from your authenticator app
-            </p>
+        <!-- MFA Form Card -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+          <!-- User Info -->
+          <div class="bg-blue-50 rounded-2xl p-4 mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="pi pi-user text-blue-600"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Signing in as</p>
+                <p class="font-semibold text-gray-900">{{ email() }}</p>
+              </div>
+            </div>
           </div>
 
           <form [formGroup]="mfaForm" (ngSubmit)="onSubmit()" class="space-y-6">
-            <!-- TOTP Code Input -->
-            <div class="field">
-              <label for="totpCode" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2 text-center">
-                Verification Code
+            <!-- MFA Code Input -->
+            <div class="space-y-2">
+              <label for="totpCode" class="block text-sm font-semibold text-gray-700">
+                Authentication Code
               </label>
-              <input
-                id="totpCode"
-                type="text"
-                pInputText
-                formControlName="totpCode"
-                placeholder="000000"
-                maxlength="6"
-                class="w-full text-center text-2xl tracking-widest font-mono"
-                [class.ng-invalid]="isFieldInvalid('totpCode')"
-                (input)="onCodeInput($event)"
-              />
-              @if (isFieldInvalid('totpCode')) {
-                <small class="p-error block mt-1 text-center">
-                  {{ getErrorMessage(mfaForm.get('totpCode'), 'Verification code') }}
-                </small>
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="pi pi-key text-gray-400 group-focus-within:text-green-500 transition-colors"></i>
+                </div>
+                <input
+                  id="totpCode"
+                  type="text"
+                  pInputText
+                  formControlName="totpCode"
+                  placeholder="000000"
+                  maxlength="6"
+                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-center text-2xl font-mono tracking-widest"
+                  [class.border-red-300]="mfaForm.get('totpCode')?.invalid && mfaForm.get('totpCode')?.touched"
+                  (input)="onCodeInput($event)"
+                />
+              </div>
+              @if (mfaForm.get('totpCode')?.invalid && mfaForm.get('totpCode')?.touched) {
+                <p class="text-red-500 text-sm mt-1 flex items-center">
+                  <i class="pi pi-exclamation-circle mr-1"></i>
+                  {{ getErrorMessage(mfaForm.get('totpCode'), 'Authentication code') }}
+                </p>
               }
+              <p class="text-xs text-gray-500 text-center">
+                Enter the 6-digit code from your authenticator app
+              </p>
             </div>
 
             <!-- Submit Button -->
-            <p-button
+            <button
               type="submit"
-              label="Verify"
-              icon="pi pi-check"
-              [loading]="loading()"
-              [disabled]="mfaForm.invalid"
-              styleClass="w-full"
-            ></p-button>
+              [disabled]="mfaForm.invalid || verifying()"
+              class="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
+            >
+              @if (verifying()) {
+                <i class="pi pi-spin pi-spinner text-lg"></i>
+                <span class="text-lg">Verifying...</span>
+              } @else {
+                <i class="pi pi-check text-lg"></i>
+                <span class="text-lg">Verify & Continue</span>
+              }
+            </button>
 
-            <!-- Backup Options -->
-            <div class="text-center space-y-2">
-              <p class="text-sm text-surface-500">
-                Having trouble?
-              </p>
-              <div class="space-x-4">
-                <a 
-                  href="#" 
-                  class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400"
-                  (click)="$event.preventDefault(); useBackupCode()"
-                >
-                  Use backup code
-                </a>
-                <span class="text-surface-300">|</span>
-                <a 
-                  href="#" 
-                  class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400"
-                  (click)="$event.preventDefault(); resendCode()"
-                >
-                  Resend code
-                </a>
+            <!-- Help Section -->
+            <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+              <h3 class="font-semibold text-gray-800 flex items-center">
+                <i class="pi pi-question-circle mr-2 text-gray-600"></i>
+                Need Help?
+              </h3>
+              <div class="space-y-2 text-sm text-gray-600">
+                <p class="flex items-start">
+                  <i class="pi pi-mobile mr-2 mt-0.5 text-gray-400"></i>
+                  Open your authenticator app (Google Authenticator, Authy, etc.)
+                </p>
+                <p class="flex items-start">
+                  <i class="pi pi-eye mr-2 mt-0.5 text-gray-400"></i>
+                  Find the 6-digit code for NeoVerify
+                </p>
+                <p class="flex items-start">
+                  <i class="pi pi-clock mr-2 mt-0.5 text-gray-400"></i>
+                  Enter the code before it expires (usually 30 seconds)
+                </p>
               </div>
             </div>
 
-            <!-- Back to Login -->
-            <div class="text-center">
-              <p-button
-                label="Back to Login"
-                icon="pi pi-arrow-left"
-                [text]="true"
-                (onClick)="backToLogin()"
-              ></p-button>
+            <!-- Alternative Options -->
+            <div class="text-center space-y-3">
+              <button
+                type="button"
+                class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                (click)="resendCode()"
+              >
+                Didn't receive a code? Try again
+              </button>
+              
+              <div class="text-sm text-gray-500">
+                or
+              </div>
+              
+              <button
+                type="button"
+                routerLink="/auth/login"
+                class="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+              >
+                ← Back to Sign In
+              </button>
             </div>
           </form>
-        </p-card>
-
-        <!-- Security Notice -->
-        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div class="flex items-start">
-            <i class="pi pi-info-circle text-blue-500 mr-2 mt-0.5"></i>
-            <div class="text-sm text-blue-700 dark:text-blue-300">
-              <p class="font-medium mb-1">Security Notice</p>
-              <p>This code expires in 30 seconds. Never share your verification codes with anyone.</p>
-            </div>
-          </div>
         </div>
 
-        <!-- Footer -->
-        <div class="text-center mt-8 text-sm text-surface-500">
-          <p>&copy; 2025 NeoVerify. All rights reserved.</p>
+        <!-- Security Notice -->
+        <div class="text-center mt-8">
+          <div class="bg-green-50 rounded-2xl p-4 border border-green-200">
+            <div class="flex items-center justify-center space-x-2 text-green-700">
+              <i class="pi pi-shield"></i>
+              <span class="text-sm font-medium">Your account is protected by two-factor authentication</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -126,106 +150,78 @@ import { FormUtils } from '../../../shared/utils/form.utils';
     :host {
       display: block;
     }
-    
-    .field {
-      margin-bottom: 1rem;
-    }
   `]
 })
 export class MfaComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  readonly loading = this.authService.loading;
-  
-  private email = signal<string>('');
-  private sessionToken = signal<string>('');
+  readonly email = signal<string>('');
+  readonly sessionToken = signal<string>('');
+  readonly verifying = signal<boolean>(false);
 
   readonly mfaForm = this.fb.group({
-    totpCode: ['', [
-      Validators.required, 
-      Validators.pattern(/^\d{6}$/),
-      Validators.minLength(6),
-      Validators.maxLength(6)
-    ]]
+    totpCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
   });
 
   ngOnInit(): void {
-    // Get email and session token from navigation state or redirect to login
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state;
-    
+    // Get email and session token from navigation state
+    const state = this.router.getCurrentNavigation()?.extras.state;
     if (state?.['email'] && state?.['sessionToken']) {
       this.email.set(state['email']);
       this.sessionToken.set(state['sessionToken']);
     } else {
-      // Try to get from session storage as fallback
-      const storedSessionToken = sessionStorage.getItem('mfaSessionToken');
-      if (!storedSessionToken) {
-        this.router.navigate(['/auth/login']);
-        return;
-      }
-      this.sessionToken.set(storedSessionToken);
+      // Redirect to login if no session data
+      this.router.navigate(['/auth/login']);
     }
   }
 
   onSubmit(): void {
-    if (this.mfaForm.valid && this.sessionToken()) {
-      const totpCode = this.mfaForm.value.totpCode!;
-      
-      this.authService.verifyMfa({
+    if (this.mfaForm.invalid) {
+      this.markFormGroupTouched();
+      return;
+    }
+
+    this.verifying.set(true);
+    const { totpCode } = this.mfaForm.value;
+
+    // Mock MFA verification - replace with actual implementation
+    setTimeout(() => {
+      console.log('MFA verification:', {
         email: this.email(),
         totpCode,
         sessionToken: this.sessionToken()
-      }).subscribe({
-        next: () => {
-          // Navigation handled by auth service
-        },
-        error: (error) => {
-          console.error('MFA verification failed:', error);
-          // Clear the form for retry
-          this.mfaForm.patchValue({ totpCode: '' });
-        }
       });
-    } else {
-      FormUtils.markFormGroupTouched(this.mfaForm);
-    }
+      
+      this.verifying.set(false);
+      // Navigate to dashboard on successful verification
+      this.router.navigate(['/dashboard']);
+    }, 1500);
   }
 
   onCodeInput(event: any): void {
-    const value = event.target.value.replace(/\D/g, ''); // Only allow digits
-    event.target.value = value;
-    this.mfaForm.patchValue({ totpCode: value });
-    
     // Auto-submit when 6 digits are entered
-    if (value.length === 6) {
+    const value = event.target.value;
+    if (value.length === 6 && /^\d{6}$/.test(value)) {
       setTimeout(() => this.onSubmit(), 100);
     }
   }
 
-  useBackupCode(): void {
-    // TODO: Implement backup code functionality
-    console.log('Use backup code clicked');
-  }
-
   resendCode(): void {
-    // TODO: Implement resend code functionality
-    console.log('Resend code clicked');
-  }
-
-  backToLogin(): void {
-    // Clear MFA session
-    sessionStorage.removeItem('mfaSessionToken');
-    this.router.navigate(['/auth/login']);
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.mfaForm.get(fieldName);
-    return !!(field?.invalid && field?.touched);
+    // Mock resend functionality
+    console.log('Resending MFA code to:', this.email());
   }
 
   getErrorMessage(control: any, fieldName: string): string {
     return FormUtils.getErrorMessage(control, fieldName);
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.mfaForm.controls).forEach(key => {
+      const control = this.mfaForm.get(key);
+      control?.markAsTouched();
+    });
   }
 }
