@@ -1,5 +1,7 @@
 // Models
 export * from './models/common.models';
+export * from './models/auth.models';
+export * from './models/document.models';
 
 // Components
 export * from './components/loading-spinner/loading-spinner.component';
