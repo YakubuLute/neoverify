@@ -42,7 +42,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   pInputText
                   formControlName="organizationName"
                   placeholder="Enter your organization name"
-                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                   [class.border-red-300]="isFieldInvalid('organizationName')"
                 />
               </div>
@@ -69,7 +69,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   pInputText
                   formControlName="domain"
                   placeholder="example.com"
-                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                   [class.border-red-300]="isFieldInvalid('domain')"
                 />
               </div>
@@ -106,7 +106,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                     pInputText
                     formControlName="adminName"
                     placeholder="Enter your full name"
-                    class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                    class="w-full pl-14 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                     [class.border-red-300]="isFieldInvalid('adminName')"
                   />
                 </div>
@@ -133,7 +133,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                     pInputText
                     formControlName="adminEmail"
                     placeholder="admin@example.com"
-                    class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                    class="w-full pl-14 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                     [class.border-red-300]="isFieldInvalid('adminEmail')"
                   />
                 </div>
@@ -164,7 +164,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                     [toggleMask]="true"
                     [feedback]="true"
                     styleClass="w-full"
-                    inputStyleClass="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                    inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                     [class.ng-invalid]="isFieldInvalid('password')"
                   ></p-password>
                 </div>
@@ -192,7 +192,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                     [toggleMask]="true"
                     [feedback]="false"
                     styleClass="w-full"
-                    inputStyleClass="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                    inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                     [class.ng-invalid]="isFieldInvalid('confirmPassword')"
                   ></p-password>
                 </div>
@@ -319,12 +319,12 @@ export class SignupComponent {
   private passwordMatchValidator(form: any) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-    
+
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
+
     return null;
   }
 

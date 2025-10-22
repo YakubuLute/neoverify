@@ -42,7 +42,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   pInputText
                   formControlName="email"
                   placeholder="Enter your email address"
-                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                   [class.border-red-300]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
                   [class.focus:ring-red-100]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
                   [class.focus:border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
@@ -72,7 +72,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   [toggleMask]="true"
                   [feedback]="false"
                   styleClass="w-full"
-                  inputStyleClass="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                  inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                   [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
                 ></p-password>
               </div>

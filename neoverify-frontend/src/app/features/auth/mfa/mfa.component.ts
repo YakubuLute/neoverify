@@ -56,7 +56,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   formControlName="totpCode"
                   placeholder="000000"
                   maxlength="6"
-                  class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-center text-2xl font-mono tracking-widest"
+                  class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-200 text-gray-900 placeholder-gray-400 text-center text-2xl font-mono tracking-widest"
                   [class.border-red-300]="mfaForm.get('totpCode')?.invalid && mfaForm.get('totpCode')?.touched"
                   (input)="onCodeInput($event)"
                 />
