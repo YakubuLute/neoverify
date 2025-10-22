@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 import { FormUtils } from '../../../shared/utils/form.utils';
 
 interface Organization {
@@ -21,7 +21,7 @@ interface Organization {
 @Component({
   selector: 'app-org-settings',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-4xl mx-auto">

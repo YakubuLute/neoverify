@@ -1,14 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { DocumentService } from '../../../core/services/document.service';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 import { VerificationRequest, VerificationResult } from '../../../shared/models/document.models';
 import { FormUtils } from '../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-document-verify',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-4xl mx-auto">

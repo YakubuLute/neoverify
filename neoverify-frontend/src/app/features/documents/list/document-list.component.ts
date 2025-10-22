@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
 import { SHARED_IMPORTS } from '../../../shared';
-import { Document, DocumentStatus } from '../../../shared/models/document.models';
+import { Document as DocumentModel, DocumentStatus } from '../../../shared/models/document.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserRole } from '../../../shared/models/auth.models';
 
@@ -263,14 +263,14 @@ export class DocumentListComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly documents = signal<Document[]>([]);
-  readonly filteredDocuments = signal<Document[]>([]);
+  readonly documents = signal<DocumentModel[]>([]);
+  readonly filteredDocuments = signal<DocumentModel[]>([]);
   readonly loading = signal<boolean>(false);
   readonly selectedDocument = signal<Document | null>(null);
 
   // Filters
   searchTerm = '';
-  selectedStatus: DocumentStatus | null = null;
+  selectedStatus: DocumentModelStatus | null = null;
   selectedType: string | null = null;
   dateRange: Date[] | null = null;
 
@@ -278,10 +278,10 @@ export class DocumentListComponent implements OnInit {
   showQRDialog = false;
 
   readonly statusOptions = [
-    { label: 'Active', value: DocumentStatus.ACTIVE },
-    { label: 'Pending', value: DocumentStatus.PENDING },
-    { label: 'Revoked', value: DocumentStatus.REVOKED },
-    { label: 'Expired', value: DocumentStatus.EXPIRED }
+    { label: 'Active', value: DocumentModelStatus.ACTIVE },
+    { label: 'Pending', value: DocumentModelStatus.PENDING },
+    { label: 'Revoked', value: DocumentModelStatus.REVOKED },
+    { label: 'Expired', value: DocumentModelStatus.EXPIRED }
   ];
 
   readonly typeOptions = [
@@ -355,11 +355,11 @@ export class DocumentListComponent implements OnInit {
     this.filteredDocuments.set(filtered);
   }
 
-  viewDocument(document: Document): void {
+  viewDocument(document: DocumentModel): void {
     this.router.navigate(['/documents', document.id]);
   }
 
-  downloadDocument(document: Document): void {
+  downloadDocument(document: DocumentModel): void {
     this.documentService.downloadDocument(document.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -375,7 +375,7 @@ export class DocumentListComponent implements OnInit {
     });
   }
 
-  showQRCode(document: Document): void {
+  showQRCode(document: DocumentModel): void {
     this.selectedDocument.set(document);
     this.showQRDialog = true;
   }
@@ -406,7 +406,7 @@ export class DocumentListComponent implements OnInit {
     navigator.clipboard.writeText(verifyUrl);
   }
 
-  revokeDocument(document: Document): void {
+  revokeDocument(document: DocumentModel): void {
     // Implementation would show confirmation dialog and call revoke API
     console.log('Revoke document:', document.id);
   }
@@ -418,7 +418,7 @@ export class DocumentListComponent implements OnInit {
            user?.role === UserRole.ISSUER;
   }
 
-  canRevoke(document: Document): boolean {
+  canRevoke(document: DocumentModel): boolean {
     const user = this.authService.currentUser();
     return (user?.role === UserRole.PLATFORM_ADMIN || 
             user?.role === UserRole.ORG_ADMIN || 
@@ -436,7 +436,7 @@ export class DocumentListComponent implements OnInit {
     }
   }
 
-  getStatusSeverity(status: DocumentStatus): string {
+  getStatusSeverity(status: DocumentModelStatus): string {
     switch (status) {
       case DocumentStatus.ACTIVE: return 'success';
       case DocumentStatus.PENDING: return 'warning';

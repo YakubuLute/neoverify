@@ -1,14 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { SharedModule } from '../../shared';
+import { SHARED_IMPORTS } from '../../shared';
 import { User } from '../../shared/models/auth.models';
 import { FormUtils } from '../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-4xl mx-auto">

@@ -2,13 +2,13 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 import { FormValidators, FormUtils } from '../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-surface-900 dark:to-surface-950 p-4">
       <div class="w-full max-w-lg">

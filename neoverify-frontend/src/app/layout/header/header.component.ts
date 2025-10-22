@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core';
-import { SharedModule } from '../../shared';
+import { SHARED_IMPORTS } from '../../shared';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <p-toolbar class="border-b border-surface-200 dark:border-surface-700">
       <div class="flex items-center justify-between w-full">

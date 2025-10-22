@@ -2,14 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 import { DocumentType, DocumentMetadata } from '../../../shared/models/document.models';
 import { FormUtils } from '../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-document-upload',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-2xl mx-auto">

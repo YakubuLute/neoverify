@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-6xl mx-auto">

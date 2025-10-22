@@ -45,8 +45,8 @@ export class DocumentService {
   /**
    * Register document hash on blockchain
    */
-  registerOnChain(documentId: string): Observable<Document> {
-    return this.apiService.post<Document>(`documents/${documentId}/register`, {}).pipe(
+  registerOnChain(documentId: string): Observable<DocumentModel> {
+    return this.apiService.post<DocumentModel>(`documents/${documentId}/register`, {}).pipe(
       map(response => response.data),
       tap(document => {
         this.notificationService.success('Document registered on blockchain successfully');
@@ -61,8 +61,8 @@ export class DocumentService {
   /**
    * Retry failed blockchain registration
    */
-  retryRegistration(documentId: string): Observable<Document> {
-    return this.apiService.post<Document>(`documents/${documentId}/retry-registration`, {}).pipe(
+  retryRegistration(documentId: string): Observable<DocumentModel> {
+    return this.apiService.post<DocumentModel>(`documents/${documentId}/retry-registration`, {}).pipe(
       map(response => response.data),
       tap(() => {
         this.notificationService.info('Retrying blockchain registration...');
@@ -77,8 +77,8 @@ export class DocumentService {
   /**
    * Revoke a document
    */
-  revokeDocument(documentId: string, reason: string): Observable<Document> {
-    return this.apiService.post<Document>(`documents/${documentId}/revoke`, { reason }).pipe(
+  revokeDocument(documentId: string, reason: string): Observable<DocumentModel> {
+    return this.apiService.post<DocumentModel>(`documents/${documentId}/revoke`, { reason }).pipe(
       map(response => response.data),
       tap(() => {
         this.notificationService.success('Document revoked successfully');
@@ -93,8 +93,8 @@ export class DocumentService {
   /**
    * Get document by ID
    */
-  getDocument(documentId: string): Observable<Document> {
-    return this.apiService.get<Document>(`documents/${documentId}`).pipe(
+  getDocument(documentId: string): Observable<DocumentModel> {
+    return this.apiService.get<DocumentModel>(`documents/${documentId}`).pipe(
       map(response => response.data),
       catchError(error => {
         this.notificationService.error('Document not found');
@@ -106,8 +106,8 @@ export class DocumentService {
   /**
    * Get documents with pagination and filtering
    */
-  getDocuments(params?: QueryParams): Observable<PaginatedResponse<Document>> {
-    return this.apiService.get<PaginatedResponse<Document>>('documents', params as any).pipe(
+  getDocuments(params?: QueryParams): Observable<PaginatedResponse<DocumentModel>> {
+    return this.apiService.get<PaginatedResponse<DocumentModel>>('documents', params as any).pipe(
       map(response => response.data),
       catchError(error => {
         this.notificationService.error('Failed to load documents');
@@ -237,8 +237,8 @@ export class DocumentService {
   /**
    * Get all documents (simplified version for list component)
    */
-  getDocuments(): Observable<Document[]> {
-    return this.apiService.get<PaginatedResponse<Document>>('documents').pipe(
+  getDocuments(): Observable<DocumentModel[]> {
+    return this.apiService.get<PaginatedResponse<DocumentModel>>('documents').pipe(
       map(response => response.data.items || []),
       catchError(error => {
         this.notificationService.error('Failed to load documents');

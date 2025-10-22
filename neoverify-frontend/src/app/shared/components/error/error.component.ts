@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SharedModule } from '../../shared.module';
+import { SHARED_IMPORTS } from '../../index';
 
 @Component({
   selector: 'app-error',

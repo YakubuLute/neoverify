@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
-import { SharedModule } from '../../../shared';
+import { SHARED_IMPORTS } from '../../../shared';
 import { Document, DocumentStatus } from '../../../shared/models/document.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserRole } from '../../../shared/models/auth.models';
@@ -9,7 +9,7 @@ import { UserRole } from '../../../shared/models/auth.models';
 @Component({
   selector: 'app-document-detail',
   standalone: true,
-  imports: [SharedModule],
+  imports: SHARED_IMPORTS,
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-6xl mx-auto">
