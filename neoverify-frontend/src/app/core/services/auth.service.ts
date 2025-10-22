@@ -208,9 +208,26 @@ export class AuthService {
     localStorage.setItem('token', authData.token);
     localStorage.setItem('refreshToken', authData.refreshToken);
     localStorage.setItem('user', JSON.stringify(authData.user));
+    localStorage.setItem('organization', JSON.stringify(authData.organization));
     
     this.currentUserSubject.next(authData.user);
+    this.currentOrganizationSubject.next(authData.organization);
     this.currentUser.set(authData.user);
+    this.currentOrganization.set(authData.organization);
+  }
+
+  /**
+   * Set MFA required state
+   */
+  private setMfaRequired(required: boolean, sessionToken?: string): void {
+    this.mfaRequiredSubject.next(required);
+    this.mfaRequired.set(required);
+    
+    if (sessionToken) {
+      sessionStorage.setItem('mfaSessionToken', sessionToken);
+    } else {
+      sessionStorage.removeItem('mfaSessionToken');
+    }
   }
 
   /**
@@ -220,9 +237,14 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('organization');
+    sessionStorage.removeItem('mfaSessionToken');
     
     this.currentUserSubject.next(null);
+    this.currentOrganizationSubject.next(null);
     this.currentUser.set(null);
+    this.currentOrganization.set(null);
+    this.setMfaRequired(false);
   }
 
   /**
@@ -238,10 +260,16 @@ export class AuthService {
   private validateToken(token: string): void {
     // In a real app, you'd validate the token with the server
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const storedOrganization = localStorage.getItem('organization');
+    
+    if (storedUser && storedOrganization) {
       const user = JSON.parse(storedUser);
+      const organization = JSON.parse(storedOrganization);
+      
       this.currentUserSubject.next(user);
+      this.currentOrganizationSubject.next(organization);
       this.currentUser.set(user);
+      this.currentOrganization.set(organization);
     }
   }
 
