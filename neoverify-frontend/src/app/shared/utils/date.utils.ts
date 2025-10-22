@@ -9,7 +9,7 @@ export class DateUtils {
   static formatDate(date: Date | string, format: 'short' | 'medium' | 'long' | 'full' = 'medium'): string {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     
-    const options: Intl.DateTimeFormatOptions = {
+    const formatOptions = {
       short: { year: 'numeric', month: 'short', day: 'numeric' },
       medium: { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
       long: { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' },
@@ -21,7 +21,9 @@ export class DateUtils {
         hour: '2-digit', 
         minute: '2-digit' 
       }
-    }[format];
+    } as const;
+    
+    const options = formatOptions[format] as Intl.DateTimeFormatOptions;
 
     return dateObj.toLocaleDateString('en-US', options);
   }

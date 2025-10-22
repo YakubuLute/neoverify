@@ -1,23 +1,7 @@
 <!-- Main Application Layout -->
-<div class="min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-900 dark:to-surface-950">
-  <!-- Header -->
-  <app-header></app-header>
-
-  <!-- Global Loading Indicator -->
-  @if (isLoading()) {
-    <div class="fixed top-0 left-0 w-full h-1 bg-primary-200 dark:bg-primary-800 z-50">
-      <div class="h-full bg-primary-500 animate-pulse"></div>
-    </div>
-  }
-
+<div class="min-h-screen">
   <!-- Main Content Area -->
-  <main class="min-h-[calc(100vh-4rem)]">
+  <main>
     <router-outlet></router-outlet>
   </main>
-
-  <!-- Global Toast Messages -->
-  <p-toast position="top-right" [life]="5000"></p-toast>
-  
-  <!-- Global Confirmation Dialog -->
-  <p-confirmDialog></p-confirmDialog>
 </div>

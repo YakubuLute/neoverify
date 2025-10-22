@@ -23,9 +23,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { SliderModule } from 'primeng/slider';
 import { RatingModule } from 'primeng/rating';
 import { DataViewModule } from 'primeng/dataview';
@@ -39,8 +38,8 @@ import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { SplitterModule } from 'primeng/splitter';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { SidebarModule } from 'primeng/sidebar';
+import { PopoverModule } from 'primeng/popover';
+import { DrawerModule } from 'primeng/drawer';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
@@ -49,9 +48,7 @@ import { MenuModule } from 'primeng/menu';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MegaMenuModule } from 'primeng/megamenu';
-import { SlideMenuModule } from 'primeng/slidemenu';
 import { DockModule } from 'primeng/dock';
-import { TabMenuModule } from 'primeng/tabmenu';
 
 // Shared Components
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
@@ -84,9 +81,8 @@ const PRIMENG_MODULES = [
   PasswordModule,
   CheckboxModule,
   RadioButtonModule,
-  DropdownModule,
   MultiSelectModule,
-  CalendarModule,
+  DatePickerModule,
   SliderModule,
   RatingModule,
   DataViewModule,
@@ -100,8 +96,8 @@ const PRIMENG_MODULES = [
   DividerModule,
   SplitterModule,
   ScrollPanelModule,
-  OverlayPanelModule,
-  SidebarModule,
+  PopoverModule,
+  DrawerModule,
   TooltipModule,
   FileUploadModule,
   BreadcrumbModule,
@@ -110,9 +106,7 @@ const PRIMENG_MODULES = [
   TieredMenuModule,
   ContextMenuModule,
   MegaMenuModule,
-  SlideMenuModule,
-  DockModule,
-  TabMenuModule
+  DockModule
 ];
 
 const SHARED_COMPONENTS = [

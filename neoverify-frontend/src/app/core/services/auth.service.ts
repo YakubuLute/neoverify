@@ -67,12 +67,11 @@ export class AuthService {
     this.setLoading(true);
     
     return this.apiService.post<AuthResponse>('auth/login', credentials).pipe(
-      tap(response => {
-        if (response.success) {
-          this.setAuthData(response.data);
-          this.notificationService.success('Login successful!');
-          this.router.navigate(['/dashboard']);
-        }
+      map(response => response.data),
+      tap(authData => {
+        this.setAuthData(authData);
+        this.notificationService.success('Login successful!');
+        this.router.navigate(['/dashboard']);
       }),
       catchError(error => {
         this.notificationService.error('Login failed. Please check your credentials.');
@@ -102,10 +101,9 @@ export class AuthService {
     }
 
     return this.apiService.post<AuthResponse>('auth/refresh', { refreshToken }).pipe(
-      tap(response => {
-        if (response.success) {
-          this.setAuthData(response.data);
-        }
+      map(response => response.data),
+      tap(authData => {
+        this.setAuthData(authData);
       }),
       catchError(error => {
         this.logout();

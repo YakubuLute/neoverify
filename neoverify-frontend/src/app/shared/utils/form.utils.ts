@@ -102,14 +102,17 @@ export class FormUtils {
    * Mark all fields as touched to show validation errors
    */
   static markFormGroupTouched(formGroup: AbstractControl): void {
-    Object.keys(formGroup.controls || {}).forEach(field => {
-      const control = formGroup.get(field);
-      control?.markAsTouched({ onlySelf: true });
+    const controls = (formGroup as any).controls;
+    if (controls) {
+      Object.keys(controls).forEach(field => {
+        const control = formGroup.get(field);
+        control?.markAsTouched({ onlySelf: true });
 
-      if (control && 'controls' in control) {
-        this.markFormGroupTouched(control);
-      }
-    });
+        if (control && 'controls' in control) {
+          this.markFormGroupTouched(control);
+        }
+      });
+    }
   }
 
   /**
