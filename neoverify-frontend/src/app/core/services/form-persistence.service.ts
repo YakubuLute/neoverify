@@ -12,12 +12,13 @@ export interface SignupFormData {
         acceptTerms?: boolean;
     };
     organizationForm?: {
+        contactFirstName?: string;
+        contactLastName?: string;
+        contactEmail?: string;
+        contactPhone?: string;
         organizationName?: string;
-        domain?: string;
-        organizationType?: string;
-        adminName?: string;
-        adminEmail?: string;
-        adminTitle?: string;
+        organizationEmail?: string;
+        organizationLocation?: string;
         password?: string;
         confirmPassword?: string;
         acceptTerms?: boolean;

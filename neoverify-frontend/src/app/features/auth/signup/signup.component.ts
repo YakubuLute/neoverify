@@ -314,12 +314,304 @@ export interface SignupStep {
                   }
                 </form>
               } @else {
-                <!-- Organization Account Form - Placeholder for now -->
-                <div class="text-center py-12">
-                  <i class="pi pi-building text-6xl text-gray-300 mb-4 block"></i>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">Organization Account</h3>
-                  <p class="text-gray-600">Organization signup form coming soon...</p>
-                </div>
+                <!-- Organization Account Form -->
+                <form [formGroup]="organizationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                  @if (currentStep() === 1) {
+                    <!-- Contact Person Info Step -->
+                    <div class="space-y-6">
+                      <div class="text-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Contact Person Information</h3>
+                        <p class="text-gray-600">Tell us about the primary contact for this organization</p>
+                      </div>
+
+                      <!-- First Name -->
+                      <div class="space-y-2">
+                        <label for="org-contactFirstName" class="block text-sm font-semibold text-gray-700">
+                          First Name
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-user text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-contactFirstName"
+                            type="text"
+                            pInputText
+                            formControlName="contactFirstName"
+                            placeholder="Enter contact's first name"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('contactFirstName')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('contactFirstName')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('contactFirstName'), 'First Name') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Last Name -->
+                      <div class="space-y-2">
+                        <label for="org-contactLastName" class="block text-sm font-semibold text-gray-700">
+                          Last Name
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-user text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-contactLastName"
+                            type="text"
+                            pInputText
+                            formControlName="contactLastName"
+                            placeholder="Enter contact's last name"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('contactLastName')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('contactLastName')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('contactLastName'), 'Last Name') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Contact Email -->
+                      <div class="space-y-2">
+                        <label for="org-contactEmail" class="block text-sm font-semibold text-gray-700">
+                          Email Address
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-envelope text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-contactEmail"
+                            type="email"
+                            pInputText
+                            formControlName="contactEmail"
+                            placeholder="Enter contact's email address"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('contactEmail')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('contactEmail')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('contactEmail'), 'Email') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Contact Phone -->
+                      <div class="space-y-2">
+                        <label for="org-contactPhone" class="block text-sm font-semibold text-gray-700">
+                          Phone Number
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-phone text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-contactPhone"
+                            type="tel"
+                            pInputText
+                            formControlName="contactPhone"
+                            placeholder="Enter contact's phone number"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('contactPhone')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('contactPhone')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('contactPhone'), 'Phone Number') }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (currentStep() === 2) {
+                    <!-- Organization Details Step -->
+                    <div class="space-y-6">
+                      <div class="text-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Organization Details</h3>
+                        <p class="text-gray-600">Provide information about your organization</p>
+                      </div>
+
+                      <!-- Organization Name -->
+                      <div class="space-y-2">
+                        <label for="org-organizationName" class="block text-sm font-semibold text-gray-700">
+                          Organization Name
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-building text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-organizationName"
+                            type="text"
+                            pInputText
+                            formControlName="organizationName"
+                            placeholder="Enter organization name"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('organizationName')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('organizationName')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('organizationName'), 'Organization Name') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Organization Email -->
+                      <div class="space-y-2">
+                        <label for="org-organizationEmail" class="block text-sm font-semibold text-gray-700">
+                          Organization Email Address
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-envelope text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-organizationEmail"
+                            type="email"
+                            pInputText
+                            formControlName="organizationEmail"
+                            placeholder="Enter organization email address"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('organizationEmail')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('organizationEmail')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('organizationEmail'), 'Organization Email') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Organization Location -->
+                      <div class="space-y-2">
+                        <label for="org-organizationLocation" class="block text-sm font-semibold text-gray-700">
+                          Location
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="pi pi-map-marker text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <input
+                            id="org-organizationLocation"
+                            type="text"
+                            pInputText
+                            formControlName="organizationLocation"
+                            placeholder="Enter organization location (city, country)"
+                            class="w-full pl-14 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.border-red-300]="isOrganizationFieldInvalid('organizationLocation')"
+                          />
+                        </div>
+                        @if (isOrganizationFieldInvalid('organizationLocation')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('organizationLocation'), 'Location') }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (currentStep() === 3) {
+                    <!-- Account Security Step -->
+                    <div class="space-y-6">
+                      <div class="text-center mb-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Account Security</h3>
+                        <p class="text-gray-600">Create a secure password for your organization account</p>
+                      </div>
+
+                      <!-- Password -->
+                      <div class="space-y-2">
+                        <label for="org-password" class="block text-sm font-semibold text-gray-700">
+                          Password
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                            <i class="pi pi-lock text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <p-password
+                            id="org-password"
+                            formControlName="password"
+                            placeholder="Create a strong password"
+                            [toggleMask]="true"
+                            [feedback]="true"
+                            inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.ng-invalid]="isOrganizationFieldInvalid('password')"
+                          ></p-password>
+                        </div>
+                        @if (isOrganizationFieldInvalid('password')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('password'), 'Password') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Confirm Password -->
+                      <div class="space-y-2">
+                        <label for="org-confirmPassword" class="block text-sm font-semibold text-gray-700">
+                          Confirm Password
+                        </label>
+                        <div class="relative group">
+                          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                            <i class="pi pi-lock text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                          </div>
+                          <p-password
+                            id="org-confirmPassword"
+                            formControlName="confirmPassword"
+                            placeholder="Confirm your password"
+                            [toggleMask]="true"
+                            [feedback]="false"
+                            inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
+                            [class.ng-invalid]="isOrganizationFieldInvalid('confirmPassword')"
+                          ></p-password>
+                        </div>
+                        @if (isOrganizationFieldInvalid('confirmPassword')) {
+                          <p class="text-red-500 text-sm mt-1 flex items-center">
+                            <i class="pi pi-exclamation-circle mr-1"></i>
+                            {{ getErrorMessage(organizationForm.get('confirmPassword'), 'Confirm Password') }}
+                          </p>
+                        }
+                      </div>
+
+                      <!-- Terms and Conditions -->
+                      <div class="flex items-start space-x-3">
+                        <p-checkbox
+                          formControlName="acceptTerms"
+                          inputId="org-acceptTerms"
+                          [binary]="true"
+                          class="mt-1"
+                        ></p-checkbox>
+                        <label for="org-acceptTerms" class="text-sm text-gray-600 leading-relaxed">
+                          I agree to the 
+                          <a href="#" class="text-purple-600 hover:text-purple-800 font-medium">Terms of Service</a> 
+                          and 
+                          <a href="#" class="text-purple-600 hover:text-purple-800 font-medium">Privacy Policy</a>
+                          on behalf of this organization
+                        </label>
+                      </div>
+                      @if (isOrganizationFieldInvalid('acceptTerms')) {
+                        <p class="text-red-500 text-sm flex items-center">
+                          <i class="pi pi-exclamation-circle mr-1"></i>
+                          You must accept the terms and conditions
+                        </p>
+                      }
+                    </div>
+                  }
+                </form>
               }
             </div>
           </div>
@@ -676,7 +968,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
     // Restore organization form data
     if (savedData['organizationForm'] && this.selectedAccountType() === 'organization') {
-      const organizationData = savedData['organizationForm'];
+      const organizationData = savedData['organizationForm'] as any;
       this.organizationForm.patchValue({
         contactFirstName: organizationData.contactFirstName || '',
         contactLastName: organizationData.contactLastName || '',
