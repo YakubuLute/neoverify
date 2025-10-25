@@ -15,6 +15,7 @@ export * from './components/verification-status-display/verification-status-disp
 export * from './components/permission-denied/permission-denied.component';
 export * from './components/document-sharing-dialog/document-sharing-dialog.component';
 export * from './directives/has-permission.directive';
+export * from './directives/virtual-scroll.directive';
 
 // Import array for standalone components
 import { CommonModule } from '@angular/common';

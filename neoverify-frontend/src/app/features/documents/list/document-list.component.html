@@ -138,16 +138,43 @@
 
     <!-- Grid View -->
     @if (viewMode() === 'grid') {
+    <!-- Virtual Scroll Container for large datasets -->
+    @if (enableVirtualScroll() && totalCount() > 50) {
+    <div class="documents-grid-virtual" appVirtualScroll [items]="filteredDocuments()" [config]="virtualScrollConfig()"
+        (viewportChange)="onVirtualScrollViewportChange($event)" (scrollEnd)="onVirtualScrollEnd()">
+
+        <div class="virtual-scroll-content" [style.height.px]="virtualViewport()?.totalHeight || 0">
+
+            <div class="virtual-scroll-viewport"
+                [style.transform]="'translateY(' + (virtualViewport()?.offsetY || 0) + 'px)'">
+
+                @for (document of virtualViewport()?.visibleItems || []; track document.id) {
+                <div class="document-card-wrapper" [style.height.px]="virtualScrollConfig().itemHeight"
+                    *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
+                    <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
+                        [canSelect]="canBulkEdit()" [thumbnailUrl]="getThumbnailUrl(document)"
+                        [isLoading]="isDocumentLoading(document)" (documentClick)="onDocumentClick(document)"
+                        (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
+                    </app-document-card>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    } @else {
+    <!-- Regular Grid for smaller datasets -->
     <div class="documents-grid">
         @for (document of filteredDocuments(); track document.id) {
         <div *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
             <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
-                [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
+                [canSelect]="canBulkEdit()" [thumbnailUrl]="getThumbnailUrl(document)"
+                [isLoading]="isDocumentLoading(document)" (documentClick)="onDocumentClick(document)"
                 (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
             </app-document-card>
         </div>
         }
     </div>
+    }
     }
 
     <!-- List View -->

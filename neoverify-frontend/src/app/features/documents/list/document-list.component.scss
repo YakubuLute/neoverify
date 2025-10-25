@@ -249,6 +249,42 @@
             @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
         }
 
+        // Virtual Scroll Grid
+        .documents-grid-virtual {
+            @apply relative overflow-auto;
+            height: 600px; // Fixed height for virtual scrolling
+
+            .virtual-scroll-content {
+                @apply relative w-full;
+            }
+
+            .virtual-scroll-viewport {
+                @apply relative w-full;
+                @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+            }
+
+            .document-card-wrapper {
+                @apply flex items-stretch;
+
+                app-document-card {
+                    @apply w-full;
+                }
+            }
+
+            // Scrollbar styling
+            &::-webkit-scrollbar {
+                @apply w-2;
+            }
+
+            &::-webkit-scrollbar-track {
+                @apply bg-gray-800/50 rounded-full;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                @apply bg-gray-600/50 rounded-full hover:bg-gray-500/50;
+            }
+        }
+
         // Table View
         .documents-table {
             @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden;

@@ -178,11 +178,15 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadDocuments();
     this.setupSearchDebounce();
+    this.setupSearchService();
+    this.setupPerformanceOptimizations();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.lazyLoadingService.destroy();
+    this.searchService.destroy();
   }
 
   private setupSearchDebounce(): void {
@@ -190,19 +194,91 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     // For now, we'll handle it in the search method
   }
 
+  private setupSearchService(): void {
+    // Subscribe to search results
+    this.searchService.searchResults$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(results => {
+        this.documents.set(results.documents);
+        this.totalCount.set(results.totalCount);
+      });
+
+    // Subscribe to search loading state
+    this.searchService.isSearching
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isSearching => {
+        this.loading.set(isSearching);
+      });
+
+    // Subscribe to search errors
+    this.searchService.searchError
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(error => {
+        this.error.set(error);
+      });
+  }
+
+  private setupPerformanceOptimizations(): void {
+    // Enable virtual scrolling for large datasets
+    if (this.totalCount() > 50) {
+      this.enableVirtualScroll.set(true);
+    }
+
+    // Preload thumbnails for visible items
+    this.preloadVisibleThumbnails();
+
+    // Setup cache cleanup interval
+    setInterval(() => {
+      this.cacheService.clearExpired();
+    }, 5 * 60 * 1000); // Every 5 minutes
+  }
+
+  private preloadVisibleThumbnails(): void {
+    const viewport = this.virtualViewport();
+    if (!viewport) return;
+
+    const visibleDocuments = viewport.visibleItems as Document[];
+    const lazyLoadItems = visibleDocuments.map(doc => ({
+      id: doc.id,
+      type: 'thumbnail' as const,
+      priority: 1
+    }));
+
+    this.lazyLoadingService.preload(lazyLoadItems);
+  }
+
   async loadDocuments(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
 
     try {
+      const cacheKey = `documents:${this.currentPage()}:${this.pageSize()}:${JSON.stringify(this.filters())}`;
+
+      // Try to get from cache first
+      const cachedResult = this.cacheService.getSync<{ documents: Document[], totalCount: number }>(cacheKey);
+      if (cachedResult) {
+        this.documents.set(cachedResult.documents);
+        this.totalCount.set(cachedResult.totalCount);
+        this.loading.set(false);
+        return;
+      }
+
       // For development, use mock data
       const mockDocuments = this.getMockDocuments();
 
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 200)); // Reduced delay
 
-      this.documents.set(mockDocuments);
-      this.totalCount.set(mockDocuments.length);
+      const result = { documents: mockDocuments, totalCount: mockDocuments.length };
+
+      // Cache the result
+      this.cacheService.set(cacheKey, result, { ttl: 2 * 60 * 1000 }); // 2 minutes
+
+      this.documents.set(result.documents);
+      this.totalCount.set(result.totalCount);
+
+      // Preload thumbnails for visible documents
+      this.preloadDocumentAssets(result.documents.slice(0, 10)); // First 10 items
 
       // TODO: Replace with actual API call
       // const params = {
@@ -214,8 +290,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       // };
       // const response = await this.documentService.getDocuments(params).toPromise();
       // if (response) {
+      //   const result = { documents: response.items, totalCount: response.totalCount };
+      //   this.cacheService.set(cacheKey, result, { ttl: 2 * 60 * 1000 });
       //   this.documents.set(response.items);
       //   this.totalCount.set(response.totalCount);
+      //   this.preloadDocumentAssets(response.items.slice(0, 10));
       // }
     } catch (error) {
       console.error('Failed to load documents:', error);
@@ -226,16 +305,34 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     }
   }
 
+  private preloadDocumentAssets(documents: Document[]): void {
+    const lazyLoadItems = documents.flatMap(doc => [
+      { id: doc.id, type: 'thumbnail' as const, priority: 2 },
+      { id: doc.id, type: 'metadata' as const, priority: 1 }
+    ]);
+
+    this.lazyLoadingService.preload(lazyLoadItems);
+  }
+
   onSearch(query: string): void {
     this.searchQuery.set(query);
     this.currentPage.set(1);
-    // In a real implementation, this would be debounced
-    this.loadDocuments();
+
+    // Use optimized search service
+    this.searchService.setSearchQuery(query);
+    this.searchService.setSearchFilters(this.filters());
   }
 
   onFilterChange(newFilters: DocumentFilters): void {
     this.filters.set(newFilters);
     this.currentPage.set(1);
+
+    // Invalidate cache when filters change
+    this.cacheService.invalidatePattern('^documents:');
+
+    // Update search service
+    this.searchService.setSearchFilters(newFilters);
+
     this.loadDocuments();
   }
 
@@ -331,7 +428,86 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   }
 
   refreshDocuments(): void {
+    // Clear cache before refreshing
+    this.cacheService.invalidatePattern('^documents:');
+    this.lazyLoadingService.clearQueue();
     this.loadDocuments();
+  }
+
+  // Virtual scroll event handlers
+  onVirtualScrollViewportChange(viewport: VirtualScrollViewport): void {
+    this.virtualViewport.set(viewport);
+    this.preloadVisibleThumbnails();
+  }
+
+  onVirtualScrollEnd(): void {
+    // Load more documents if available
+    if (this.documents().length < this.totalCount()) {
+      this.currentPage.set(this.currentPage() + 1);
+      this.loadMoreDocuments();
+    }
+  }
+
+  private async loadMoreDocuments(): Promise<void> {
+    if (this.loading()) return;
+
+    this.loading.set(true);
+
+    try {
+      const cacheKey = `documents:${this.currentPage()}:${this.pageSize()}:${JSON.stringify(this.filters())}`;
+
+      // For development, simulate loading more documents
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const moreDocuments = this.getMockDocuments().slice(0, 5); // Simulate pagination
+      const currentDocs = this.documents();
+      const updatedDocs = [...currentDocs, ...moreDocuments];
+
+      this.documents.set(updatedDocs);
+
+      // Preload assets for new documents
+      this.preloadDocumentAssets(moreDocuments);
+
+    } catch (error) {
+      console.error('Failed to load more documents:', error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  // Performance monitoring methods
+  getCacheStats(): void {
+    this.cacheService.getStats().subscribe(stats => {
+      console.log('Cache Statistics:', stats);
+    });
+  }
+
+  getSearchAnalytics(): void {
+    this.searchService.getSearchAnalytics().subscribe(analytics => {
+      console.log('Search Analytics:', analytics);
+    });
+  }
+
+  // Lazy loading helpers
+  getThumbnailUrl(document: Document): string {
+    const cached = this.lazyLoadingService.isCached(document.id, 'thumbnail');
+    if (cached) {
+      return document.thumbnailUrl || '/assets/images/document-placeholder.svg';
+    }
+
+    // Trigger lazy loading
+    this.lazyLoadingService.preload([{
+      id: document.id,
+      type: 'thumbnail',
+      priority: 1
+    }]);
+
+    return '/assets/images/document-placeholder.svg';
+  }
+
+  isDocumentLoading(document: Document): boolean {
+    return this.lazyLoadingService.isLoading(document.id, 'thumbnail') ||
+      this.lazyLoadingService.isLoading(document.id, 'metadata');
   }
 
   // Helper methods for template
