@@ -11,6 +11,7 @@ export * from './components/status-badge/status-badge.component';
 export * from './components/verification-progress/verification-progress.component';
 export * from './components/status-history/status-history.component';
 export * from './components/status-management-dialog/status-management-dialog.component';
+export * from './components/verification-status-display/verification-status-display.component';
 
 // Import array for standalone components
 import { CommonModule } from '@angular/common';
@@ -79,6 +80,7 @@ import { StatusBadgeComponent } from './components/status-badge/status-badge.com
 import { VerificationProgressComponent } from './components/verification-progress/verification-progress.component';
 import { StatusHistoryComponent } from './components/status-history/status-history.component';
 import { StatusManagementDialogComponent } from './components/status-management-dialog/status-management-dialog.component';
+import { VerificationStatusDisplayComponent } from './components/verification-status-display/verification-status-display.component';
 
 export const SHARED_IMPORTS = [
   // Angular modules
@@ -148,5 +150,6 @@ export const SHARED_IMPORTS = [
   StatusBadgeComponent,
   VerificationProgressComponent,
   StatusHistoryComponent,
-  StatusManagementDialogComponent
+  StatusManagementDialogComponent,
+  VerificationStatusDisplayComponent
 ];
