@@ -6,6 +6,10 @@ import { DocumentService } from '../../../core/services/document.service';
 import { DocumentStatusService } from '../../../core/services/document-status.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
+import { CacheService } from '../../../core/services/cache.service';
+import { LazyLoadingService } from '../../../core/services/lazy-loading.service';
+import { SearchService } from '../../../core/services/search.service';
+import { VirtualScrollDirective, VirtualScrollViewport } from '../../../shared/directives/virtual-scroll.directive';
 import { DocumentCardComponent } from '../components/document-card/document-card.component';
 import { DocumentSearchComponent } from '../components/document-search/document-search.component';
 import { BulkOperationsComponent } from '../components/bulk-operations/bulk-operations.component';
@@ -33,7 +37,8 @@ import { UserRole } from '../../../shared/models/auth.models';
     StatusManagementDialogComponent,
     StatusHistoryComponent,
     HasPermissionDirective,
-    DocumentSharingDialogComponent
+    DocumentSharingDialogComponent,
+    VirtualScrollDirective
   ],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss'
@@ -43,6 +48,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   private readonly statusService = inject(DocumentStatusService);
   private readonly authService = inject(AuthService);
   private readonly permissionsService = inject(PermissionsService);
+  private readonly cacheService = inject(CacheService);
+  private readonly lazyLoadingService = inject(LazyLoadingService);
+  private readonly searchService = inject(SearchService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -53,6 +61,15 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly totalCount = signal(0);
   readonly currentPage = signal(1);
   readonly pageSize = signal(20);
+
+  // Virtual scrolling signals
+  readonly virtualScrollConfig = signal({
+    itemHeight: 120,
+    bufferSize: 5,
+    threshold: 100
+  });
+  readonly virtualViewport = signal<VirtualScrollViewport | null>(null);
+  readonly enableVirtualScroll = signal(true);
 
   // Search and filter signals
   readonly searchQuery = signal('');
