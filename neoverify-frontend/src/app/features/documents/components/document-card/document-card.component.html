@@ -128,11 +128,11 @@
 
         <!-- Status Badges -->
         <div class="status-badges">
-            <p-tag [value]="document.status" [severity]="statusSeverity()" class="status-tag">
-            </p-tag>
+            <app-status-badge [status]="document.status" type="document" size="sm">
+            </app-status-badge>
 
-            <p-tag [value]="document.verificationStatus" [severity]="verificationSeverity()" class="verification-tag">
-            </p-tag>
+            <app-status-badge [status]="document.verificationStatus" type="verification" size="sm">
+            </app-status-badge>
         </div>
 
         <!-- Card Actions -->

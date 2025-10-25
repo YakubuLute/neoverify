@@ -1,24 +1,37 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { SHARED_IMPORTS } from '../../../../shared';
-import { Document, DocumentStatus, DocumentType, VerificationStatus } from '../../../../shared/models/document.models';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { VerificationProgressComponent } from '../../../../shared/components/verification-progress/verification-progress.component';
+import { DocumentStatusService } from '../../../../core/services/document-status.service';
+import { Document, DocumentStatus, DocumentType, VerificationStatus, VerificationProgress } from '../../../../shared/models/document.models';
 
 @Component({
     selector: 'app-document-card',
     standalone: true,
-    imports: SHARED_IMPORTS,
+    imports: [
+        ...SHARED_IMPORTS,
+        StatusBadgeComponent,
+        VerificationProgressComponent
+    ],
     templateUrl: './document-card.component.html',
     styleUrl: './document-card.component.scss'
 })
-export class DocumentCardComponent {
+export class DocumentCardComponent implements OnInit, OnDestroy {
     @Input({ required: true }) document!: Document;
     @Input() selected = false;
     @Input() canSelect = false;
+    @Input() showVerificationProgress = true;
 
     @Output() documentClick = new EventEmitter<Document>();
     @Output() selectionChange = new EventEmitter<boolean>();
     @Output() quickAction = new EventEmitter<{ action: string; document: Document }>();
 
+    private readonly statusService = inject(DocumentStatusService);
+    private readonly destroy$ = new Subject<void>();
+
     readonly showMenu = signal(false);
+    readonly verificationProgress = signal<VerificationProgress | null>(null);
 
     // Computed properties
     readonly statusSeverity = computed(() => this.getStatusSeverity(this.document.status));
@@ -37,6 +50,26 @@ export class DocumentCardComponent {
     // Enum references for template
     readonly DocumentStatus = DocumentStatus;
     readonly VerificationStatus = VerificationStatus;
+
+    ngOnInit(): void {
+        // Load verification progress if document is being processed
+        if (this.showVerificationProgress && this.isProcessing()) {
+            this.loadVerificationProgress();
+        }
+
+        // Subscribe to verification progress updates
+        this.statusService.verificationProgress$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(progressMap => {
+                const progress = progressMap.get(this.document.id);
+                this.verificationProgress.set(progress || null);
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 
     onCardClick(event: Event): void {
         // Don't trigger card click if clicking on interactive elements
@@ -118,5 +151,31 @@ export class DocumentCardComponent {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    private isProcessing(): boolean {
+        return this.document.status === DocumentStatus.PROCESSING ||
+            this.document.verificationStatus === VerificationStatus.PENDING;
+    }
+
+    private loadVerificationProgress(): void {
+        this.statusService.getVerificationProgress(this.document.id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(progress => {
+                this.verificationProgress.set(progress);
+            });
+    }
+
+    // New methods for status tracking
+    onStatusChange(newStatus: DocumentStatus): void {
+        this.quickAction.emit({ action: 'change-status', document: { ...this.document, status: newStatus } });
+    }
+
+    onRetryVerification(): void {
+        this.quickAction.emit({ action: 'retry-verification', document: this.document });
+    }
+
+    onViewStatusHistory(): void {
+        this.quickAction.emit({ action: 'view-status-history', document: this.document });
     }
 }
