@@ -74,7 +74,7 @@ export const routes: Routes = [
             path: 'templates',
             canActivate: [roleGuard],
             data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
-            loadComponent: () => import('./features/documents/list/document-list.component').then(m => m.DocumentListComponent)
+            loadComponent: () => import('./features/documents/templates/templates-list.component').then(m => m.TemplatesListComponent)
           },
           {
             path: ':id',

@@ -57,8 +57,8 @@
     - Add template preview functionality during upload process
     - _Requirements: 3.5, 2.5_
 
-- [ ] 4. Develop document templates management
-  - [ ] 4.1 Create templates list page
+- [-] 4. Develop document templates management
+  - [-] 4.1 Create templates list page
     - Build templates gallery with preview thumbnails and search
     - Implement template categorization and filtering
     - Add template usage statistics and analytics display
