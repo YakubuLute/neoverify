@@ -317,15 +317,19 @@ export class TemplateVersionsComponent implements OnInit, OnDestroy {
         }).format(new Date(date));
     }
 
+    isVersionSelected(version: TemplateVersion): boolean {
+        return this.selectedVersions().some(v => v.id === version.id);
+    }
+
     getVersionStatusSeverity(version: TemplateVersion): string {
         return version.isActive ? 'success' : 'secondary';
     }
 
-    getChangeTypeSeverity(changeType: 'added' | 'removed' | 'modified'): string {
+    getChangeTypeSeverity(changeType: 'added' | 'removed' | 'modified'): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
         switch (changeType) {
             case 'added': return 'success';
             case 'removed': return 'danger';
-            case 'modified': return 'warning';
+            case 'modified': return 'warn';
             default: return 'info';
         }
     }

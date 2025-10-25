@@ -100,7 +100,7 @@
             <i class="pi pi-exclamation-triangle error-icon"></i>
             <h3>Error Loading Versions</h3>
             <p>{{ error() }}</p>
-            <p-button label="Try Again" icon="pi pi-refresh" (onClick)="loadVersions(templateId()!)">
+            <p-button label="Try Again" icon="pi pi-refresh" (onClick)="ngOnInit()">
             </p-button>
         </div>
     </div>
@@ -111,12 +111,12 @@
     <div class="versions-content">
         <div class="versions-list">
             @for (version of sortedVersions(); track version.id) {
-            <div class="version-item" [class.selected]="selectedVersions().some(v => v.id === version.id)">
+            <div class="version-item" [class.selected]="isVersionSelected(version)">
                 <div class="version-header">
                     <div class="version-selection">
-                        <p-checkbox [binary]="true" [ngModel]="selectedVersions().some(v => v.id === version.id)"
+                        <p-checkbox [binary]="true" [ngModel]="isVersionSelected(version)"
                             (ngModelChange)="onVersionSelect(version, $event)"
-                            [disabled]="!$event && selectedVersions().length >= 2">
+                            [disabled]="!isVersionSelected(version) && selectedVersions().length >= 2"></p-checkbox>
                         </p-checkbox>
                     </div>
                     <div class="version-info">
@@ -184,103 +184,109 @@
         </div>
 
         <div class="comparison-body">
-            <p-tabView>
-                <p-tabPanel header="Field Changes">
-                    <div class="changes-list">
-                        @for (change of comparison.fieldChanges; track change.fieldName) {
-                        <div class="change-item">
-                            <div class="change-header">
-                                <i [class]="getChangeTypeIcon(change.type)"></i>
-                                <span class="change-type">
-                                    <p-tag [value]="change.type.toUpperCase()"
-                                        [severity]="getChangeTypeSeverity(change.type)">
-                                    </p-tag>
-                                </span>
-                                <span class="field-name">{{ change.fieldName }}</span>
-                            </div>
+            <p-tabs value="0">
+                <p-tabList>
+                    <p-tab value="0">Field Changes</p-tab>
+                    <p-tab value="1">Validation Changes</p-tab>
+                </p-tabList>
+                <p-tabPanels>
+                    <p-tabPanel value="0">
+                        <div class="changes-list">
+                            @for (change of comparison.fieldChanges; track change.fieldName) {
+                            <div class="change-item">
+                                <div class="change-header">
+                                    <i [class]="getChangeTypeIcon(change.type)"></i>
+                                    <span class="change-type">
+                                        <p-tag [value]="change.type.toUpperCase()"
+                                            [severity]="getChangeTypeSeverity(change.type) as any"></p-tag>
+                                        </p-tag>
+                                    </span>
+                                    <span class="field-name">{{ change.fieldName }}</span>
+                                </div>
 
-                            @if (change.changes && change.changes.length > 0) {
-                            <div class="change-details">
-                                <ul>
-                                    @for (changeDetail of change.changes; track changeDetail) {
-                                    <li>{{ changeDetail }}</li>
-                                    }
-                                </ul>
-                            </div>
-                            }
+                                @if (change.changes && change.changes.length > 0) {
+                                <div class="change-details">
+                                    <ul>
+                                        @for (changeDetail of change.changes; track changeDetail) {
+                                        <li>{{ changeDetail }}</li>
+                                        }
+                                    </ul>
+                                </div>
+                                }
 
-                            @if (change.type === 'added' && change.newField) {
-                            <div class="field-preview">
-                                <strong>New Field:</strong>
-                                <code>{{ change.newField.name }} ({{ change.newField.type }})</code>
-                            </div>
-                            }
+                                @if (change.type === 'added' && change.newField) {
+                                <div class="field-preview">
+                                    <strong>New Field:</strong>
+                                    <code>{{ change.newField.name }} ({{ change.newField.type }})</code>
+                                </div>
+                                }
 
-                            @if (change.type === 'removed' && change.oldField) {
-                            <div class="field-preview">
-                                <strong>Removed Field:</strong>
-                                <code>{{ change.oldField.name }} ({{ change.oldField.type }})</code>
-                            </div>
-                            }
-                        </div>
-                        }
-
-                        @if (comparison.fieldChanges.length === 0) {
-                        <div class="no-changes">
-                            <p>No field changes between these versions</p>
-                        </div>
-                        }
-                    </div>
-                </p-tabPanel>
-
-                <p-tabPanel header="Validation Changes">
-                    <div class="changes-list">
-                        @for (change of comparison.ruleChanges; track change.ruleName) {
-                        <div class="change-item">
-                            <div class="change-header">
-                                <i [class]="getChangeTypeIcon(change.type)"></i>
-                                <span class="change-type">
-                                    <p-tag [value]="change.type.toUpperCase()"
-                                        [severity]="getChangeTypeSeverity(change.type)">
-                                    </p-tag>
-                                </span>
-                                <span class="rule-name">{{ change.ruleName }}</span>
-                            </div>
-
-                            @if (change.changes && change.changes.length > 0) {
-                            <div class="change-details">
-                                <ul>
-                                    @for (changeDetail of change.changes; track changeDetail) {
-                                    <li>{{ changeDetail }}</li>
-                                    }
-                                </ul>
+                                @if (change.type === 'removed' && change.oldField) {
+                                <div class="field-preview">
+                                    <strong>Removed Field:</strong>
+                                    <code>{{ change.oldField.name }} ({{ change.oldField.type }})</code>
+                                </div>
+                                }
                             </div>
                             }
 
-                            @if (change.type === 'added' && change.newRule) {
-                            <div class="rule-preview">
-                                <strong>New Rule:</strong>
-                                <code>{{ change.newRule.type }}: {{ change.newRule.message }}</code>
-                            </div>
-                            }
-
-                            @if (change.type === 'removed' && change.oldRule) {
-                            <div class="rule-preview">
-                                <strong>Removed Rule:</strong>
-                                <code>{{ change.oldRule.type }}: {{ change.oldRule.message }}</code>
+                            @if (comparison.fieldChanges.length === 0) {
+                            <div class="no-changes">
+                                <p>No field changes between these versions</p>
                             </div>
                             }
                         </div>
-                        }
+                    </p-tabPanel>
 
-                        @if (comparison.ruleChanges.length === 0) {
-                        <div class="no-changes">
-                            <p>No validation rule changes between these versions</p>
+                    <p-tabPanel value="1">
+                        <div class="changes-list">
+                            @for (change of comparison.ruleChanges; track change.ruleName) {
+                            <div class="change-item">
+                                <div class="change-header">
+                                    <i [class]="getChangeTypeIcon(change.type)"></i>
+                                    <span class="change-type">
+                                        <p-tag [value]="change.type.toUpperCase()"
+                                            [severity]="getChangeTypeSeverity(change.type) as any">
+                                        </p-tag>
+                                    </span>
+                                    <span class="rule-name">{{ change.ruleName }}</span>
+                                </div>
+
+                                @if (change.changes && change.changes.length > 0) {
+                                <div class="change-details">
+                                    <ul>
+                                        @for (changeDetail of change.changes; track changeDetail) {
+                                        <li>{{ changeDetail }}</li>
+                                        }
+                                    </ul>
+                                </div>
+                                }
+
+                                @if (change.type === 'added' && change.newRule) {
+                                <div class="rule-preview">
+                                    <strong>New Rule:</strong>
+                                    <code>{{ change.newRule.type }}: {{ change.newRule.message }}</code>
+                                </div>
+                                }
+
+                                @if (change.type === 'removed' && change.oldRule) {
+                                <div class="rule-preview">
+                                    <strong>Removed Rule:</strong>
+                                    <code>{{ change.oldRule.type }}: {{ change.oldRule.message }}</code>
+                                </div>
+                                }
+                            </div>
+                            }
+
+                            @if (comparison.ruleChanges.length === 0) {
+                            <div class="no-changes">
+                                <p>No validation rule changes between these versions</p>
+                            </div>
+                            }
                         </div>
-                        }
-                    </div>
-                </p-tabPanel>
-            </p-tabView>
+                    </p-tabPanel>
+                </p-tabPanels>
+            </p-tabs>
         </div>
     </div>
     }
