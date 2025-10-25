@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 import {
@@ -13,6 +14,7 @@ import { PaginatedResponse, QueryParams } from '../../shared/models/common.model
     providedIn: 'root'
 })
 export class AuditService {
+    private readonly http = inject(HttpClient);
     private readonly apiService = inject(ApiService);
     private readonly notificationService = inject(NotificationService);
 
@@ -112,7 +114,8 @@ export class AuditService {
             format
         };
 
-        return this.apiService.post<Blob>('audit/export', exportData, { responseType: 'blob' }).pipe(
+        // Use HttpClient directly for blob responses
+        return this.http.post(`${this.apiService.getBaseUrl()}/audit/export`, exportData, { responseType: 'blob' }).pipe(
             tap(() => {
                 this.notificationService.success('Audit trail export completed successfully');
             }),
@@ -160,7 +163,8 @@ export class AuditService {
         organizationId?: string;
         includeDetails?: boolean;
     }): Observable<Blob> {
-        return this.apiService.post<Blob>('audit/compliance-report', params, { responseType: 'blob' }).pipe(
+        // Use HttpClient directly for blob responses
+        return this.http.post(`${this.apiService.getBaseUrl()}/audit/compliance-report`, params, { responseType: 'blob' }).pipe(
             tap(() => {
                 this.notificationService.success('Compliance report generated successfully');
             }),
@@ -302,6 +306,3 @@ export class AuditService {
         );
     }
 }
-
-// Helper function to import 'of' operator
-import { of } from 'rxjs';

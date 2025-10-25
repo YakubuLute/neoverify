@@ -59,11 +59,18 @@ export class ApiService {
   }
 
   /**
+   * Get base URL for direct HTTP calls
+   */
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  /**
    * Handle HTTP errors
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Client Error: ${error.error.message}`;
@@ -71,7 +78,7 @@ export class ApiService {
       // Server-side error
       errorMessage = `Server Error: ${error.status} - ${error.message}`;
     }
-    
+
     console.error('API Error:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }

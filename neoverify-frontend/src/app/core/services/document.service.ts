@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 import {
@@ -19,6 +20,7 @@ import { PaginatedResponse, QueryParams } from '../../shared/models/common.model
   providedIn: 'root'
 })
 export class DocumentService {
+  private readonly http = inject(HttpClient);
   private readonly apiService = inject(ApiService);
   private readonly notificationService = inject(NotificationService);
 
@@ -292,7 +294,7 @@ export class DocumentService {
    * Remove tags from document
    */
   removeTags(documentId: string, tags: string[]): Observable<DocumentModel> {
-    return this.apiService.delete<DocumentModel>(`documents/${documentId}/tags`, { tags }).pipe(
+    return this.apiService.post<DocumentModel>(`documents/${documentId}/tags/remove`, { tags }).pipe(
       map(response => response.data),
       tap(() => {
         this.notificationService.success('Tags removed successfully');
@@ -375,7 +377,10 @@ export class DocumentService {
       ...options
     };
 
-    return this.apiService.post<Blob>('documents/export', exportData, { responseType: 'blob' }).pipe(
+    // Use HttpClient directly for blob responses
+    return this.http.post(`${this.apiService.getBaseUrl()}/documents/export`, exportData, {
+      responseType: 'blob'
+    }).pipe(
       tap(() => {
         this.notificationService.success('Export completed successfully');
       }),

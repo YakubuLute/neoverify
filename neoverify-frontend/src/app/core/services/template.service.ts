@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 import {
@@ -16,6 +17,7 @@ import { PaginatedResponse, QueryParams } from '../../shared/models/common.model
     providedIn: 'root'
 })
 export class TemplateService {
+    private readonly http = inject(HttpClient);
     private readonly apiService = inject(ApiService);
     private readonly notificationService = inject(NotificationService);
 
@@ -296,7 +298,10 @@ export class TemplateService {
      * Export template
      */
     exportTemplate(templateId: string, format: 'json' | 'pdf'): Observable<Blob> {
-        return this.apiService.get<Blob>(`templates/${templateId}/export?format=${format}`, {}, { responseType: 'blob' }).pipe(
+        // Use HttpClient directly for blob responses
+        return this.http.get(`${this.apiService.getBaseUrl()}/templates/${templateId}/export?format=${format}`, {
+            responseType: 'blob'
+        }).pipe(
             catchError(error => {
                 this.notificationService.error('Failed to export template');
                 return throwError(() => error);
