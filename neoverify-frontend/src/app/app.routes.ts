@@ -120,6 +120,10 @@ export const routes: Routes = [
               {
                 path: 'scheduled-reports',
                 loadComponent: () => import('./features/documents/audit/scheduled-reports.component').then(m => m.ScheduledReportsComponent)
+              },
+              {
+                path: 'report-templates',
+                loadComponent: () => import('./features/documents/audit/compliance-report-templates.component').then(m => m.ComplianceReportTemplatesComponent)
               }
             ]
           },

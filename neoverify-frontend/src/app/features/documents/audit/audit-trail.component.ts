@@ -28,39 +28,39 @@ import { AuditEntry, AuditAction } from '../../../shared/models/document.models'
 import { PaginatedResponse } from '../../../shared/models/common.models';
 
 interface AuditFilters {
-    query?: string;
-    actions?: AuditAction[];
-    dateRange?: {
-        start: Date;
-        end: Date;
-    };
-    userIds?: string[];
-    documentIds?: string[];
+  query?: string;
+  actions?: AuditAction[];
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  userIds?: string[];
+  documentIds?: string[];
 }
 
 @Component({
-    selector: 'app-audit-trail',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        TableModule,
-        ButtonModule,
-        InputTextModule,
-        DropdownModule,
-        CalendarModule,
-        MultiSelectModule,
-        TagModule,
-        TooltipModule,
-        ProgressSpinnerModule,
-        CardModule,
-        PanelModule,
-        DialogModule,
-        ConfirmDialogModule
-    ],
-    providers: [ConfirmationService],
-    template: `
+  selector: 'app-audit-trail',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    CalendarModule,
+    MultiSelectModule,
+    TagModule,
+    TooltipModule,
+    ProgressSpinnerModule,
+    CardModule,
+    PanelModule,
+    DialogModule,
+    ConfirmDialogModule
+  ],
+  providers: [ConfirmationService],
+  template: `
     <div class="audit-trail-container p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
@@ -121,7 +121,7 @@ interface AuditFilters {
             <label class="text-sm font-medium text-gray-300 mb-2">Start Date</label>
             <p-calendar
               formControlName="startDate"
-              [showIcon]="true"
+              showIcon="true"
               placeholder="Start date"
               styleClass="w-full"
             />
@@ -131,7 +131,7 @@ interface AuditFilters {
             <label class="text-sm font-medium text-gray-300 mb-2">End Date</label>
             <p-calendar
               formControlName="endDate"
-              [showIcon]="true"
+              showIcon="true"
               placeholder="End date"
               styleClass="w-full"
             />
@@ -432,7 +432,7 @@ interface AuditFilters {
               <label class="text-sm font-medium text-gray-300 mb-2 block">Start Date</label>
               <p-calendar
                 [(ngModel)]="reportStartDate"
-                [showIcon]="true"
+                showIcon="true"
                 placeholder="Start date"
                 styleClass="w-full"
               />
@@ -441,7 +441,7 @@ interface AuditFilters {
               <label class="text-sm font-medium text-gray-300 mb-2 block">End Date</label>
               <p-calendar
                 [(ngModel)]="reportEndDate"
-                [showIcon]="true"
+                showIcon="true"
                 placeholder="End date"
                 styleClass="w-full"
               />
@@ -464,7 +464,7 @@ interface AuditFilters {
       </p-dialog>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
       min-height: 100vh;
@@ -521,302 +521,302 @@ interface AuditFilters {
   `]
 })
 export class AuditTrailComponent implements OnInit {
-    private readonly auditService = inject(AuditService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly router = inject(Router);
-    private readonly route = inject(ActivatedRoute);
-    private readonly fb = inject(FormBuilder);
+  private readonly auditService = inject(AuditService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
 
-    // Signals
-    auditEntries = signal<AuditEntry[]>([]);
-    loading = signal(false);
-    exporting = signal(false);
-    generatingReport = signal(false);
-    totalRecords = signal(0);
-    statistics = signal<any>(null);
-    selectedEntry = signal<AuditEntry | null>(null);
+  // Signals
+  auditEntries = signal<AuditEntry[]>([]);
+  loading = signal(false);
+  exporting = signal(false);
+  generatingReport = signal(false);
+  totalRecords = signal(0);
+  statistics = signal<any>(null);
+  selectedEntry = signal<AuditEntry | null>(null);
 
-    // Form and filters
-    filtersForm: FormGroup;
-    currentFilters: AuditFilters = {};
-    pageSize = 25;
-    currentPage = 0;
+  // Form and filters
+  filtersForm: FormGroup;
+  currentFilters: AuditFilters = {};
+  pageSize = 25;
+  currentPage = 0;
 
-    // Dialog states
-    showDetailsDialog = false;
-    showExportDialog = false;
-    showReportDialog = false;
+  // Dialog states
+  showDetailsDialog = false;
+  showExportDialog = false;
+  showReportDialog = false;
 
-    // Export/Report options
-    exportFormat = 'csv';
-    reportType = 'monthly';
-    reportStartDate: Date | null = null;
-    reportEndDate: Date | null = null;
+  // Export/Report options
+  exportFormat = 'csv';
+  reportType = 'monthly';
+  reportStartDate: Date | null = null;
+  reportEndDate: Date | null = null;
 
-    // Options
-    actionOptions = Object.values(AuditAction).map(action => ({
-        label: this.getActionLabel(action),
-        value: action
-    }));
+  // Options
+  actionOptions = Object.values(AuditAction).map(action => ({
+    label: this.getActionLabel(action),
+    value: action
+  }));
 
-    exportFormatOptions = [
-        { label: 'CSV', value: 'csv' },
-        { label: 'Excel', value: 'excel' },
-        { label: 'PDF', value: 'pdf' }
-    ];
+  exportFormatOptions = [
+    { label: 'CSV', value: 'csv' },
+    { label: 'Excel', value: 'excel' },
+    { label: 'PDF', value: 'pdf' }
+  ];
 
-    reportTypeOptions = [
-        { label: 'Monthly', value: 'monthly' },
-        { label: 'Quarterly', value: 'quarterly' },
-        { label: 'Annual', value: 'annual' },
-        { label: 'Custom Range', value: 'custom' }
-    ];
+  reportTypeOptions = [
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Quarterly', value: 'quarterly' },
+    { label: 'Annual', value: 'annual' },
+    { label: 'Custom Range', value: 'custom' }
+  ];
 
-    private searchSubject = new Subject<string>();
+  private searchSubject = new Subject<string>();
 
-    constructor() {
-        this.filtersForm = this.fb.group({
-            query: [''],
-            actions: [[]],
-            startDate: [null],
-            endDate: [null]
-        });
+  constructor() {
+    this.filtersForm = this.fb.group({
+      query: [''],
+      actions: [[]],
+      startDate: [null],
+      endDate: [null]
+    });
 
-        // Setup search debouncing
-        this.searchSubject.pipe(
-            debounceTime(300),
-            distinctUntilChanged()
-        ).subscribe(query => {
-            this.currentFilters.query = query;
-            this.loadAuditEntries();
-        });
+    // Setup search debouncing
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      this.currentFilters.query = query;
+      this.loadAuditEntries();
+    });
 
-        // Watch for form changes
-        this.filtersForm.get('query')?.valueChanges.subscribe(value => {
-            this.searchSubject.next(value || '');
-        });
+    // Watch for form changes
+    this.filtersForm.get('query')?.valueChanges.subscribe(value => {
+      this.searchSubject.next(value || '');
+    });
+  }
+
+  ngOnInit() {
+    this.loadAuditEntries();
+    this.loadStatistics();
+  }
+
+  loadAuditEntries() {
+    this.loading.set(true);
+
+    const params = {
+      page: this.currentPage + 1,
+      limit: this.pageSize,
+      ...this.currentFilters
+    };
+
+    this.auditService.searchAuditEntries(this.currentFilters, params).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: (response) => {
+        this.auditEntries.set(response.items);
+        this.totalRecords.set(response.totalCount);
+      },
+      error: (error) => {
+        console.error('Failed to load audit entries:', error);
+        this.notificationService.error('Failed to load audit entries');
+      }
+    });
+  }
+
+  loadStatistics() {
+    this.auditService.getAuditStatistics().subscribe({
+      next: (stats) => {
+        this.statistics.set(stats);
+      },
+      error: (error) => {
+        console.error('Failed to load audit statistics:', error);
+      }
+    });
+  }
+
+  onLazyLoad(event: any) {
+    this.currentPage = Math.floor(event.first / event.rows);
+    this.pageSize = event.rows;
+    this.loadAuditEntries();
+  }
+
+  applyFilters() {
+    const formValue = this.filtersForm.value;
+
+    this.currentFilters = {
+      query: formValue.query || undefined,
+      actions: formValue.actions?.length ? formValue.actions : undefined,
+      dateRange: formValue.startDate && formValue.endDate ? {
+        start: formValue.startDate,
+        end: formValue.endDate
+      } : undefined
+    };
+
+    this.currentPage = 0;
+    this.loadAuditEntries();
+  }
+
+  clearFilters() {
+    this.filtersForm.reset();
+    this.currentFilters = {};
+    this.currentPage = 0;
+    this.loadAuditEntries();
+  }
+
+  viewDetails(entry: AuditEntry) {
+    this.selectedEntry.set(entry);
+    this.showDetailsDialog = true;
+  }
+
+  viewDocument(documentId: string) {
+    this.router.navigate(['/documents', documentId]);
+  }
+
+  copyEntryId(entryId: string) {
+    navigator.clipboard.writeText(entryId).then(() => {
+      this.notificationService.success('Entry ID copied to clipboard');
+    });
+  }
+
+  exportAuditTrail() {
+    this.exporting.set(true);
+
+    this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat as any).pipe(
+      finalize(() => this.exporting.set(false))
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${this.exportFormat}`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.showExportDialog = false;
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.notificationService.error('Export failed. Please try again.');
+      }
+    });
+  }
+
+  generateReport() {
+    this.generatingReport.set(true);
+
+    const params: any = {
+      reportType: this.reportType
+    };
+
+    if (this.reportType === 'custom' && this.reportStartDate && this.reportEndDate) {
+      params.dateRange = {
+        start: this.reportStartDate,
+        end: this.reportEndDate
+      };
     }
 
-    ngOnInit() {
-        this.loadAuditEntries();
-        this.loadStatistics();
-    }
+    this.auditService.generateComplianceReport(params).pipe(
+      finalize(() => this.generatingReport.set(false))
+    ).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.showReportDialog = false;
+      },
+      error: (error) => {
+        console.error('Report generation failed:', error);
+        this.notificationService.error('Report generation failed. Please try again.');
+      }
+    });
+  }
 
-    loadAuditEntries() {
-        this.loading.set(true);
+  getActionLabel(action: AuditAction): string {
+    const labels: Record<AuditAction, string> = {
+      [AuditAction.CREATED]: 'Created',
+      [AuditAction.VIEWED]: 'Viewed',
+      [AuditAction.UPDATED]: 'Updated',
+      [AuditAction.DELETED]: 'Deleted',
+      [AuditAction.SHARED]: 'Shared',
+      [AuditAction.DOWNLOADED]: 'Downloaded',
+      [AuditAction.VERIFIED]: 'Verified',
+      [AuditAction.REVOKED]: 'Revoked',
+      [AuditAction.PERMISSION_CHANGED]: 'Permission Changed',
+      [AuditAction.STATUS_CHANGED]: 'Status Changed',
+      [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
+      [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
+      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
+    };
+    return labels[action] || action;
+  }
 
-        const params = {
-            page: this.currentPage + 1,
-            limit: this.pageSize,
-            ...this.currentFilters
-        };
+  getActionSeverity(action: AuditAction): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
+    const severities: Record<AuditAction, "success" | "info" | "warn" | "danger" | "secondary" | "contrast"> = {
+      [AuditAction.CREATED]: 'success',
+      [AuditAction.VIEWED]: 'info',
+      [AuditAction.UPDATED]: 'warn',
+      [AuditAction.DELETED]: 'danger',
+      [AuditAction.SHARED]: 'info',
+      [AuditAction.DOWNLOADED]: 'info',
+      [AuditAction.VERIFIED]: 'success',
+      [AuditAction.REVOKED]: 'danger',
+      [AuditAction.PERMISSION_CHANGED]: 'warn',
+      [AuditAction.STATUS_CHANGED]: 'warn',
+      [AuditAction.VERIFICATION_STARTED]: 'info',
+      [AuditAction.VERIFICATION_COMPLETED]: 'success',
+      [AuditAction.VERIFICATION_FAILED]: 'danger'
+    };
+    return severities[action] || 'info';
+  }
 
-        this.auditService.searchAuditEntries(this.currentFilters, params).pipe(
-            finalize(() => this.loading.set(false))
-        ).subscribe({
-            next: (response) => {
-                this.auditEntries.set(response.items);
-                this.totalRecords.set(response.totalCount);
-            },
-            error: (error) => {
-                console.error('Failed to load audit entries:', error);
-                this.notificationService.error('Failed to load audit entries');
-            }
-        });
-    }
+  getRelativeTime(timestamp: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - new Date(timestamp).getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-    loadStatistics() {
-        this.auditService.getAuditStatistics().subscribe({
-            next: (stats) => {
-                this.statistics.set(stats);
-            },
-            error: (error) => {
-                console.error('Failed to load audit statistics:', error);
-            }
-        });
-    }
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  }
 
-    onLazyLoad(event: any) {
-        this.currentPage = Math.floor(event.first / event.rows);
-        this.pageSize = event.rows;
-        this.loadAuditEntries();
-    }
+  hasDetails(details: any): boolean {
+    return details && Object.keys(details).length > 0;
+  }
 
-    applyFilters() {
-        const formValue = this.filtersForm.value;
+  formatDetails(details: any): string {
+    return JSON.stringify(details, null, 2);
+  }
 
-        this.currentFilters = {
-            query: formValue.query || undefined,
-            actions: formValue.actions?.length ? formValue.actions : undefined,
-            dateRange: formValue.startDate && formValue.endDate ? {
-                start: formValue.startDate,
-                end: formValue.endDate
-            } : undefined
-        };
+  getTodayActivity(): number {
+    const stats = this.statistics();
+    if (!stats?.dailyActivity) return 0;
 
-        this.currentPage = 0;
-        this.loadAuditEntries();
-    }
+    const today = new Date().toISOString().split('T')[0];
+    const todayActivity = stats.dailyActivity.find((activity: any) => activity.date === today);
+    return todayActivity?.count || 0;
+  }
 
-    clearFilters() {
-        this.filtersForm.reset();
-        this.currentFilters = {};
-        this.currentPage = 0;
-        this.loadAuditEntries();
-    }
+  getMostActiveUser(): string {
+    const stats = this.statistics();
+    if (!stats?.topUsers?.length) return 'N/A';
+    return stats.topUsers[0].userEmail;
+  }
 
-    viewDetails(entry: AuditEntry) {
-        this.selectedEntry.set(entry);
-        this.showDetailsDialog = true;
-    }
+  getMostCommonAction(): string {
+    const stats = this.statistics();
+    if (!stats?.actionCounts) return 'N/A';
 
-    viewDocument(documentId: string) {
-        this.router.navigate(['/documents', documentId]);
-    }
+    const actions = Object.entries(stats.actionCounts);
+    if (!actions.length) return 'N/A';
 
-    copyEntryId(entryId: string) {
-        navigator.clipboard.writeText(entryId).then(() => {
-            this.notificationService.success('Entry ID copied to clipboard');
-        });
-    }
-
-    exportAuditTrail() {
-        this.exporting.set(true);
-
-        this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat as any).pipe(
-            finalize(() => this.exporting.set(false))
-        ).subscribe({
-            next: (blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${this.exportFormat}`;
-                link.click();
-                window.URL.revokeObjectURL(url);
-                this.showExportDialog = false;
-            },
-            error: (error) => {
-                console.error('Export failed:', error);
-                this.notificationService.error('Export failed. Please try again.');
-            }
-        });
-    }
-
-    generateReport() {
-        this.generatingReport.set(true);
-
-        const params: any = {
-            reportType: this.reportType
-        };
-
-        if (this.reportType === 'custom' && this.reportStartDate && this.reportEndDate) {
-            params.dateRange = {
-                start: this.reportStartDate,
-                end: this.reportEndDate
-            };
-        }
-
-        this.auditService.generateComplianceReport(params).pipe(
-            finalize(() => this.generatingReport.set(false))
-        ).subscribe({
-            next: (blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
-                link.click();
-                window.URL.revokeObjectURL(url);
-                this.showReportDialog = false;
-            },
-            error: (error) => {
-                console.error('Report generation failed:', error);
-                this.notificationService.error('Report generation failed. Please try again.');
-            }
-        });
-    }
-
-    getActionLabel(action: AuditAction): string {
-        const labels: Record<AuditAction, string> = {
-            [AuditAction.CREATED]: 'Created',
-            [AuditAction.VIEWED]: 'Viewed',
-            [AuditAction.UPDATED]: 'Updated',
-            [AuditAction.DELETED]: 'Deleted',
-            [AuditAction.SHARED]: 'Shared',
-            [AuditAction.DOWNLOADED]: 'Downloaded',
-            [AuditAction.VERIFIED]: 'Verified',
-            [AuditAction.REVOKED]: 'Revoked',
-            [AuditAction.PERMISSION_CHANGED]: 'Permission Changed',
-            [AuditAction.STATUS_CHANGED]: 'Status Changed',
-            [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
-            [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
-            [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
-        };
-        return labels[action] || action;
-    }
-
-    getActionSeverity(action: AuditAction): string {
-        const severities: Record<AuditAction, string> = {
-            [AuditAction.CREATED]: 'success',
-            [AuditAction.VIEWED]: 'info',
-            [AuditAction.UPDATED]: 'warning',
-            [AuditAction.DELETED]: 'danger',
-            [AuditAction.SHARED]: 'info',
-            [AuditAction.DOWNLOADED]: 'info',
-            [AuditAction.VERIFIED]: 'success',
-            [AuditAction.REVOKED]: 'danger',
-            [AuditAction.PERMISSION_CHANGED]: 'warning',
-            [AuditAction.STATUS_CHANGED]: 'warning',
-            [AuditAction.VERIFICATION_STARTED]: 'info',
-            [AuditAction.VERIFICATION_COMPLETED]: 'success',
-            [AuditAction.VERIFICATION_FAILED]: 'danger'
-        };
-        return severities[action] || 'info';
-    }
-
-    getRelativeTime(timestamp: Date): string {
-        const now = new Date();
-        const diff = now.getTime() - new Date(timestamp).getTime();
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-        if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-        return 'Just now';
-    }
-
-    hasDetails(details: any): boolean {
-        return details && Object.keys(details).length > 0;
-    }
-
-    formatDetails(details: any): string {
-        return JSON.stringify(details, null, 2);
-    }
-
-    getTodayActivity(): number {
-        const stats = this.statistics();
-        if (!stats?.dailyActivity) return 0;
-
-        const today = new Date().toISOString().split('T')[0];
-        const todayActivity = stats.dailyActivity.find((activity: any) => activity.date === today);
-        return todayActivity?.count || 0;
-    }
-
-    getMostActiveUser(): string {
-        const stats = this.statistics();
-        if (!stats?.topUsers?.length) return 'N/A';
-        return stats.topUsers[0].userEmail;
-    }
-
-    getMostCommonAction(): string {
-        const stats = this.statistics();
-        if (!stats?.actionCounts) return 'N/A';
-
-        const actions = Object.entries(stats.actionCounts);
-        if (!actions.length) return 'N/A';
-
-        const mostCommon = actions.reduce((a, b) => a[1] > b[1] ? a : b);
-        return this.getActionLabel(mostCommon[0] as AuditAction);
-    }
+    const mostCommon = actions.reduce((a, b) => a[1] > b[1] ? a : b);
+    return this.getActionLabel(mostCommon[0] as AuditAction);
+  }
 }
