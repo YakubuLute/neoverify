@@ -1,10 +1,11 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent } from '../../../shared';
+import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent, HasPermissionDirective } from '../../../shared';
 import { DocumentService } from '../../../core/services/document.service';
 import { DocumentStatusService } from '../../../core/services/document-status.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
 import { DocumentCardComponent } from '../components/document-card/document-card.component';
 import { DocumentSearchComponent } from '../components/document-search/document-search.component';
 import { BulkOperationsComponent } from '../components/bulk-operations/bulk-operations.component';
@@ -29,7 +30,8 @@ import { UserRole } from '../../../shared/models/auth.models';
     DocumentSearchComponent,
     BulkOperationsComponent,
     StatusManagementDialogComponent,
-    StatusHistoryComponent
+    StatusHistoryComponent,
+    HasPermissionDirective
   ],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss'
@@ -38,6 +40,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   private readonly documentService = inject(DocumentService);
   private readonly statusService = inject(DocumentStatusService);
   private readonly authService = inject(AuthService);
+  private readonly permissionsService = inject(PermissionsService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
@@ -69,10 +72,10 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly currentUser = computed(() => this.authService.getCurrentUser());
   readonly userRole = computed(() => this.currentUser()?.role);
   readonly canUpload = computed(() => {
-    const role = this.userRole();
-    return role === UserRole.PLATFORM_ADMIN ||
-      role === UserRole.ORG_ADMIN ||
-      role === UserRole.ISSUER;
+    return this.permissionsService.canPerformDocumentOperation({
+      action: AuditAction.CREATED,
+      resource: 'document'
+    }).allowed;
   });
   readonly canBulkEdit = computed(() => {
     const role = this.userRole();

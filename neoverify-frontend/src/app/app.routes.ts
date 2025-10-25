@@ -1,5 +1,11 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard, roleGuard } from './core';
+import {
+  documentPermissionGuard,
+  documentUploadGuard,
+  templateManagementGuard,
+  auditTrailGuard
+} from './core/guards/document-permission.guard';
 import { UserRole } from './shared/models/auth.models';
 
 export const routes: Routes = [
@@ -66,14 +72,12 @@ export const routes: Routes = [
           },
           {
             path: 'upload',
-            canActivate: [roleGuard],
-            data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
+            canActivate: [documentUploadGuard],
             loadComponent: () => import('./features/documents/upload/document-upload.component').then(m => m.DocumentUploadComponent)
           },
           {
             path: 'templates',
-            canActivate: [roleGuard],
-            data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
+            canActivate: [templateManagementGuard],
             children: [
               {
                 path: '',
@@ -95,6 +99,8 @@ export const routes: Routes = [
           },
           {
             path: ':id',
+            canActivate: [documentPermissionGuard],
+            data: { action: 'view', requireDocument: true },
             loadComponent: () => import('./features/documents/detail/document-detail.component').then(m => m.DocumentDetailComponent)
           }
         ]
@@ -163,6 +169,10 @@ export const routes: Routes = [
   },
 
   // Error pages
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./features/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+  },
   {
     path: '403',
     loadComponent: () => import('./shared/components/error/error.component').then(m => m.ErrorComponent),
