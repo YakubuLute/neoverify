@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
@@ -11,7 +11,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
-import { TabViewModule } from 'primeng/tabview';
+import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { PasswordModule } from 'primeng/password';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -40,7 +40,7 @@ import { User } from '../../models/auth.models';
     SelectModule,
     DatePickerModule,
     TextareaModule,
-    TabViewModule,
+    TabsModule,
     TagModule,
     PasswordModule,
     InputNumberModule,
@@ -74,10 +74,25 @@ import { User } from '../../models/auth.models';
         </div>
 
         <!-- Tabs for different sharing methods -->
-        <p-tabView [(activeIndex)]="activeTabIndex">
+        <p-tabs [(value)]="activeTabValue">
+          <p-tablist>
+            <p-tab value="users">
+              <i class="pi pi-users mr-2"></i>
+              Share with Users
+            </p-tab>
+            <p-tab value="link">
+              <i class="pi pi-link mr-2"></i>
+              Share Link
+            </p-tab>
+            <p-tab value="current">
+              <i class="pi pi-users mr-2"></i>
+              Current Shares
+            </p-tab>
+          </p-tablist>
           
-          <!-- Share with Users Tab -->
-          <p-tabPanel header="Share with Users" leftIcon="pi pi-users">
+          <p-tabpanels>
+            <!-- Share with Users Tab -->
+            <p-tabpanel value="users">
             <div class="share-users-content">
               
               <!-- User Search and Selection -->
@@ -91,7 +106,7 @@ import { User } from '../../models/auth.models';
                   (onSelect)="addUserToShare($event)"
                   field="email"
                   placeholder="Search by email or name..."
-                  [loading]="searchingUsers()"
+
                   [dropdown]="true"
                   class="w-full">
                   
@@ -212,10 +227,10 @@ import { User } from '../../models/auth.models';
                 </p-button>
               </div>
             </div>
-          </p-tabPanel>
+            </p-tabpanel>
 
-          <!-- Share Link Tab -->
-          <p-tabPanel header="Share Link" leftIcon="pi pi-link">
+            <!-- Share Link Tab -->
+            <p-tabpanel value="link">
             <div class="share-link-content">
               
               <!-- Create Link Section -->
@@ -393,10 +408,10 @@ import { User } from '../../models/auth.models';
                 </div>
               </div>
             </div>
-          </p-tabPanel>
+            </p-tabpanel>
 
-          <!-- Current Shares Tab -->
-          <p-tabPanel header="Current Shares" leftIcon="pi pi-users">
+            <!-- Current Shares Tab -->
+            <p-tabpanel value="current">
             <div class="current-shares-content">
               <div class="shares-loading" *ngIf="loadingShares()">
                 <p-progressSpinner></p-progressSpinner>
@@ -461,8 +476,9 @@ import { User } from '../../models/auth.models';
                 <p>This document is not currently shared with any users.</p>
               </div>
             </div>
-          </p-tabPanel>
-        </p-tabView>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
       </div>
 
       <ng-template pTemplate="footer">
@@ -481,7 +497,7 @@ import { User } from '../../models/auth.models';
   `,
   styleUrl: './document-sharing-dialog.component.scss'
 })
-export class DocumentSharingDialogComponent implements OnInit {
+export class DocumentSharingDialogComponent implements OnInit, OnDestroy {
   private readonly sharingService = inject(DocumentSharingService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly destroy$ = new Subject<void>();
@@ -492,7 +508,7 @@ export class DocumentSharingDialogComponent implements OnInit {
   @Output() documentShared = new EventEmitter<void>();
 
   // State signals
-  readonly activeTabIndex = signal(0);
+  readonly activeTabValue = signal('users');
   readonly sharing = signal(false);
   readonly creatingLink = signal(false);
   readonly loadingShares = signal(false);
@@ -649,7 +665,7 @@ export class DocumentSharingDialogComponent implements OnInit {
           this.documentShared.emit();
           this.loadCurrentShares();
           this.resetForm();
-          this.activeTabIndex.set(2); // Switch to current shares tab
+          this.activeTabValue.set('current'); // Switch to current shares tab
         },
         error: () => {
           this.sharing.set(false);
