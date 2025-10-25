@@ -19,19 +19,19 @@ import { NotificationService } from '../../../core/services/notification.service
 import { AuditEntry, AuditAction, Document } from '../../../shared/models/document.models';
 
 @Component({
-    selector: 'app-audit-entry-detail',
-    standalone: true,
-    imports: [
-        CommonModule,
-        CardModule,
-        ButtonModule,
-        TagModule,
-        TooltipModule,
-        ProgressSpinnerModule,
-        DividerModule,
-        TimelineModule
-    ],
-    template: `
+  selector: 'app-audit-entry-detail',
+  standalone: true,
+  imports: [
+    CommonModule,
+    CardModule,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
+    ProgressSpinnerModule,
+    DividerModule,
+    TimelineModule
+  ],
+  template: `
     <div class="audit-entry-detail-container p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
@@ -296,7 +296,7 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
       min-height: 100vh;
@@ -334,224 +334,224 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
   `]
 })
 export class AuditEntryDetailComponent implements OnInit {
-    private readonly auditService = inject(AuditService);
-    private readonly documentService = inject(DocumentService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly router = inject(Router);
-    private readonly route = inject(ActivatedRoute);
+  private readonly auditService = inject(AuditService);
+  private readonly documentService = inject(DocumentService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-    // Signals
-    auditEntry = signal<AuditEntry | null>(null);
-    document = signal<Document | null>(null);
-    relatedEntries = signal<AuditEntry[]>([]);
-    loading = signal(false);
-    error = signal(false);
+  // Signals
+  auditEntry = signal<AuditEntry | null>(null);
+  document = signal<Document | null>(null);
+  relatedEntries = signal<AuditEntry[]>([]);
+  loading = signal(false);
+  error = signal(false);
 
-    // Input for entry ID
-    entryId = input<string>();
+  // Input for entry ID
+  entryId = input<string>();
 
-    ngOnInit() {
-        const entryId = this.route.snapshot.paramMap.get('id');
-        if (entryId) {
-            this.loadAuditEntry(entryId);
+  ngOnInit() {
+    const entryId = this.route.snapshot.paramMap.get('id');
+    if (entryId) {
+      this.loadAuditEntry(entryId);
+    } else {
+      this.error.set(true);
+    }
+  }
+
+  loadAuditEntry(entryId: string) {
+    this.loading.set(true);
+    this.error.set(false);
+
+    // Since we don't have a direct getAuditEntry method, we'll search for it
+    this.auditService.searchAuditEntries({ query: entryId }).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: (response) => {
+        const entry = response.items.find(item => item.id === entryId);
+        if (entry) {
+          this.auditEntry.set(entry);
+          this.loadRelatedData(entry);
         } else {
-            this.error.set(true);
+          this.error.set(true);
         }
-    }
+      },
+      error: (error) => {
+        console.error('Failed to load audit entry:', error);
+        this.error.set(true);
+      }
+    });
+  }
 
-    loadAuditEntry(entryId: string) {
-        this.loading.set(true);
-        this.error.set(false);
-
-        // Since we don't have a direct getAuditEntry method, we'll search for it
-        this.auditService.searchAuditEntries({ query: entryId }).pipe(
-            finalize(() => this.loading.set(false))
-        ).subscribe({
-            next: (response) => {
-                const entry = response.items.find(item => item.id === entryId);
-                if (entry) {
-                    this.auditEntry.set(entry);
-                    this.loadRelatedData(entry);
-                } else {
-                    this.error.set(true);
-                }
-            },
-            error: (error) => {
-                console.error('Failed to load audit entry:', error);
-                this.error.set(true);
-            }
-        });
-    }
-
-    loadRelatedData(entry: AuditEntry) {
-        // Load document information if available
-        if (entry.documentId) {
-            this.documentService.getDocument(entry.documentId).subscribe({
-                next: (document) => {
-                    this.document.set(document);
-                },
-                error: (error) => {
-                    console.error('Failed to load document:', error);
-                }
-            });
-
-            // Load related audit entries for the same document
-            this.auditService.getDocumentAuditTrail(entry.documentId, { limit: 10 }).subscribe({
-                next: (response) => {
-                    const related = response.items.filter(item => item.id !== entry.id);
-                    this.relatedEntries.set(related);
-                },
-                error: (error) => {
-                    console.error('Failed to load related entries:', error);
-                }
-            });
+  loadRelatedData(entry: AuditEntry) {
+    // Load document information if available
+    if (entry.documentId) {
+      this.documentService.getDocument(entry.documentId).subscribe({
+        next: (document) => {
+          this.document.set(document);
+        },
+        error: (error) => {
+          console.error('Failed to load document:', error);
         }
-    }
+      });
 
-    goBack() {
-        window.history.back();
-    }
-
-    copyEntryId() {
-        const entry = this.auditEntry();
-        if (entry) {
-            navigator.clipboard.writeText(entry.id).then(() => {
-                this.notificationService.success('Entry ID copied to clipboard');
-            });
+      // Load related audit entries for the same document
+      this.auditService.getDocumentAuditTrail(entry.documentId, { limit: 10 }).subscribe({
+        next: (response) => {
+          const related = response.items.filter(item => item.id !== entry.id);
+          this.relatedEntries.set(related);
+        },
+        error: (error) => {
+          console.error('Failed to load related entries:', error);
         }
+      });
     }
+  }
 
-    viewDocument() {
-        const entry = this.auditEntry();
-        if (entry?.documentId) {
-            this.router.navigate(['/documents', entry.documentId]);
+  goBack() {
+    window.history.back();
+  }
+
+  copyEntryId() {
+    const entry = this.auditEntry();
+    if (entry) {
+      navigator.clipboard.writeText(entry.id).then(() => {
+        this.notificationService.success('Entry ID copied to clipboard');
+      });
+    }
+  }
+
+  viewDocument() {
+    const entry = this.auditEntry();
+    if (entry?.documentId) {
+      this.router.navigate(['/documents', entry.documentId]);
+    }
+  }
+
+  viewRelatedEntry(entryId: string) {
+    this.router.navigate(['/documents/audit/entry', entryId]);
+  }
+
+  viewAllRelated() {
+    const entry = this.auditEntry();
+    if (entry?.documentId) {
+      this.router.navigate(['/documents/audit'], {
+        queryParams: { documentId: entry.documentId }
+      });
+    }
+  }
+
+  exportEntry() {
+    const entry = this.auditEntry();
+    if (entry) {
+      const exportData = {
+        ...entry,
+        exportedAt: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit-entry-${entry.id}.json`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      this.notificationService.success('Audit entry exported successfully');
+    }
+  }
+
+  viewUserActivity() {
+    const entry = this.auditEntry();
+    if (entry?.userId) {
+      this.router.navigate(['/documents/audit'], {
+        queryParams: { userId: entry.userId }
+      });
+    }
+  }
+
+  searchSimilar() {
+    const entry = this.auditEntry();
+    if (entry) {
+      this.router.navigate(['/documents/audit'], {
+        queryParams: {
+          action: entry.action,
+          userId: entry.userId
         }
+      });
     }
+  }
 
-    viewRelatedEntry(entryId: string) {
-        this.router.navigate(['/documents/audit/entry', entryId]);
-    }
+  getActionLabel(action: AuditAction): string {
+    const labels: Record<AuditAction, string> = {
+      [AuditAction.CREATED]: 'Created',
+      [AuditAction.VIEWED]: 'Viewed',
+      [AuditAction.UPDATED]: 'Updated',
+      [AuditAction.DELETED]: 'Deleted',
+      [AuditAction.SHARED]: 'Shared',
+      [AuditAction.DOWNLOADED]: 'Downloaded',
+      [AuditAction.VERIFIED]: 'Verified',
+      [AuditAction.REVOKED]: 'Revoked',
+      [AuditAction.PERMISSION_CHANGED]: 'Permission Changed',
+      [AuditAction.STATUS_CHANGED]: 'Status Changed',
+      [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
+      [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
+      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
+    };
+    return labels[action] || action;
+  }
 
-    viewAllRelated() {
-        const entry = this.auditEntry();
-        if (entry?.documentId) {
-            this.router.navigate(['/documents/audit'], {
-                queryParams: { documentId: entry.documentId }
-            });
-        }
-    }
+  getActionSeverity(action: AuditAction): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
+    const severities: Record<AuditAction, "success" | "info" | "warn" | "danger" | "secondary" | "contrast"> = {
+      [AuditAction.CREATED]: 'success',
+      [AuditAction.VIEWED]: 'info',
+      [AuditAction.UPDATED]: 'warn',
+      [AuditAction.DELETED]: 'danger',
+      [AuditAction.SHARED]: 'info',
+      [AuditAction.DOWNLOADED]: 'info',
+      [AuditAction.VERIFIED]: 'success',
+      [AuditAction.REVOKED]: 'danger',
+      [AuditAction.PERMISSION_CHANGED]: 'warn',
+      [AuditAction.STATUS_CHANGED]: 'warn',
+      [AuditAction.VERIFICATION_STARTED]: 'info',
+      [AuditAction.VERIFICATION_COMPLETED]: 'success',
+      [AuditAction.VERIFICATION_FAILED]: 'danger'
+    };
+    return severities[action] || 'info';
+  }
 
-    exportEntry() {
-        const entry = this.auditEntry();
-        if (entry) {
-            const exportData = {
-                ...entry,
-                exportedAt: new Date().toISOString()
-            };
+  getDocumentStatusSeverity(status: string): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
+    const severities: Record<string, "success" | "info" | "warn" | "danger" | "secondary" | "contrast"> = {
+      'verified': 'success',
+      'processing': 'warn',
+      'rejected': 'danger',
+      'expired': 'secondary',
+      'uploaded': 'info'
+    };
+    return severities[status] || 'info';
+  }
 
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-                type: 'application/json'
-            });
+  getRelativeTime(timestamp: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - new Date(timestamp).getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `audit-entry-${entry.id}.json`;
-            link.click();
-            window.URL.revokeObjectURL(url);
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  }
 
-            this.notificationService.success('Audit entry exported successfully');
-        }
-    }
+  hasDetails(details: any): boolean {
+    return details && Object.keys(details).length > 0;
+  }
 
-    viewUserActivity() {
-        const entry = this.auditEntry();
-        if (entry?.userId) {
-            this.router.navigate(['/documents/audit'], {
-                queryParams: { userId: entry.userId }
-            });
-        }
-    }
-
-    searchSimilar() {
-        const entry = this.auditEntry();
-        if (entry) {
-            this.router.navigate(['/documents/audit'], {
-                queryParams: {
-                    action: entry.action,
-                    userId: entry.userId
-                }
-            });
-        }
-    }
-
-    getActionLabel(action: AuditAction): string {
-        const labels: Record<AuditAction, string> = {
-            [AuditAction.CREATED]: 'Created',
-            [AuditAction.VIEWED]: 'Viewed',
-            [AuditAction.UPDATED]: 'Updated',
-            [AuditAction.DELETED]: 'Deleted',
-            [AuditAction.SHARED]: 'Shared',
-            [AuditAction.DOWNLOADED]: 'Downloaded',
-            [AuditAction.VERIFIED]: 'Verified',
-            [AuditAction.REVOKED]: 'Revoked',
-            [AuditAction.PERMISSION_CHANGED]: 'Permission Changed',
-            [AuditAction.STATUS_CHANGED]: 'Status Changed',
-            [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
-            [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
-            [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
-        };
-        return labels[action] || action;
-    }
-
-    getActionSeverity(action: AuditAction): string {
-        const severities: Record<AuditAction, string> = {
-            [AuditAction.CREATED]: 'success',
-            [AuditAction.VIEWED]: 'info',
-            [AuditAction.UPDATED]: 'warning',
-            [AuditAction.DELETED]: 'danger',
-            [AuditAction.SHARED]: 'info',
-            [AuditAction.DOWNLOADED]: 'info',
-            [AuditAction.VERIFIED]: 'success',
-            [AuditAction.REVOKED]: 'danger',
-            [AuditAction.PERMISSION_CHANGED]: 'warning',
-            [AuditAction.STATUS_CHANGED]: 'warning',
-            [AuditAction.VERIFICATION_STARTED]: 'info',
-            [AuditAction.VERIFICATION_COMPLETED]: 'success',
-            [AuditAction.VERIFICATION_FAILED]: 'danger'
-        };
-        return severities[action] || 'info';
-    }
-
-    getDocumentStatusSeverity(status: string): string {
-        const severities: Record<string, string> = {
-            'verified': 'success',
-            'processing': 'warning',
-            'rejected': 'danger',
-            'expired': 'secondary',
-            'uploaded': 'info'
-        };
-        return severities[status] || 'info';
-    }
-
-    getRelativeTime(timestamp: Date): string {
-        const now = new Date();
-        const diff = now.getTime() - new Date(timestamp).getTime();
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-        if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-        return 'Just now';
-    }
-
-    hasDetails(details: any): boolean {
-        return details && Object.keys(details).length > 0;
-    }
-
-    formatDetails(details: any): string {
-        return JSON.stringify(details, null, 2);
-    }
+  formatDetails(details: any): string {
+    return JSON.stringify(details, null, 2);
+  }
 }
