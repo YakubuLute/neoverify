@@ -5,7 +5,7 @@ import { DocumentService } from '../../../core/services/document.service';
 import { UploadService } from '../../../core/services/upload.service';
 import { TemplateService } from '../../../core/services/template.service';
 import { SHARED_IMPORTS } from '../../../shared';
-import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus, DocumentTemplate, TemplateField } from '../../../shared/models/document.models';
+import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus, DocumentTemplate, TemplateField, ValidationRule, ValidationType } from '../../../shared/models/document.models';
 import { FormUtils } from '../../../shared/utils/form.utils';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -407,6 +407,78 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   Document Information
                 </h3>
 
+                <!-- Template Selection -->
+                @if (availableTemplates().length > 0) {
+                  <div class="field">
+                    <label for="templateId" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                      Document Template (Optional)
+                    </label>
+                    <div class="flex gap-2">
+                      <p-select
+                        id="templateId"
+                        formControlName="templateId"
+                        [options]="getTemplateOptions()"
+                        placeholder="Select a template to pre-fill fields"
+                        class="flex-1"
+                        [showClear]="true"
+                      ></p-select>
+                      @if (selectedTemplate()) {
+                        <p-button
+                          icon="pi pi-eye"
+                          [text]="true"
+                          [rounded]="true"
+                          severity="secondary"
+                          size="small"
+                          (onClick)="toggleTemplatePreview()"
+                          pTooltip="Preview template"
+                        ></p-button>
+                      }
+                    </div>
+                    <small class="text-surface-500 mt-1 block">
+                      Templates help standardize document information and pre-fill common fields
+                    </small>
+                  </div>
+
+                  <!-- Template Preview -->
+                  @if (selectedTemplate() && showTemplatePreview()) {
+                    <div class="field">
+                      <div class="p-3 bg-surface-50 dark:bg-surface-800 rounded border">
+                        <div class="flex items-center justify-between mb-2">
+                          <h4 class="text-sm font-medium text-surface-900 dark:text-surface-0">
+                            {{ selectedTemplate()?.name }}
+                          </h4>
+                          <button
+                            type="button"
+                            class="text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
+                            (click)="toggleTemplatePreview()"
+                          >
+                            <i class="pi pi-times text-sm"></i>
+                          </button>
+                        </div>
+                        <p class="text-xs text-surface-600 dark:text-surface-400 mb-3">
+                          {{ selectedTemplate()?.description }}
+                        </p>
+                        <div class="space-y-2">
+                          <div class="text-xs font-medium text-surface-700 dark:text-surface-300">
+                            Template Fields:
+                          </div>
+                          @for (field of selectedTemplate()?.fields || []; track field.id) {
+                            <div class="flex items-center justify-between text-xs">
+                              <span class="text-surface-600 dark:text-surface-400">
+                                {{ field.name }}
+                                @if (field.required) {
+                                  <span class="text-red-500">*</span>
+                                }
+                              </span>
+                              <span class="text-surface-500 capitalize">{{ field.type }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+
                 <!-- Document Type -->
                 <div class="field">
                   <label for="documentType" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
@@ -710,9 +782,12 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   readonly uploadProgress = signal<DocumentUploadProgress | null>(null);
   readonly bulkUploadProgress = signal<Map<string, DocumentUploadProgress>>(new Map());
   readonly titleSuggestions = signal<string[]>([]);
-  readonly customFields = signal<any[]>([]);
+  readonly customFields = signal<TemplateField[]>([]);
   readonly today = new Date();
   readonly bulkUploadResults = signal<{ success: number; failed: number; total: number } | null>(null);
+  readonly availableTemplates = signal<DocumentTemplate[]>([]);
+  readonly selectedTemplate = signal<DocumentTemplate | null>(null);
+  readonly showTemplatePreview = signal<boolean>(false);
 
   readonly UploadStatus = UploadStatus;
 
@@ -726,6 +801,7 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   ];
 
   readonly uploadForm = this.fb.group({
+    templateId: [''],
     documentType: ['', [Validators.required]],
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
     description: ['', [Validators.maxLength(500)]],
@@ -776,6 +852,7 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupFormWatchers();
     this.subscribeToUploadProgress();
+    this.loadTemplates();
   }
 
   ngOnDestroy(): void {
@@ -784,6 +861,19 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   }
 
   private setupFormWatchers(): void {
+    // Watch template selection changes
+    this.uploadForm.get('templateId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(templateId => {
+        if (templateId) {
+          this.loadTemplate(templateId);
+        } else {
+          this.selectedTemplate.set(null);
+          this.customFields.set([]);
+          this.clearTemplateFields();
+        }
+      });
+
     // Watch document type changes to show/hide recipient field
     this.uploadForm.get('documentType')?.valueChanges
       .pipe(takeUntil(this.destroy$))
@@ -1022,8 +1112,15 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   }
 
   // Custom Fields Support
-  getFieldOptions(field: any): any[] {
+  getFieldOptions(field: TemplateField): any[] {
     return field.options?.map((option: string) => ({ label: option, value: option })) || [];
+  }
+
+  getTemplateOptions(): any[] {
+    return this.availableTemplates().map(template => ({
+      label: template.name,
+      value: template.id
+    }));
   }
 
   // Upload Mode Management
@@ -1093,6 +1190,184 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
     this.uploadService.cancelUpload(fileId);
   }
 
+  // Template Management
+  private loadTemplates(): void {
+    this.templateService.getTemplates({ limit: 100 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.availableTemplates.set(response.items);
+        },
+        error: (error) => {
+          console.error('Failed to load templates:', error);
+        }
+      });
+  }
+
+  private loadTemplate(templateId: string): void {
+    this.templateService.getTemplate(templateId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (template) => {
+          this.selectedTemplate.set(template);
+          this.customFields.set(template.fields);
+          this.applyTemplateToForm(template);
+        },
+        error: (error) => {
+          console.error('Failed to load template:', error);
+        }
+      });
+  }
+
+  private applyTemplateToForm(template: DocumentTemplate): void {
+    // Pre-populate form fields based on template
+    const updates: any = {};
+
+    // Set document type if template has a specific type
+    if (template.category) {
+      const documentType = this.mapCategoryToDocumentType(template.category);
+      if (documentType) {
+        updates.documentType = documentType;
+      }
+    }
+
+    // Apply template field defaults
+    template.fields.forEach(field => {
+      if (field.defaultValue !== undefined) {
+        switch (field.name.toLowerCase()) {
+          case 'title':
+            updates.title = field.defaultValue;
+            break;
+          case 'description':
+            updates.description = field.defaultValue;
+            break;
+          case 'recipient':
+          case 'recipientname':
+            updates.recipientName = field.defaultValue;
+            break;
+          default:
+            // Add custom field to form
+            this.addCustomFieldToForm(field);
+            updates[`custom_${field.id}`] = field.defaultValue;
+            break;
+        }
+      } else {
+        // Add custom field to form even without default value
+        this.addCustomFieldToForm(field);
+      }
+    });
+
+    // Apply validation rules from template
+    this.applyTemplateValidation(template);
+
+    // Update form with template values
+    this.uploadForm.patchValue(updates);
+  }
+
+  private mapCategoryToDocumentType(category: string): DocumentType | null {
+    const categoryMap: Record<string, DocumentType> = {
+      'degree': DocumentType.DEGREE,
+      'certificate': DocumentType.CERTIFICATE,
+      'license': DocumentType.LICENSE,
+      'transcript': DocumentType.TRANSCRIPT,
+      'id': DocumentType.ID_DOCUMENT,
+      'identity': DocumentType.ID_DOCUMENT
+    };
+
+    return categoryMap[category.toLowerCase()] || null;
+  }
+
+  private addCustomFieldToForm(field: TemplateField): void {
+    const controlName = `custom_${field.id}`;
+
+    if (!this.uploadForm.get(controlName)) {
+      const validators = this.getFieldValidators(field);
+      (this.uploadForm as any).addControl(controlName, this.fb.control(field.defaultValue || '', validators));
+    }
+  }
+
+  private getFieldValidators(field: TemplateField): any[] {
+    const validators: any[] = [];
+
+    if (field.required) {
+      validators.push(Validators.required);
+    }
+
+    if (field.validation) {
+      if (field.validation.minLength) {
+        validators.push(Validators.minLength(field.validation.minLength));
+      }
+      if (field.validation.maxLength) {
+        validators.push(Validators.maxLength(field.validation.maxLength));
+      }
+      if (field.validation.pattern) {
+        validators.push(Validators.pattern(field.validation.pattern));
+      }
+      if (field.validation.min !== undefined) {
+        validators.push(Validators.min(field.validation.min));
+      }
+      if (field.validation.max !== undefined) {
+        validators.push(Validators.max(field.validation.max));
+      }
+    }
+
+    return validators;
+  }
+
+  private applyTemplateValidation(template: DocumentTemplate): void {
+    template.validationRules.forEach(rule => {
+      const control = this.uploadForm.get(rule.fieldId);
+      if (control) {
+        const currentValidators = control.validator ? [control.validator] : [];
+
+        switch (rule.type) {
+          case ValidationType.REQUIRED:
+            currentValidators.push(Validators.required);
+            break;
+          case ValidationType.MIN_LENGTH:
+            currentValidators.push(Validators.minLength(rule.value));
+            break;
+          case ValidationType.MAX_LENGTH:
+            currentValidators.push(Validators.maxLength(rule.value));
+            break;
+          case ValidationType.PATTERN:
+            currentValidators.push(Validators.pattern(rule.value));
+            break;
+        }
+
+        control.setValidators(currentValidators);
+        control.updateValueAndValidity();
+      }
+    });
+  }
+
+  private clearTemplateFields(): void {
+    // Remove custom field controls
+    const controlsToRemove: string[] = [];
+
+    Object.keys(this.uploadForm.controls).forEach(key => {
+      if (key.startsWith('custom_')) {
+        controlsToRemove.push(key);
+      }
+    });
+
+    controlsToRemove.forEach(controlName => {
+      this.uploadForm.removeControl(controlName);
+    });
+  }
+
+  onTemplateSelect(templateId: string): void {
+    this.uploadForm.patchValue({ templateId });
+  }
+
+  clearTemplate(): void {
+    this.uploadForm.patchValue({ templateId: '' });
+  }
+
+  toggleTemplatePreview(): void {
+    this.showTemplatePreview.set(!this.showTemplatePreview());
+  }
+
   // Expose Array for template
   Array = Array;
 
@@ -1142,7 +1417,8 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
     this.uploadService.uploadDocument(
       file,
       metadata,
-      formValue.documentType as DocumentType
+      formValue.documentType as DocumentType,
+      formValue.templateId || undefined
     ).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -1194,7 +1470,8 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
     this.uploadService.uploadMultipleDocuments(
       files,
       metadataArray,
-      formValue.documentType as DocumentType
+      formValue.documentType as DocumentType,
+      formValue.templateId || undefined
     ).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
