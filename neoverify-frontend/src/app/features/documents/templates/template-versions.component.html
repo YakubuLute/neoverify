@@ -117,7 +117,6 @@
                         <p-checkbox [binary]="true" [ngModel]="isVersionSelected(version)"
                             (ngModelChange)="onVersionSelect(version, $event)"
                             [disabled]="!isVersionSelected(version) && selectedVersions().length >= 2"></p-checkbox>
-                        </p-checkbox>
                     </div>
                     <div class="version-info">
                         <div class="version-title">
@@ -185,7 +184,7 @@
 
         <div class="comparison-body">
             <p-accordion>
-                <p-accordionTab header="Field Changes">
+                <p-accordion-panel header="Field Changes">
                     <div class="changes-list">
                         @for (change of comparison.fieldChanges; track change.fieldName) {
                         <div class="change-item">
@@ -231,62 +230,56 @@
                         </div>
                         }
                     </div>
-                </p-accordionTab>
+                </p-accordion-panel>
 
-                <p-accordionTab header="Validation Changes">
+                <p-accordion-panel header="Validation Changes">
                     <div class="changes-list">
                         @for (change of comparison.ruleChanges; track change.ruleName) {
                         <div class="change-item">
                             <div class="change-header">
-                                <i [class>
-                        <div class="changes-list">
-                            @for (change of comparison.ruleChanges; track change.ruleName) {
-                            <div class="change-item">
-                                <div class="change-header">
-                                    <i [class]="getChangeTypeIcon(change.type)"></i>
-                                    <span class="change-type">
-                                        <p-tag [value]="change.type.toUpperCase()"
-                                            [severity]="getChangeTypeSeverity(change.type)">
-                                        </p-tag>
-                                    </span>
-                                    <span class="rule-name">{{ change.ruleName }}</span>
-                                </div>
+                                <i [class]="getChangeTypeIcon(change.type)"></i>
+                                <span class="change-type">
+                                    <p-tag [value]="change.type.toUpperCase()"
+                                        [severity]="getChangeTypeSeverity(change.type)">
+                                    </p-tag>
+                                </span>
+                                <span class="rule-name">{{ change.ruleName }}</span>
+                            </div>
 
-                                @if (change.changes && change.changes.length > 0) {
-                                <div class="change-details">
-                                    <ul>
-                                        @for (changeDetail of change.changes; track changeDetail) {
-                                        <li>{{ changeDetail }}</li>
-                                        }
-                                    </ul>
-                                </div>
-                                }
-
-                                @if (change.type === 'added' && change.newRule) {
-                                <div class="rule-preview">
-                                    <strong>New Rule:</strong>
-                                    <code>{{ change.newRule.type }}: {{ change.newRule.message }}</code>
-                                </div>
-                                }
-
-                                @if (change.type === 'removed' && change.oldRule) {
-                                <div class="rule-preview">
-                                    <strong>Removed Rule:</strong>
-                                    <code>{{ change.oldRule.type }}: {{ change.oldRule.message }}</code>
-                                </div>
-                                }
+                            @if (change.changes && change.changes.length > 0) {
+                            <div class="change-details">
+                                <ul>
+                                    @for (changeDetail of change.changes; track changeDetail) {
+                                    <li>{{ changeDetail }}</li>
+                                    }
+                                </ul>
                             </div>
                             }
 
-                            @if (comparison.ruleChanges.length === 0) {
-                            <div class="no-changes">
-                                <p>No validation rule changes between these versions</p>
+                            @if (change.type === 'added' && change.newRule) {
+                            <div class="rule-preview">
+                                <strong>New Rule:</strong>
+                                <code>{{ change.newRule.type }}: {{ change.newRule.message }}</code>
+                            </div>
+                            }
+
+                            @if (change.type === 'removed' && change.oldRule) {
+                            <div class="rule-preview">
+                                <strong>Removed Rule:</strong>
+                                <code>{{ change.oldRule.type }}: {{ change.oldRule.message }}</code>
                             </div>
                             }
                         </div>
-                    </p-tabPanel>
-                </p-tabPanels>
-            </p-tabs>
+                        }
+
+                        @if (comparison.ruleChanges.length === 0) {
+                        <div class="no-changes">
+                            <p>No validation rule changes between these versions</p>
+                        </div>
+                        }
+                    </div>
+                </p-accordion-panel>
+            </p-accordion>
         </div>
     </div>
     }
