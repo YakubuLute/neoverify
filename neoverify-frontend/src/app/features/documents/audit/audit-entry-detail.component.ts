@@ -48,33 +48,38 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
           <p class="text-gray-400">Detailed information about this audit entry</p>
         </div>
         <div class="flex gap-3">
-          <p-button
-            label="Copy Entry ID"
-            icon="pi pi-copy"
-            [outlined]="true"
-            (onClick)="copyEntryId()"
-            *ngIf="auditEntry()"
-          />
-          <p-button
-            label="View Document"
-            icon="pi pi-external-link"
-            (onClick)="viewDocument()"
-            *ngIf="auditEntry()?.documentId"
-          />
+          @if (auditEntry()) {
+            <p-button
+              label="Copy Entry ID"
+              icon="pi pi-copy"
+              [outlined]="true"
+              (onClick)="copyEntryId()"
+            />
+          }
+          @if (auditEntry()?.documentId) {
+            <p-button
+              label="View Document"
+              icon="pi pi-external-link"
+              (onClick)="viewDocument()"
+            />
+          }
         </div>
       </div>
 
       <!-- Loading State -->
-      <div class="flex justify-center items-center py-12" *ngIf="loading()">
-        <p-progressSpinner />
-      </div>
+      @if (loading()) {
+        <div class="flex justify-center items-center py-12">
+          <p-progressSpinner />
+        </div>
+      }
 
       <!-- Entry Details -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" *ngIf="auditEntry() && !loading()">
+      @if (auditEntry() && !loading()) {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Details -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Basic Information -->
-          <p-card header="Basic Information" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Basic Information" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="text-sm font-medium text-gray-300 mb-2 block">Entry ID</label>
@@ -94,7 +99,7 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
                 <p-tag
                   [value]="getActionLabel(auditEntry()?.action!)"
                   [severity]="getActionSeverity(auditEntry()?.action!)"
-                  styleClass="text-sm"
+                  class="text-sm"
                 />
               </div>
 
@@ -106,73 +111,90 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
                 </div>
               </div>
 
-              <div *ngIf="auditEntry()?.documentId">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Document ID</label>
-                <div class="flex items-center gap-2">
-                  <p class="text-white font-mono text-sm">{{ auditEntry()?.documentId }}</p>
-                  <p-button
-                    icon="pi pi-external-link"
-                    [text]="true"
-                    size="small"
-                    (onClick)="viewDocument()"
-                    pTooltip="View document"
-                  />
+              @if (auditEntry()?.documentId) {
+                <div>
+                  <label class="text-sm font-medium text-gray-300 mb-2 block">Document ID</label>
+                  <div class="flex items-center gap-2">
+                    <p class="text-white font-mono text-sm">{{ auditEntry()?.documentId }}</p>
+                    <p-button
+                      icon="pi pi-external-link"
+                      [text]="true"
+                      size="small"
+                      (onClick)="viewDocument()"
+                      pTooltip="View document"
+                    />
+                  </div>
                 </div>
-              </div>
+              }
 
-              <div *ngIf="auditEntry()?.ipAddress">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">IP Address</label>
-                <p class="text-white font-mono">{{ auditEntry()?.ipAddress }}</p>
-              </div>
+              @if (auditEntry()?.ipAddress) {
+                <div>
+                  <label class="text-sm font-medium text-gray-300 mb-2 block">IP Address</label>
+                  <p class="text-white font-mono">{{ auditEntry()?.ipAddress }}</p>
+                </div>
+              }
             </div>
           </p-card>
 
           <!-- Status Changes -->
-          <p-card 
-            header="Status Changes" 
-            styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            *ngIf="auditEntry()?.previousStatus || auditEntry()?.newStatus"
-          >
-            <div class="flex items-center justify-center gap-4">
-              <div class="text-center" *ngIf="auditEntry()?.previousStatus">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Previous Status</label>
-                <p-tag
-                  [value]="auditEntry()?.previousStatus!"
-                  severity="secondary"
-                  styleClass="text-sm"
-                />
+          @if (auditEntry()?.previousStatus || auditEntry()?.newStatus) {
+            <p-card 
+              header="Status Changes" 
+              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+            >
+              <div class="flex items-center justify-center gap-4">
+                @if (auditEntry()?.previousStatus) {
+                  <div class="text-center">
+                    <label class="text-sm font-medium text-gray-300 mb-2 block">Previous Status</label>
+                    <p-tag
+                      [value]="auditEntry()?.previousStatus!"
+                      severity="secondary"
+                      class="text-sm"
+                    />
+                  </div>
+                }
+
+                @if (auditEntry()?.previousStatus && auditEntry()?.newStatus) {
+                  <i class="pi pi-arrow-right text-gray-400 text-xl"></i>
+                }
+
+                @if (auditEntry()?.newStatus) {
+                  <div class="text-center">
+                    <label class="text-sm font-medium text-gray-300 mb-2 block">New Status</label>
+                    <p-tag
+                      [value]="auditEntry()?.newStatus!"
+                      severity="success"
+                      class="text-sm"
+                    />
+                  </div>
+                }
               </div>
 
-              <i class="pi pi-arrow-right text-gray-400 text-xl" *ngIf="auditEntry()?.previousStatus && auditEntry()?.newStatus"></i>
-
-              <div class="text-center" *ngIf="auditEntry()?.newStatus">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">New Status</label>
-                <p-tag
-                  [value]="auditEntry()?.newStatus!"
-                  severity="success"
-                  styleClass="text-sm"
-                />
-              </div>
-            </div>
-
-            <div class="mt-4" *ngIf="auditEntry()?.reason">
-              <label class="text-sm font-medium text-gray-300 mb-2 block">Reason</label>
-              <p class="text-white bg-gray-900 p-3 rounded">{{ auditEntry()?.reason }}</p>
-            </div>
-          </p-card>
+              @if (auditEntry()?.reason) {
+                <div class="mt-4">
+                  <label class="text-sm font-medium text-gray-300 mb-2 block">Reason</label>
+                  <p class="text-white bg-gray-900 p-3 rounded">{{ auditEntry()?.reason }}</p>
+                </div>
+              }
+            </p-card>
+          }
 
           <!-- Technical Details -->
-          <p-card header="Technical Details" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Technical Details" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
             <div class="space-y-4">
-              <div *ngIf="auditEntry()?.userAgent">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">User Agent</label>
-                <p class="text-white text-sm bg-gray-900 p-3 rounded break-all">{{ auditEntry()?.userAgent }}</p>
-              </div>
+              @if (auditEntry()?.userAgent) {
+                <div>
+                  <label class="text-sm font-medium text-gray-300 mb-2 block">User Agent</label>
+                  <p class="text-white text-sm bg-gray-900 p-3 rounded break-all">{{ auditEntry()?.userAgent }}</p>
+                </div>
+              }
 
-              <div *ngIf="auditEntry()?.details && hasDetails(auditEntry()?.details!)">
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Additional Details</label>
-                <pre class="text-white text-sm bg-gray-900 p-3 rounded overflow-auto max-h-60">{{ formatDetails(auditEntry()?.details!) }}</pre>
-              </div>
+              @if (auditEntry()?.details && hasDetails(auditEntry()?.details!)) {
+                <div>
+                  <label class="text-sm font-medium text-gray-300 mb-2 block">Additional Details</label>
+                  <pre class="text-white text-sm bg-gray-900 p-3 rounded overflow-auto max-h-60">{{ formatDetails(auditEntry()?.details!) }}</pre>
+                </div>
+              }
             </div>
           </p-card>
         </div>
@@ -180,11 +202,11 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
         <!-- Sidebar -->
         <div class="space-y-6">
           <!-- Document Information -->
-          <p-card 
-            header="Document Information" 
-            styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            *ngIf="document()"
-          >
+          @if (document()) {
+            <p-card 
+              header="Document Information" 
+              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+            >
             <div class="space-y-4">
               <div>
                 <label class="text-sm font-medium text-gray-300 mb-2 block">Title</label>
@@ -212,19 +234,20 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
                 label="View Full Document"
                 icon="pi pi-external-link"
                 [outlined]="true"
-                styleClass="w-full"
+                class="w-full"
                 (onClick)="viewDocument()"
               />
-            </div>
-          </p-card>
+              </div>
+            </p-card>
+          }
 
           <!-- Related Entries -->
-          <p-card 
-            header="Related Entries" 
-            styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            *ngIf="relatedEntries().length > 0"
-          >
-            <p-timeline [value]="relatedEntries()" styleClass="w-full">
+          @if (relatedEntries().length > 0) {
+            <p-card 
+              header="Related Entries" 
+              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+            >
+            <p-timeline [value]="relatedEntries()" class="w-full">
               <ng-template pTemplate="content" let-entry>
                 <div class="p-3 bg-gray-900/50 rounded cursor-pointer hover:bg-gray-900/70 transition-colors"
                      (click)="viewRelatedEntry(entry.id)">
@@ -232,7 +255,7 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
                     <p-tag
                       [value]="getActionLabel(entry.action)"
                       [severity]="getActionSeverity(entry.action)"
-                      styleClass="text-xs"
+                      class="text-xs"
                     />
                     <span class="text-xs text-gray-400">{{ entry.timestamp | date:'short' }}</span>
                   </div>
@@ -241,59 +264,66 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
               </ng-template>
             </p-timeline>
 
-            <div class="mt-4" *ngIf="relatedEntries().length >= 5">
-              <p-button
-                label="View All Related"
-                [text]="true"
-                styleClass="w-full"
-                (onClick)="viewAllRelated()"
-              />
-            </div>
-          </p-card>
+            @if (relatedEntries().length >= 5) {
+              <div class="mt-4">
+                <p-button
+                  label="View All Related"
+                  [text]="true"
+                  class="w-full"
+                  (onClick)="viewAllRelated()"
+                />
+              </div>
+            }
+            </p-card>
+          }
 
           <!-- Quick Actions -->
-          <p-card header="Quick Actions" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Quick Actions" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
             <div class="space-y-3">
               <p-button
                 label="Export Entry"
                 icon="pi pi-download"
                 [outlined]="true"
-                styleClass="w-full"
+                class="w-full"
                 (onClick)="exportEntry()"
               />
 
-              <p-button
-                label="View User Activity"
-                icon="pi pi-user"
-                [outlined]="true"
-                styleClass="w-full"
-                (onClick)="viewUserActivity()"
-                *ngIf="auditEntry()?.userId"
-              />
+              @if (auditEntry()?.userId) {
+                <p-button
+                  label="View User Activity"
+                  icon="pi pi-user"
+                  [outlined]="true"
+                  class="w-full"
+                  (onClick)="viewUserActivity()"
+                />
+              }
 
               <p-button
                 label="Search Similar"
                 icon="pi pi-search"
                 [outlined]="true"
-                styleClass="w-full"
+                class="w-full"
                 (onClick)="searchSimilar()"
               />
             </div>
           </p-card>
         </div>
-      </div>
+        </div>
+      }
 
       <!-- Error State -->
-      <div class="text-center py-12" *ngIf="error() && !loading()">
-        <i class="pi pi-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-        <h3 class="text-xl font-semibold text-white mb-2">Entry Not Found</h3>
-        <p class="text-gray-400 mb-4">The requested audit entry could not be found.</p>
-        <p-button
-          label="Go Back"
-          icon="pi pi-arrow-left"
-          (onClick)="goBack()"
-        />
-      </div>
+      @if (error() && !loading()) {
+        <div class="text-center py-12">
+          <i class="pi pi-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+          <h3 class="text-xl font-semibold text-white mb-2">Entry Not Found</h3>
+          <p class="text-gray-400 mb-4">The requested audit entry could not be found.</p>
+          <p-button
+            label="Go Back"
+            icon="pi pi-arrow-left"
+            (onClick)="goBack()"
+          />
+        </div>
+      }
     </div>
   `,
   styles: [`
