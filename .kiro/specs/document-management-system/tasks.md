@@ -35,8 +35,8 @@
     - Add bulk operation progress tracking and result notifications
     - _Requirements: 1.1, 7.2, 7.3, 7.4_
 
-- [ ] 3. Create document upload functionality
-  - [ ] 3.1 Build single document upload component
+- [-] 3. Create document upload functionality
+  - [-] 3.1 Build single document upload component
     - Create drag-and-drop upload interface with file validation
     - Implement file format and size validation with clear error messages
     - Add upload progress tracking with cancel capability
