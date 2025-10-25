@@ -255,9 +255,8 @@
 
                     <div class="form-group">
                         <label for="fieldType">Field Type</label>
-                        <p-select id="fieldType" formControlName="type"
-                            [options]="fieldTypeOptions.map(opt => ({label: opt.label, value: opt.value}))"
-                            styleClass="w-full">
+                        <p-select id="fieldType" formControlName="type" [options]="fieldTypeOptions" optionLabel="label"
+                            optionValue="value" styleClass="w-full">
                         </p-select>
                     </div>
 
@@ -427,13 +426,12 @@
     <form [formGroup]="validationForm()" class="validation-form">
         <div class="form-group">
             <label for="validationType">Validation Type</label>
-            <p-select id="validationType" formControlName="type"
-                [options]="validationRuleOptions.map(opt => ({label: opt.label, value: opt.value}))"
-                styleClass="w-full">
+            <p-select id="validationType" formControlName="type" [options]="validationRuleOptions" optionLabel="label"
+                optionValue="value" styleClass="w-full">
             </p-select>
         </div>
 
-        @if (validationRuleOptions.find(opt => opt.value === validationForm().get('type')?.value)?.hasValue) {
+        @if (shouldShowValidationValue()) {
         <div class="form-group">
             <label for="validationValue">Value</label>
             <input id="validationValue" type="text" pInputText formControlName="value"

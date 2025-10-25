@@ -585,6 +585,12 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
         return option?.icon || 'pi pi-question';
     }
 
+    shouldShowValidationValue(): boolean {
+        const selectedType = this.validationForm().get('type')?.value;
+        const ruleOption = this.validationRuleOptions.find(opt => opt.value === selectedType);
+        return ruleOption?.hasValue || false;
+    }
+
     // Mock data for development
     private getMockTemplate(templateId: string): DocumentTemplate {
         return {

@@ -140,7 +140,7 @@ import {
                 id="notes"
                 formControlName="notes"
                 placeholder="Add any additional notes about this status change..."
-                [rows]="3"
+                rows="3"
                 styleClass="w-full"
                 [disabled]="loading()"
               ></p-textarea>
