@@ -47,10 +47,11 @@
     </div>
 
     <div class="bulk-actions">
-        <p-button label="Delete" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="onBulkAction('delete')">
+        <p-button label="Delete" icon="pi pi-trash" severity="danger" [text]="true"
+            (onClick)="onBulkAction(BulkActionType.DELETE)">
         </p-button>
 
-        <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction('add_tags')">
+        <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction(BulkActionType.ADD_TAGS)">
         </p-button>
 
         <p-button label="Export" icon="pi pi-download" [text]="true"
@@ -89,7 +90,7 @@
     <div class="empty-content">
         <i class="pi pi-file empty-icon"></i>
         <h3>No Documents Found</h3>
-        @if (searchQuery() || Object.keys(filters()).length > 0) {
+        @if (searchQuery() || getFilterCount() > 0) {
         <p>No documents match your current search and filter criteria.</p>
         <p-button label="Clear Filters" icon="pi pi-filter-slash" (onClick)="clearFilters()">
         </p-button>
@@ -111,7 +112,7 @@
     <!-- List Header with Selection and Sorting -->
     <div class="list-header">
         <div class="selection-controls">
-            <p-checkbox [binary]="true" [checked]="isAllSelected()" [indeterminate]="hasSelection() && !isAllSelected()"
+            <p-checkbox [binary]="true" [ngModel]="isAllSelected()" [indeterminate]="hasSelection() && !isAllSelected()"
                 (onChange)="onSelectAll()" label="Select all">
             </p-checkbox>
         </div>
@@ -122,7 +123,7 @@
               { label: 'Title', value: 'title' },
               { label: 'File Size', value: 'fileSize' },
               { label: 'Status', value: 'status' }
-            ]" optionLabel="label" optionValue="value" [value]="sortBy()"
+            ]" optionLabel="label" optionValue="value" [ngModel]="sortBy()"
                 (onChange)="onSortChange($event.value, sortOrder())" placeholder="Sort by">
             </p-select>
 
@@ -154,7 +155,7 @@
                 <tr>
                     @if (canBulkEdit()) {
                     <th style="width: 3rem">
-                        <p-checkbox [binary]="true" [checked]="isAllSelected()"
+                        <p-checkbox [binary]="true" [ngModel]="isAllSelected()"
                             [indeterminate]="hasSelection() && !isAllSelected()" (onChange)="onSelectAll()">
                         </p-checkbox>
                     </th>
@@ -173,7 +174,7 @@
                 <tr>
                     @if (canBulkEdit()) {
                     <td>
-                        <p-checkbox [binary]="true" [checked]="selectedDocuments().includes(document.id)"
+                        <p-checkbox [binary]="true" [ngModel]="selectedDocuments().includes(document.id)"
                             (onChange)="onDocumentSelect(document.id, $event.checked)">
                         </p-checkbox>
                     </td>
@@ -230,7 +231,7 @@
     @if (totalCount() > pageSize()) {
     <div class="pagination-container">
         <p-paginator [rows]="pageSize()" [totalRecords]="totalCount()" [first]="(currentPage() - 1) * pageSize()"
-            (onPageChange)="onPageChange($event.page + 1)" [showCurrentPageReport]="true"
+            (onPageChange)="onPageChange(($event.page || 0) + 1)" [showCurrentPageReport]="true"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} documents">
         </p-paginator>
     </div>
@@ -252,6 +253,6 @@
 <!-- Status History Dialog -->
 <p-dialog header="Status History" [(visible)]="showHistoryDialog" [modal]="true" [closable]="true"
     [style]="{ width: '800px', maxHeight: '90vh' }">
-    <app-status-history *ngIf="selectedDocumentForStatus()" [documentId]="selectedDocumentForStatus()!.id">
+    <app-status-history *ngIf="selectedDocumentForStatus()" [documentId]="selectedDocumentForStatus()?.id || ''">
     </app-status-history>
 </p-dialog>

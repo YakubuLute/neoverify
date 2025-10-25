@@ -146,6 +146,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly DocumentStatus = DocumentStatus;
   readonly VerificationStatus = VerificationStatus;
   readonly UserRole = UserRole;
+  readonly BulkActionType = BulkActionType;
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -307,14 +308,14 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   }
 
   // Helper methods for template
-  getDocumentTypeSeverity(type: DocumentType): string {
+  getDocumentTypeSeverity(type: DocumentType): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
     switch (type) {
       case DocumentType.DEGREE:
         return 'success';
       case DocumentType.CERTIFICATE:
         return 'info';
       case DocumentType.LICENSE:
-        return 'warning';
+        return 'warn';
       case DocumentType.TRANSCRIPT:
         return 'secondary';
       default:
@@ -322,12 +323,12 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusSeverity(status: DocumentStatus): string {
+  getStatusSeverity(status: DocumentStatus): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
     switch (status) {
       case DocumentStatus.ACTIVE:
         return 'success';
       case DocumentStatus.PENDING:
-        return 'warning';
+        return 'warn';
       case DocumentStatus.REVOKED:
         return 'danger';
       case DocumentStatus.EXPIRED:
@@ -337,12 +338,12 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  getVerificationSeverity(status: VerificationStatus): string {
+  getVerificationSeverity(status: VerificationStatus): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
     switch (status) {
       case VerificationStatus.VERIFIED:
         return 'success';
       case VerificationStatus.PENDING:
-        return 'warning';
+        return 'warn';
       case VerificationStatus.FAILED:
         return 'danger';
       case VerificationStatus.EXPIRED:
@@ -358,6 +359,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getFilterCount(): number {
+    const currentFilters = this.filters();
+    return Object.keys(currentFilters).length;
   }
 
   // Status management methods
