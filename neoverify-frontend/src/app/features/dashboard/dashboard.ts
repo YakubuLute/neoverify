@@ -2,7 +2,9 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared';
 import { AuthService } from '../../core/services/auth.service';
+import { DocumentService } from '../../core/services/document.service';
 import { UserRole } from '../../shared/models/auth.models';
+import { catchError, of } from 'rxjs';
 
 interface DashboardCard {
   title: string;
@@ -30,6 +32,17 @@ interface RecentActivity {
   type: 'success' | 'warning' | 'info' | 'danger';
 }
 
+interface DocumentStats {
+  totalDocuments: number;
+  documentsToday: number;
+  pendingVerifications: number;
+  verifiedDocuments: number;
+  rejectedDocuments: number;
+  templatesCount: number;
+  sharedDocuments: number;
+  storageUsed: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [SharedModule],
@@ -38,10 +51,12 @@ interface RecentActivity {
 })
 export class Dashboard implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly documentService = inject(DocumentService);
   private readonly router = inject(Router);
 
   readonly currentUser = signal<any>(null);
   readonly userRole = signal<UserRole | null>(null);
+  readonly documentStats = signal<DocumentStats | null>(null);
   readonly UserRole = UserRole; // Make enum available in template
 
   // Platform Admin Dashboard Data

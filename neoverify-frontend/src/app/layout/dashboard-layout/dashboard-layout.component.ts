@@ -130,14 +130,29 @@ export class DashboardLayoutComponent implements OnInit {
         if (role === UserRole.VERIFIER || !role) {
             baseItems.push(
                 {
-                    label: 'My Documents',
+                    label: 'Documents',
                     icon: 'pi pi-file',
-                    route: '/documents'
-                },
+                    route: '/documents',
+                    children: [
+                        { label: 'My Documents', icon: 'pi pi-list', route: '/documents' },
+                        { label: 'Verify Document', icon: 'pi pi-search', route: '/documents/verify' }
+                    ]
+                }
+            );
+        }
+
+        // Auditor specific items
+        if (role === UserRole.AUDITOR) {
+            baseItems.push(
                 {
-                    label: 'Verify Document',
-                    icon: 'pi pi-search',
-                    route: '/documents/verify'
+                    label: 'Documents',
+                    icon: 'pi pi-file',
+                    route: '/documents',
+                    children: [
+                        { label: 'All Documents', icon: 'pi pi-list', route: '/documents' },
+                        { label: 'Audit Trail', icon: 'pi pi-history', route: '/documents/audit' },
+                        { label: 'Compliance Reports', icon: 'pi pi-chart-bar', route: '/documents/audit/compliance' }
+                    ]
                 }
             );
         }
@@ -158,6 +173,118 @@ export class DashboardLayoutComponent implements OnInit {
         const user = this.authService.getCurrentUser();
         this.currentUser.set(user);
         this.userRole.set(user?.role || UserRole.VERIFIER);
+
+        // Set up breadcrumb navigation
+        this.setupBreadcrumbs();
+    }
+
+    private setupBreadcrumbs(): void {
+        this.router.events
+            .pipe(
+                filter(event => event instanceof NavigationEnd),
+                map(() => this.buildBreadcrumbs())
+            )
+            .subscribe(breadcrumbs => {
+                this.breadcrumbs.set(breadcrumbs);
+                this.updatePageTitle(breadcrumbs);
+            });
+
+        // Initial breadcrumb setup
+        const initialBreadcrumbs = this.buildBreadcrumbs();
+        this.breadcrumbs.set(initialBreadcrumbs);
+        this.updatePageTitle(initialBreadcrumbs);
+    }
+
+    private buildBreadcrumbs(): BreadcrumbItem[] {
+        const url = this.router.url;
+        const segments = url.split('/').filter(segment => segment);
+        const breadcrumbs: BreadcrumbItem[] = [];
+
+        // Always start with Dashboard
+        breadcrumbs.push({ label: 'Dashboard', route: '/dashboard', icon: 'pi pi-home' });
+
+        if (segments.length === 0 || segments[0] === 'dashboard') {
+            return breadcrumbs;
+        }
+
+        // Handle different route patterns
+        if (segments[0] === 'documents') {
+            breadcrumbs.push({ label: 'Documents', route: '/documents', icon: 'pi pi-file' });
+
+            if (segments.length > 1) {
+                switch (segments[1]) {
+                    case 'upload':
+                        breadcrumbs.push({ label: 'Upload Document', icon: 'pi pi-upload' });
+                        break;
+                    case 'templates':
+                        breadcrumbs.push({ label: 'Templates', route: '/documents/templates', icon: 'pi pi-bookmark' });
+                        if (segments[2] === 'create') {
+                            breadcrumbs.push({ label: 'Create Template', icon: 'pi pi-plus' });
+                        } else if (segments[2] && segments[3] === 'edit') {
+                            breadcrumbs.push({ label: 'Edit Template', icon: 'pi pi-pencil' });
+                        } else if (segments[2] && segments[3] === 'versions') {
+                            breadcrumbs.push({ label: 'Template Versions', icon: 'pi pi-history' });
+                        }
+                        break;
+                    case 'audit':
+                        breadcrumbs.push({ label: 'Audit Trail', route: '/documents/audit', icon: 'pi pi-history' });
+                        if (segments[2] === 'compliance') {
+                            breadcrumbs.push({ label: 'Compliance Dashboard', icon: 'pi pi-chart-bar' });
+                        } else if (segments[2] === 'scheduled-reports') {
+                            breadcrumbs.push({ label: 'Scheduled Reports', icon: 'pi pi-calendar' });
+                        } else if (segments[2] === 'report-templates') {
+                            breadcrumbs.push({ label: 'Report Templates', icon: 'pi pi-file-edit' });
+                        } else if (segments[2] === 'entry') {
+                            breadcrumbs.push({ label: 'Audit Entry Details', icon: 'pi pi-info-circle' });
+                        }
+                        break;
+                    case 'verify':
+                        breadcrumbs.push({ label: 'Verify Document', icon: 'pi pi-search' });
+                        break;
+                    case 'shared':
+                        breadcrumbs.push({ label: 'Shared Document', icon: 'pi pi-share-alt' });
+                        break;
+                    default:
+                        if (segments[1] && segments[1] !== 'verify') {
+                            breadcrumbs.push({ label: 'Document Details', icon: 'pi pi-info-circle' });
+                        }
+                        break;
+                }
+            }
+        } else if (segments[0] === 'organization') {
+            breadcrumbs.push({ label: 'Organization', route: '/organization', icon: 'pi pi-building' });
+            if (segments[1] === 'settings') {
+                breadcrumbs.push({ label: 'Settings', icon: 'pi pi-cog' });
+            } else if (segments[1] === 'users') {
+                breadcrumbs.push({ label: 'Team Members', icon: 'pi pi-users' });
+            } else if (segments[1] === 'api-keys') {
+                breadcrumbs.push({ label: 'API Keys', icon: 'pi pi-key' });
+            }
+        } else if (segments[0] === 'admin') {
+            breadcrumbs.push({ label: 'Administration', route: '/admin', icon: 'pi pi-shield' });
+            if (segments[1] === 'organizations') {
+                breadcrumbs.push({ label: 'Organizations', icon: 'pi pi-building' });
+            } else if (segments[1] === 'users') {
+                breadcrumbs.push({ label: 'Users', icon: 'pi pi-users' });
+            } else if (segments[1] === 'analytics') {
+                breadcrumbs.push({ label: 'Analytics', icon: 'pi pi-chart-bar' });
+            } else if (segments[1] === 'security') {
+                breadcrumbs.push({ label: 'Security', icon: 'pi pi-shield' });
+            }
+        } else if (segments[0] === 'profile') {
+            breadcrumbs.push({ label: 'Profile', icon: 'pi pi-user' });
+        } else if (segments[0] === 'analytics') {
+            breadcrumbs.push({ label: 'Analytics', icon: 'pi pi-chart-line' });
+        }
+
+        return breadcrumbs;
+    }
+
+    private updatePageTitle(breadcrumbs: BreadcrumbItem[]): void {
+        if (breadcrumbs.length > 0) {
+            const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
+            this.pageTitle.set(lastBreadcrumb.label);
+        }
     }
 
     toggleSidebar(): void {

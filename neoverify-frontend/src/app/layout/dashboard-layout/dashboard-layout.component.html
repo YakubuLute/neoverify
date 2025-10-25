@@ -109,9 +109,32 @@
                         <i class="pi pi-bars text-lg"></i>
                     </button>
 
-                    <!-- Breadcrumb or page title could go here -->
-                    <div class="hidden md:block">
-                        <h1 class="text-white font-semibold text-lg">Dashboard</h1>
+                    <!-- Breadcrumb Navigation -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        @for (breadcrumb of breadcrumbs(); track breadcrumb.label; let isLast = $last) {
+                        @if (!isLast && breadcrumb.route) {
+                        <button (click)="navigateTo(breadcrumb.route)"
+                            class="flex items-center space-x-1 text-gray-400 hover:text-white transition-colors text-sm">
+                            @if (breadcrumb.icon) {
+                            <i [class]="breadcrumb.icon + ' text-xs'"></i>
+                            }
+                            <span>{{ breadcrumb.label }}</span>
+                        </button>
+                        <i class="pi pi-chevron-right text-gray-500 text-xs"></i>
+                        } @else {
+                        <div class="flex items-center space-x-1 text-white text-sm font-medium">
+                            @if (breadcrumb.icon) {
+                            <i [class]="breadcrumb.icon + ' text-xs'"></i>
+                            }
+                            <span>{{ breadcrumb.label }}</span>
+                        </div>
+                        }
+                        }
+                    </div>
+
+                    <!-- Mobile page title -->
+                    <div class="md:hidden">
+                        <h1 class="text-white font-semibold text-lg">{{ pageTitle() }}</h1>
                     </div>
                 </div>
 
