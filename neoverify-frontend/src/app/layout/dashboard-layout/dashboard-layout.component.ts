@@ -1,9 +1,10 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { UserRole } from '../../shared/models/auth.models';
 import { SHARED_IMPORTS } from '../../shared';
+import { filter, map } from 'rxjs/operators';
 
 interface MenuItem {
     label: string;
@@ -12,6 +13,12 @@ interface MenuItem {
     roles?: UserRole[];
     badge?: string;
     children?: MenuItem[];
+}
+
+interface BreadcrumbItem {
+    label: string;
+    route?: string;
+    icon?: string;
 }
 
 @Component({
@@ -23,11 +30,14 @@ interface MenuItem {
 })
 export class DashboardLayoutComponent implements OnInit {
     private readonly authService = inject(AuthService);
+    private readonly activatedRoute = inject(ActivatedRoute);
     readonly router = inject(Router); // Make router available in template
 
     readonly sidebarCollapsed = signal<boolean>(false);
     readonly currentUser = signal<any>(null);
     readonly userRole = signal<UserRole | null>(null);
+    readonly breadcrumbs = signal<BreadcrumbItem[]>([]);
+    readonly pageTitle = signal<string>('Dashboard');
     readonly UserRole = UserRole; // Make enum available in template
 
     // Menu items based on user role
@@ -78,7 +88,8 @@ export class DashboardLayoutComponent implements OnInit {
                     children: [
                         { label: 'All Documents', icon: 'pi pi-list', route: '/documents' },
                         { label: 'Upload Document', icon: 'pi pi-upload', route: '/documents/upload' },
-                        { label: 'Templates', icon: 'pi pi-bookmark', route: '/documents/templates' }
+                        { label: 'Templates', icon: 'pi pi-bookmark', route: '/documents/templates' },
+                        { label: 'Audit Trail', icon: 'pi pi-history', route: '/documents/audit' }
                     ]
                 },
                 {
@@ -103,19 +114,14 @@ export class DashboardLayoutComponent implements OnInit {
         if (role === UserRole.ISSUER) {
             baseItems.push(
                 {
-                    label: 'My Documents',
+                    label: 'Documents',
                     icon: 'pi pi-file',
-                    route: '/documents'
-                },
-                {
-                    label: 'Upload Document',
-                    icon: 'pi pi-upload',
-                    route: '/documents/upload'
-                },
-                {
-                    label: 'Templates',
-                    icon: 'pi pi-bookmark',
-                    route: '/documents/templates'
+                    route: '/documents',
+                    children: [
+                        { label: 'My Documents', icon: 'pi pi-list', route: '/documents' },
+                        { label: 'Upload Document', icon: 'pi pi-upload', route: '/documents/upload' },
+                        { label: 'Templates', icon: 'pi pi-bookmark', route: '/documents/templates' }
+                    ]
                 }
             );
         }
