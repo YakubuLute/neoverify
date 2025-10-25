@@ -6,20 +6,20 @@ import { finalize, startWith, switchMap } from 'rxjs/operators';
 import { interval } from 'rxjs';
 
 // PrimeNG Imports
-import { Card } from 'primeng/card';
-import { Button } from 'primeng/button';
-import { Select } from 'primeng/select';
-import { DatePicker } from 'primeng/datepicker';
-import { Chart } from 'primeng/chart';
-import { Table } from 'primeng/table';
-import { Tag } from 'primeng/tag';
-import { ProgressBar } from 'primeng/progressbar';
-import { Tooltip } from 'primeng/tooltip';
-import { Dialog } from 'primeng/dialog';
-import { InputText } from 'primeng/inputtext';
-import { InputNumber } from 'primeng/inputnumber';
-import { ToggleButton } from 'primeng/togglebutton';
-import { Message } from 'primeng/message';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ChartModule } from 'primeng/chart';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { MessageModule } from 'primeng/message';
 
 // Services and Models
 import { AuditService } from '../../../core/services/audit.service';
@@ -59,20 +59,20 @@ interface RetentionPolicy {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    Card,
-    Button,
-    Select,
-    DatePicker,
-    Chart,
-    Table,
-    Tag,
-    ProgressBar,
-    Tooltip,
-    Dialog,
-    InputText,
-    InputNumber,
-    ToggleButton,
-    Message
+    CardModule,
+    ButtonModule,
+    SelectModule,
+    DatePickerModule,
+    ChartModule,
+    TableModule,
+    TagModule,
+    ProgressBarModule,
+    TooltipModule,
+    DialogModule,
+    InputTextModule,
+    InputNumberModule,
+    ToggleSwitchModule,
+    MessageModule
   ],
   template: `
     <div class="compliance-dashboard-container p-6">
@@ -285,7 +285,7 @@ interface RetentionPolicy {
               <span class="text-gray-300">Auto-Delete</span>
               <p-tag
                 [value]="retentionPolicy()?.autoDeleteEnabled ? 'Enabled' : 'Disabled'"
-                [severity]="retentionPolicy()?.autoDeleteEnabled ? 'success' : 'warning'"
+                [severity]="retentionPolicy()?.autoDeleteEnabled ? 'success' : 'warn'"
               />
             </div>
 
@@ -380,18 +380,14 @@ interface RetentionPolicy {
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-300">Real-time Monitoring</span>
-                <p-toggleButton
+                <p-toggleswitch
                   formControlName="realTimeMonitoring"
-                  onLabel="Enabled"
-                  offLabel="Disabled"
                 />
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-300">Email Alerts</span>
-                <p-toggleButton
+                <p-toggleswitch
                   formControlName="emailAlerts"
-                  onLabel="Enabled"
-                  offLabel="Disabled"
                 />
               </div>
             </div>
@@ -438,10 +434,8 @@ interface RetentionPolicy {
               <label class="text-sm font-medium text-gray-300">Auto-Delete Expired Logs</label>
               <p class="text-xs text-gray-400">Automatically delete logs older than retention period</p>
             </div>
-            <p-toggleButton
+            <p-toggleswitch
               formControlName="autoDeleteEnabled"
-              onLabel="Enabled"
-              offLabel="Disabled"
             />
           </div>
 
@@ -505,10 +499,8 @@ interface RetentionPolicy {
 
           <div class="flex items-center justify-between">
             <span class="text-sm text-gray-300">Include Detailed Logs</span>
-            <p-toggleButton
+            <p-toggleswitch
               formControlName="includeDetails"
-              onLabel="Yes"
-              offLabel="No"
             />
           </div>
 
@@ -862,10 +854,10 @@ export class ComplianceDashboardComponent implements OnInit {
   }) {
     // Activity chart data
     const activityData = {
-      labels: stats.dailyActivity?.map((item) => new Date(item.date.date).toLocaleDateString()) || [],
+      labels: stats.dailyActivity?.map((item) => new Date(item.date).toLocaleDateString()) || [],
       datasets: [{
         label: 'Daily Activity',
-        data: stats.dailyActivity?.map((item: any) => item.count) || [],
+        data: stats.dailyActivity?.map((item) => item.count) || [],
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4
@@ -904,7 +896,13 @@ export class ComplianceDashboardComponent implements OnInit {
     });
   }
 
-  checkThresholds(stats: any) {
+  checkThresholds(stats: {
+    totalEntries: number;
+    actionCounts: Record<AuditAction, number>;
+    topUsers: Array<{ userId: string; userEmail: string; count: number }>;
+    topDocuments: Array<{ documentId: string; documentTitle: string; count: number }>;
+    dailyActivity: Array<{ date: string; count: number }>;
+  }) {
     // Check for threshold violations and generate alerts
     // This would be more sophisticated in a real implementation
   }
@@ -1017,19 +1015,19 @@ export class ComplianceDashboardComponent implements OnInit {
     return Math.min((metric.value / metric.target) * 100, 100);
   }
 
-  getReportStatusSeverity(status: string): string {
-    const severities: Record<string, string> = {
+  getReportStatusSeverity(status: string): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" {
+    const severities: Record<string, "success" | "secondary" | "info" | "warn" | "danger" | "contrast"> = {
       'completed': 'success',
-      'processing': 'warning',
+      'processing': 'warn',
       'failed': 'danger'
     };
     return severities[status] || 'info';
   }
 
-  getThresholdSeverity(status: string): string {
-    const severities: Record<string, string> = {
+  getThresholdSeverity(status: string): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" {
+    const severities: Record<string, "success" | "secondary" | "info" | "warn" | "danger" | "contrast"> = {
       'good': 'success',
-      'warning': 'warning',
+      'warning': 'warn',
       'critical': 'danger'
     };
     return severities[status] || 'info';
