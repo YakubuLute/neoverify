@@ -47,9 +47,8 @@
             <div class="filters-content">
                 <div class="filter-group">
                     <label>Category</label>
-                    <p-multiSelect [options]="availableCategories().map(cat => ({label: cat, value: cat}))"
-                        placeholder="Select categories" [ngModel]="filters().category || []"
-                        (ngModelChange)="onFilterChange({...filters(), category: $event})">
+                    <p-multiSelect [options]="getCategoryOptions()" placeholder="Select categories"
+                        [ngModel]="filters().category || []" (ngModelChange)="onCategoryFilterChange($event)">
                     </p-multiSelect>
                 </div>
 

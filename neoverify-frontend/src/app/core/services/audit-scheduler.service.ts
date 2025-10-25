@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, interval, of, throwError } from 'rxjs';
-import { switchMap, catchError, tap, filter } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { switchMap, catchError, tap, filter, map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 
@@ -62,6 +62,7 @@ export class AuditSchedulerService {
      */
     getScheduledReports(): Observable<ScheduledReport[]> {
         return this.apiService.get<ScheduledReport[]>('audit/scheduled-reports').pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to load scheduled reports:', error);
                 this.notificationService.error('Failed to load scheduled reports');
@@ -75,6 +76,7 @@ export class AuditSchedulerService {
      */
     createScheduledReport(config: ReportScheduleConfig): Observable<ScheduledReport> {
         return this.apiService.post<ScheduledReport>('audit/scheduled-reports', config).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success('Scheduled report created successfully');
             }),
@@ -91,6 +93,7 @@ export class AuditSchedulerService {
      */
     updateScheduledReport(reportId: string, config: Partial<ReportScheduleConfig>): Observable<ScheduledReport> {
         return this.apiService.put<ScheduledReport>(`audit/scheduled-reports/${reportId}`, config).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success('Scheduled report updated successfully');
             }),
@@ -107,6 +110,7 @@ export class AuditSchedulerService {
      */
     deleteScheduledReport(reportId: string): Observable<void> {
         return this.apiService.delete<void>(`audit/scheduled-reports/${reportId}`).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success('Scheduled report deleted successfully');
             }),
@@ -122,7 +126,8 @@ export class AuditSchedulerService {
      * Enable/disable a scheduled report
      */
     toggleScheduledReport(reportId: string, enabled: boolean): Observable<ScheduledReport> {
-        return this.apiService.patch<ScheduledReport>(`audit/scheduled-reports/${reportId}`, { enabled }).pipe(
+        return this.apiService.put<ScheduledReport>(`audit/scheduled-reports/${reportId}`, { enabled }).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success(
                     `Scheduled report ${enabled ? 'enabled' : 'disabled'} successfully`
@@ -141,6 +146,7 @@ export class AuditSchedulerService {
      */
     triggerScheduledReport(reportId: string): Observable<ScheduledReportExecution> {
         return this.apiService.post<ScheduledReportExecution>(`audit/scheduled-reports/${reportId}/trigger`, {}).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success('Report generation started');
             }),
@@ -156,10 +162,12 @@ export class AuditSchedulerService {
      * Get execution history for a scheduled report
      */
     getReportExecutions(reportId: string, limit: number = 50): Observable<ScheduledReportExecution[]> {
+        const params = new HttpParams().set('limit', limit.toString());
         return this.apiService.get<ScheduledReportExecution[]>(
             `audit/scheduled-reports/${reportId}/executions`,
-            { limit }
+            params
         ).pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to load report executions:', error);
                 this.notificationService.error('Failed to load report history');
@@ -173,6 +181,7 @@ export class AuditSchedulerService {
      */
     getExecutionStatus(executionId: string): Observable<ScheduledReportExecution> {
         return this.apiService.get<ScheduledReportExecution>(`audit/report-executions/${executionId}`).pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to load execution status:', error);
                 return throwError(() => error);
@@ -249,7 +258,12 @@ export class AuditSchedulerService {
         nextRuns?: Date[];
         error?: string;
     }> {
-        return this.apiService.post<any>('audit/validate-cron', { expression: cronExpression }).pipe(
+        return this.apiService.post<{
+            valid: boolean;
+            nextRuns?: Date[];
+            error?: string;
+        }>('audit/validate-cron', { expression: cronExpression }).pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to validate cron expression:', error);
                 return of({ valid: false, error: 'Invalid cron expression' });
@@ -267,7 +281,14 @@ export class AuditSchedulerService {
         maxRecipientsPerReport: number;
         enableEmailNotifications: boolean;
     }> {
-        return this.apiService.get<any>('audit/report-settings').pipe(
+        return this.apiService.get<{
+            maxRetentionDays: number;
+            maxFileSize: number;
+            allowedFormats: string[];
+            maxRecipientsPerReport: number;
+            enableEmailNotifications: boolean;
+        }>('audit/report-settings').pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to load audit report settings:', error);
                 return of({
@@ -286,6 +307,7 @@ export class AuditSchedulerService {
      */
     updateAuditReportSettings(settings: any): Observable<void> {
         return this.apiService.put<void>('audit/report-settings', settings).pipe(
+            map(response => response.data),
             tap(() => {
                 this.notificationService.success('Audit report settings updated successfully');
             }),
@@ -303,6 +325,7 @@ export class AuditSchedulerService {
     startReportMonitoring(): Observable<ScheduledReportExecution> {
         return interval(30000).pipe( // Check every 30 seconds
             switchMap(() => this.apiService.get<ScheduledReportExecution[]>('audit/active-executions')),
+            map(response => response.data),
             switchMap(executions => executions),
             filter(execution => execution.status === 'completed' || execution.status === 'failed'),
             tap(execution => {
@@ -331,7 +354,16 @@ export class AuditSchedulerService {
         averageExecutionTime: number;
         lastExecutionDate?: Date;
     }> {
-        return this.apiService.get<any>('audit/report-statistics').pipe(
+        return this.apiService.get<{
+            totalReports: number;
+            activeReports: number;
+            totalExecutions: number;
+            successfulExecutions: number;
+            failedExecutions: number;
+            averageExecutionTime: number;
+            lastExecutionDate?: Date;
+        }>('audit/report-statistics').pipe(
+            map(response => response.data),
             catchError(error => {
                 console.error('Failed to load report statistics:', error);
                 return of({
@@ -357,9 +389,17 @@ export class AuditSchedulerService {
             error?: string;
         }>;
     }> {
-        return this.apiService.post<any>('audit/test-email', { recipients }).pipe(
+        return this.apiService.post<{
+            success: boolean;
+            results: Array<{
+                email: string;
+                delivered: boolean;
+                error?: string;
+            }>;
+        }>('audit/test-email', { recipients }).pipe(
+            map(response => response.data),
             tap(result => {
-                const successful = result.results.filter((r: any) => r.delivered).length;
+                const successful = result.results.filter(r => r.delivered).length;
                 const total = result.results.length;
                 this.notificationService.success(`Email test completed: ${successful}/${total} delivered`);
             }),
