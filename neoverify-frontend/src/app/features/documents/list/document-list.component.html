@@ -259,3 +259,8 @@
     <app-status-history *ngIf="selectedDocumentForStatus()" [documentId]="selectedDocumentForStatus()?.id || ''">
     </app-status-history>
 </p-dialog>
+
+<!-- Document Sharing Dialog -->
+<app-document-sharing-dialog [document]="selectedDocumentForSharing()" [visible]="showSharingDialog()"
+    (visibleChange)="showSharingDialog.set($event)" (documentShared)="onDocumentShared()">
+</app-document-sharing-dialog>

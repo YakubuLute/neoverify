@@ -11,7 +11,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
-import { TabsModule } from 'primeng/tabs';
+import { TabViewModule } from 'primeng/tabview';
 import { TagModule } from 'primeng/tag';
 import { PasswordModule } from 'primeng/password';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -27,31 +27,31 @@ import { Document, SharedUser, SharePermissions } from '../../models/document.mo
 import { User } from '../../models/auth.models';
 
 @Component({
-    selector: 'app-document-sharing-dialog',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        DialogModule,
-        ButtonModule,
-        InputTextModule,
-        CheckboxModule,
-        SelectModule,
-        DatePickerModule,
-        TextareaModule,
-        TabsModule,
-        TagModule,
-        PasswordModule,
-        InputNumberModule,
-        TooltipModule,
-        ProgressSpinnerModule,
-        AutoCompleteModule,
-        TableModule,
-        ConfirmDialogModule
-    ],
-    providers: [ConfirmationService],
-    template: `
+  selector: 'app-document-sharing-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    DialogModule,
+    ButtonModule,
+    InputTextModule,
+    CheckboxModule,
+    SelectModule,
+    DatePickerModule,
+    TextareaModule,
+    TabViewModule,
+    TagModule,
+    PasswordModule,
+    InputNumberModule,
+    TooltipModule,
+    ProgressSpinnerModule,
+    AutoCompleteModule,
+    TableModule,
+    ConfirmDialogModule
+  ],
+  providers: [ConfirmationService],
+  template: `
     <p-dialog 
       header="Share Document" 
       [(visible)]="visible" 
@@ -74,7 +74,7 @@ import { User } from '../../models/auth.models';
         </div>
 
         <!-- Tabs for different sharing methods -->
-        <p-tabs [(activeIndex)]="activeTabIndex">
+        <p-tabView [(activeIndex)]="activeTabIndex">
           
           <!-- Share with Users Tab -->
           <p-tabPanel header="Share with Users" leftIcon="pi pi-users">
@@ -462,7 +462,7 @@ import { User } from '../../models/auth.models';
               </div>
             </div>
           </p-tabPanel>
-        </p-tabs>
+        </p-tabView>
       </div>
 
       <ng-template pTemplate="footer">
@@ -479,291 +479,291 @@ import { User } from '../../models/auth.models';
 
     <p-confirmDialog></p-confirmDialog>
   `,
-    styleUrl: './document-sharing-dialog.component.scss'
+  styleUrl: './document-sharing-dialog.component.scss'
 })
 export class DocumentSharingDialogComponent implements OnInit {
-    private readonly sharingService = inject(DocumentSharingService);
-    private readonly confirmationService = inject(ConfirmationService);
-    private readonly destroy$ = new Subject<void>();
+  private readonly sharingService = inject(DocumentSharingService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly destroy$ = new Subject<void>();
 
-    @Input() document: Document | null = null;
-    @Input() visible = false;
-    @Output() visibleChange = new EventEmitter<boolean>();
-    @Output() documentShared = new EventEmitter<void>();
+  @Input() document: Document | null = null;
+  @Input() visible = false;
+  @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() documentShared = new EventEmitter<void>();
 
-    // State signals
-    readonly activeTabIndex = signal(0);
-    readonly sharing = signal(false);
-    readonly creatingLink = signal(false);
-    readonly loadingShares = signal(false);
-    readonly searchingUsers = signal(false);
+  // State signals
+  readonly activeTabIndex = signal(0);
+  readonly sharing = signal(false);
+  readonly creatingLink = signal(false);
+  readonly loadingShares = signal(false);
+  readonly searchingUsers = signal(false);
 
-    // User sharing state
-    readonly selectedUsers = signal<User[]>([]);
-    readonly userSuggestions = signal<User[]>([]);
-    selectedUser: User | null = null;
-    shareMessage = '';
-    hasExpiration = false;
-    expirationDate: Date | null = null;
-    sharePermissions: SharePermissions = {
-        canView: true,
-        canEdit: false,
-        canDownload: false
+  // User sharing state
+  readonly selectedUsers = signal<User[]>([]);
+  readonly userSuggestions = signal<User[]>([]);
+  selectedUser: User | null = null;
+  shareMessage = '';
+  hasExpiration = false;
+  expirationDate: Date | null = null;
+  sharePermissions: SharePermissions = {
+    canView: true,
+    canEdit: false,
+    canDownload: false
+  };
+
+  // Link sharing state
+  linkPermissions: SharePermissions = {
+    canView: true,
+    canEdit: false,
+    canDownload: false
+  };
+  linkHasPassword = false;
+  linkPassword = '';
+  linkHasExpiration = false;
+  linkExpirationDate: Date | null = null;
+  linkHasDownloadLimit = false;
+  linkMaxDownloads = 10;
+
+  // Current shares
+  readonly currentShares = signal<SharedUser[]>([]);
+  readonly shareLinks = signal<ShareLink[]>([]);
+
+  // Computed properties
+  readonly minExpirationDate = computed(() => new Date());
+
+  ngOnInit() {
+    if (this.document) {
+      this.loadCurrentShares();
+      this.loadShareLinks();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onClose() {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.selectedUsers.set([]);
+    this.selectedUser = null;
+    this.shareMessage = '';
+    this.hasExpiration = false;
+    this.expirationDate = null;
+    this.sharePermissions = {
+      canView: true,
+      canEdit: false,
+      canDownload: false
+    };
+    this.resetLinkForm();
+  }
+
+  private resetLinkForm() {
+    this.linkPermissions = {
+      canView: true,
+      canEdit: false,
+      canDownload: false
+    };
+    this.linkHasPassword = false;
+    this.linkPassword = '';
+    this.linkHasExpiration = false;
+    this.linkExpirationDate = null;
+    this.linkHasDownloadLimit = false;
+    this.linkMaxDownloads = 10;
+  }
+
+  searchUsers(event: any) {
+    const query = event.query;
+    if (!query || query.length < 2) {
+      this.userSuggestions.set([]);
+      return;
+    }
+
+    this.searchingUsers.set(true);
+    this.sharingService.searchUsersForSharing(query)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (users) => {
+          // Filter out already selected users
+          const selectedEmails = this.selectedUsers().map(u => u.email);
+          const filteredUsers = users.filter(u => !selectedEmails.includes(u.email));
+          this.userSuggestions.set(filteredUsers);
+          this.searchingUsers.set(false);
+        },
+        error: () => {
+          this.userSuggestions.set([]);
+          this.searchingUsers.set(false);
+        }
+      });
+  }
+
+  addUserToShare(user: User) {
+    const current = this.selectedUsers();
+    if (!current.find(u => u.email === user.email)) {
+      this.selectedUsers.set([...current, user]);
+    }
+    this.selectedUser = null;
+  }
+
+  removeUserFromShare(user: User) {
+    const current = this.selectedUsers();
+    this.selectedUsers.set(current.filter(u => u.email !== user.email));
+  }
+
+  isValidPermissions(): boolean {
+    return this.sharePermissions.canView ||
+      this.sharePermissions.canEdit ||
+      this.sharePermissions.canDownload;
+  }
+
+  isValidLinkPermissions(): boolean {
+    return this.linkPermissions.canView || this.linkPermissions.canDownload;
+  }
+
+  shareWithUsers() {
+    if (!this.document || this.selectedUsers().length === 0 || !this.isValidPermissions()) {
+      return;
+    }
+
+    this.sharing.set(true);
+
+    const request = {
+      documentId: this.document.id,
+      userEmails: this.selectedUsers().map(u => u.email),
+      permissions: this.sharePermissions,
+      message: this.shareMessage || undefined,
+      expiresAt: this.hasExpiration ? this.expirationDate || undefined : undefined
     };
 
-    // Link sharing state
-    linkPermissions: SharePermissions = {
-        canView: true,
-        canEdit: false,
-        canDownload: false
+    this.sharingService.shareDocument(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.sharing.set(false);
+          this.documentShared.emit();
+          this.loadCurrentShares();
+          this.resetForm();
+          this.activeTabIndex.set(2); // Switch to current shares tab
+        },
+        error: () => {
+          this.sharing.set(false);
+        }
+      });
+  }
+
+  createShareLink() {
+    if (!this.document || !this.isValidLinkPermissions()) {
+      return;
+    }
+
+    this.creatingLink.set(true);
+
+    const request = {
+      documentId: this.document.id,
+      permissions: this.linkPermissions,
+      expiresAt: this.linkHasExpiration ? this.linkExpirationDate || undefined : undefined,
+      password: this.linkHasPassword ? this.linkPassword || undefined : undefined,
+      maxDownloads: this.linkHasDownloadLimit ? this.linkMaxDownloads || undefined : undefined
     };
-    linkHasPassword = false;
-    linkPassword = '';
-    linkHasExpiration = false;
-    linkExpirationDate: Date | null = null;
-    linkHasDownloadLimit = false;
-    linkMaxDownloads = 10;
 
-    // Current shares
-    readonly currentShares = signal<SharedUser[]>([]);
-    readonly shareLinks = signal<ShareLink[]>([]);
+    this.sharingService.createShareLink(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (shareLink) => {
+          this.creatingLink.set(false);
+          this.loadShareLinks();
+          this.resetLinkForm();
+          // Automatically copy the new link to clipboard
+          this.sharingService.copyShareLinkToClipboard(shareLink);
+        },
+        error: () => {
+          this.creatingLink.set(false);
+        }
+      });
+  }
 
-    // Computed properties
-    readonly minExpirationDate = computed(() => new Date());
+  copyLinkToClipboard(shareLink: ShareLink) {
+    this.sharingService.copyShareLinkToClipboard(shareLink);
+  }
 
-    ngOnInit() {
+  revokeShareLink(shareLink: ShareLink) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to revoke this share link? Users will no longer be able to access the document using this link.',
+      header: 'Revoke Share Link',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
         if (this.document) {
-            this.loadCurrentShares();
-            this.loadShareLinks();
-        }
-    }
-
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    onClose() {
-        this.visible = false;
-        this.visibleChange.emit(false);
-        this.resetForm();
-    }
-
-    private resetForm() {
-        this.selectedUsers.set([]);
-        this.selectedUser = null;
-        this.shareMessage = '';
-        this.hasExpiration = false;
-        this.expirationDate = null;
-        this.sharePermissions = {
-            canView: true,
-            canEdit: false,
-            canDownload: false
-        };
-        this.resetLinkForm();
-    }
-
-    private resetLinkForm() {
-        this.linkPermissions = {
-            canView: true,
-            canEdit: false,
-            canDownload: false
-        };
-        this.linkHasPassword = false;
-        this.linkPassword = '';
-        this.linkHasExpiration = false;
-        this.linkExpirationDate = null;
-        this.linkHasDownloadLimit = false;
-        this.linkMaxDownloads = 10;
-    }
-
-    searchUsers(event: any) {
-        const query = event.query;
-        if (!query || query.length < 2) {
-            this.userSuggestions.set([]);
-            return;
-        }
-
-        this.searchingUsers.set(true);
-        this.sharingService.searchUsersForSharing(query)
+          this.sharingService.revokeShareLink(this.document.id, shareLink.id)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (users) => {
-                    // Filter out already selected users
-                    const selectedEmails = this.selectedUsers().map(u => u.email);
-                    const filteredUsers = users.filter(u => !selectedEmails.includes(u.email));
-                    this.userSuggestions.set(filteredUsers);
-                    this.searchingUsers.set(false);
-                },
-                error: () => {
-                    this.userSuggestions.set([]);
-                    this.searchingUsers.set(false);
-                }
+              next: () => {
+                this.loadShareLinks();
+              }
             });
-    }
-
-    addUserToShare(user: User) {
-        const current = this.selectedUsers();
-        if (!current.find(u => u.email === user.email)) {
-            this.selectedUsers.set([...current, user]);
         }
-        this.selectedUser = null;
-    }
+      }
+    });
+  }
 
-    removeUserFromShare(user: User) {
-        const current = this.selectedUsers();
-        this.selectedUsers.set(current.filter(u => u.email !== user.email));
-    }
+  editUserPermissions(share: SharedUser) {
+    // TODO: Implement edit permissions dialog
+    console.log('Edit permissions for:', share);
+  }
 
-    isValidPermissions(): boolean {
-        return this.sharePermissions.canView ||
-            this.sharePermissions.canEdit ||
-            this.sharePermissions.canDownload;
-    }
-
-    isValidLinkPermissions(): boolean {
-        return this.linkPermissions.canView || this.linkPermissions.canDownload;
-    }
-
-    shareWithUsers() {
-        if (!this.document || this.selectedUsers().length === 0 || !this.isValidPermissions()) {
-            return;
+  removeUserShare(share: SharedUser) {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to remove access for ${share.email}?`,
+      header: 'Remove Access',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        if (this.document) {
+          this.sharingService.removeUserFromSharing(this.document.id, share.userId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.loadCurrentShares();
+              }
+            });
         }
+      }
+    });
+  }
 
-        this.sharing.set(true);
+  private loadCurrentShares() {
+    if (!this.document) return;
 
-        const request = {
-            documentId: this.document.id,
-            userEmails: this.selectedUsers().map(u => u.email),
-            permissions: this.sharePermissions,
-            message: this.shareMessage || undefined,
-            expiresAt: this.hasExpiration ? this.expirationDate || undefined : undefined
-        };
-
-        this.sharingService.shareDocument(request)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: () => {
-                    this.sharing.set(false);
-                    this.documentShared.emit();
-                    this.loadCurrentShares();
-                    this.resetForm();
-                    this.activeTabIndex.set(2); // Switch to current shares tab
-                },
-                error: () => {
-                    this.sharing.set(false);
-                }
-            });
-    }
-
-    createShareLink() {
-        if (!this.document || !this.isValidLinkPermissions()) {
-            return;
+    this.loadingShares.set(true);
+    this.sharingService.getDocumentSharedUsers(this.document.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (shares) => {
+          this.currentShares.set(shares);
+          this.loadingShares.set(false);
+        },
+        error: () => {
+          this.currentShares.set([]);
+          this.loadingShares.set(false);
         }
+      });
+  }
 
-        this.creatingLink.set(true);
+  private loadShareLinks() {
+    if (!this.document) return;
 
-        const request = {
-            documentId: this.document.id,
-            permissions: this.linkPermissions,
-            expiresAt: this.linkHasExpiration ? this.linkExpirationDate || undefined : undefined,
-            password: this.linkHasPassword ? this.linkPassword || undefined : undefined,
-            maxDownloads: this.linkHasDownloadLimit ? this.linkMaxDownloads || undefined : undefined
-        };
-
-        this.sharingService.createShareLink(request)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (shareLink) => {
-                    this.creatingLink.set(false);
-                    this.loadShareLinks();
-                    this.resetLinkForm();
-                    // Automatically copy the new link to clipboard
-                    this.sharingService.copyShareLinkToClipboard(shareLink);
-                },
-                error: () => {
-                    this.creatingLink.set(false);
-                }
-            });
-    }
-
-    copyLinkToClipboard(shareLink: ShareLink) {
-        this.sharingService.copyShareLinkToClipboard(shareLink);
-    }
-
-    revokeShareLink(shareLink: ShareLink) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to revoke this share link? Users will no longer be able to access the document using this link.',
-            header: 'Revoke Share Link',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                if (this.document) {
-                    this.sharingService.revokeShareLink(this.document.id, shareLink.id)
-                        .pipe(takeUntil(this.destroy$))
-                        .subscribe({
-                            next: () => {
-                                this.loadShareLinks();
-                            }
-                        });
-                }
-            }
-        });
-    }
-
-    editUserPermissions(share: SharedUser) {
-        // TODO: Implement edit permissions dialog
-        console.log('Edit permissions for:', share);
-    }
-
-    removeUserShare(share: SharedUser) {
-        this.confirmationService.confirm({
-            message: `Are you sure you want to remove access for ${share.email}?`,
-            header: 'Remove Access',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                if (this.document) {
-                    this.sharingService.removeUserFromSharing(this.document.id, share.userId)
-                        .pipe(takeUntil(this.destroy$))
-                        .subscribe({
-                            next: () => {
-                                this.loadCurrentShares();
-                            }
-                        });
-                }
-            }
-        });
-    }
-
-    private loadCurrentShares() {
-        if (!this.document) return;
-
-        this.loadingShares.set(true);
-        this.sharingService.getDocumentSharedUsers(this.document.id)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (shares) => {
-                    this.currentShares.set(shares);
-                    this.loadingShares.set(false);
-                },
-                error: () => {
-                    this.currentShares.set([]);
-                    this.loadingShares.set(false);
-                }
-            });
-    }
-
-    private loadShareLinks() {
-        if (!this.document) return;
-
-        this.sharingService.getDocumentShareLinks(this.document.id)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (links) => {
-                    this.shareLinks.set(links);
-                },
-                error: () => {
-                    this.shareLinks.set([]);
-                }
-            });
-    }
+    this.sharingService.getDocumentShareLinks(this.document.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (links) => {
+          this.shareLinks.set(links);
+        },
+        error: () => {
+          this.shareLinks.set([]);
+        }
+      });
+  }
 }

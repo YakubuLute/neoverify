@@ -430,7 +430,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
         this.downloadDocument(document);
         break;
       case 'share':
-        this.shareDocument(document);
+        this.openSharingDialog(document);
         break;
       case 'delete':
         this.deleteDocument(document);
@@ -457,6 +457,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   openStatusHistoryDialog(document: Document): void {
     this.selectedDocumentForStatus.set(document);
     this.showHistoryDialog.set(true);
+  }
+
+  openSharingDialog(document: Document): void {
+    this.selectedDocumentForSharing.set(document);
+    this.showSharingDialog.set(true);
   }
 
   onStatusChanged(event: { document: Document; newStatus: DocumentStatus; reason?: string }): void {
@@ -513,9 +518,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       });
   }
 
-  private shareDocument(document: Document): void {
-    // TODO: Implement document sharing dialog
-    console.log('Share document:', document.id);
+  onDocumentShared(): void {
+    // Refresh the documents list to show updated sharing status
+    this.loadDocuments();
+    this.showSharingDialog.set(false);
+    this.selectedDocumentForSharing.set(null);
   }
 
   private deleteDocument(document: Document): void {
