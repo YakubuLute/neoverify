@@ -1,65 +1,33 @@
-// Dashboard Styles - PrimeNG Inspired with Neon Colors
+// Dashboard Content Styles
 
 :host {
     display: block;
 }
 
-// Smooth transitions for all interactive elements
-* {
-    transition: all 0.2s ease;
+.dashboard-content {
+    // Dashboard-specific styles
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-// Custom scrollbar for activity sections
-.space-y-4::-webkit-scrollbar {
-    width: 4px;
-}
-
-.space-y-4::-webkit-scrollbar-track {
-    background: rgba(55, 65, 81, 0.3);
-    border-radius: 2px;
-}
-
-.space-y-4::-webkit-scrollbar-thumb {
-    background: rgba(6, 182, 212, 0.5);
-    border-radius: 2px;
-}
-
-.space-y-4::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 182, 212, 0.7);
-}
-
-// Enhanced hover effects for cards
+// Smooth transitions for interactive elements
 .group:hover {
     transform: translateY(-2px);
 }
 
 // Neon glow effects
-.shadow-cyan-500\/25 {
-    box-shadow: 0 10px 25px -3px rgba(6, 182, 212, 0.25);
-}
-
 .shadow-cyan-500\/10 {
     box-shadow: 0 10px 25px -3px rgba(6, 182, 212, 0.1);
 }
 
-.shadow-purple-500\/25 {
-    box-shadow: 0 10px 25px -3px rgba(168, 85, 247, 0.25);
+.shadow-cyan-500\/25 {
+    box-shadow: 0 10px 25px -3px rgba(6, 182, 212, 0.25);
 }
 
-.shadow-purple-500\/10 {
-    box-shadow: 0 10px 25px -3px rgba(168, 85, 247, 0.1);
-}
-
-// Backdrop blur support
-.backdrop-blur-sm {
-    backdrop-filter: blur(4px);
-}
-
-// Custom animations
-@keyframes fadeInUp {
+// Animation
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
 
     to {
@@ -68,167 +36,8 @@
     }
 }
 
-.animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-// Pulse animation for status indicators
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-// Focus states for accessibility
-button:focus-visible,
-[role="button"]:focus-visible {
+// Focus states
+button:focus-visible {
     outline: 2px solid #06b6d4;
     outline-offset: 2px;
-}
-
-// Responsive design enhancements
-@media (max-width: 768px) {
-    .grid {
-        gap: 1rem;
-    }
-
-    .p-6 {
-        padding: 1rem;
-    }
-
-    .text-3xl {
-        font-size: 1.875rem;
-    }
-}
-
-// Loading states
-.loading {
-    position: relative;
-    overflow: hidden;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(6, 182, 212, 0.2),
-            transparent);
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% {
-        left: -100%;
-    }
-
-    100% {
-        left: 100%;
-    }
-}
-
-// Custom border gradients for premium feel
-.border-gradient {
-    position: relative;
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1));
-    border: 1px solid transparent;
-}
-
-.border-gradient::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    background: linear-gradient(135deg, #06b6d4, #a855f7);
-    border-radius: inherit;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-}
-
-// Status indicators
-.status-online {
-    color: #06b6d4;
-}
-
-.status-warning {
-    color: #a855f7;
-}
-
-.status-error {
-    color: #ef4444;
-}
-
-// Interactive elements
-.interactive {
-    cursor: pointer;
-    user-select: none;
-}
-
-.interactive:hover {
-    transform: translateY(-1px);
-}
-
-.interactive:active {
-    transform: translateY(0);
-}
-
-// Typography enhancements
-.text-gradient {
-    background: linear-gradient(135deg, #06b6d4, #a855f7);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-// Card hover effects
-.card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -12px rgba(6, 182, 212, 0.15);
-}
-
-// Button enhancements
-.btn-primary {
-    background: linear-gradient(135deg, #06b6d4, #0891b2);
-    border: none;
-    color: #111827;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #0891b2, #06b6d4);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.3);
-}
-
-.btn-secondary {
-    background: linear-gradient(135deg, #a855f7, #9333ea);
-    border: none;
-    color: white;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-    background: linear-gradient(135deg, #9333ea, #a855f7);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.3);
 }
