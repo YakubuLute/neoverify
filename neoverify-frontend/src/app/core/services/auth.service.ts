@@ -4,15 +4,15 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
-import { 
-  User, 
-  Organization, 
-  LoginRequest, 
-  SignUpRequest, 
-  MfaVerificationRequest, 
-  AuthResponse, 
+import {
+  User,
+  Organization,
+  LoginRequest,
+  SignUpRequest,
+  MfaVerificationRequest,
+  AuthResponse,
   UserRole,
-  InviteUserRequest 
+  InviteUserRequest
 } from '../../shared/models/auth.models';
 
 @Injectable({
@@ -62,7 +62,7 @@ export class AuthService {
    */
   signUp(request: SignUpRequest): Observable<{ message: string }> {
     this.setLoading(true);
-    
+
     return this.apiService.post<{ message: string }>('auth/signup', request).pipe(
       map(response => response.data),
       tap(() => {
@@ -81,7 +81,7 @@ export class AuthService {
    */
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this.setLoading(true);
-    
+
     return this.apiService.post<AuthResponse>('auth/login', credentials).pipe(
       map(response => response.data),
       tap(authData => {
@@ -107,7 +107,7 @@ export class AuthService {
    */
   verifyMfa(request: MfaVerificationRequest): Observable<AuthResponse> {
     this.setLoading(true);
-    
+
     return this.apiService.post<AuthResponse>('auth/mfa/verify', request).pipe(
       map(response => response.data),
       tap(authData => {
@@ -138,7 +138,7 @@ export class AuthService {
    */
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem('refreshToken');
-    
+
     if (!refreshToken) {
       return throwError(() => new Error('No refresh token available'));
     }
@@ -209,7 +209,7 @@ export class AuthService {
     localStorage.setItem('refreshToken', authData.refreshToken);
     localStorage.setItem('user', JSON.stringify(authData.user));
     localStorage.setItem('organization', JSON.stringify(authData.organization));
-    
+
     this.currentUserSubject.next(authData.user);
     this.currentOrganizationSubject.next(authData.organization);
     this.currentUser.set(authData.user);
@@ -222,7 +222,7 @@ export class AuthService {
   private setMfaRequired(required: boolean, sessionToken?: string): void {
     this.mfaRequiredSubject.next(required);
     this.mfaRequired.set(required);
-    
+
     if (sessionToken) {
       sessionStorage.setItem('mfaSessionToken', sessionToken);
     } else {
@@ -239,7 +239,7 @@ export class AuthService {
     localStorage.removeItem('user');
     localStorage.removeItem('organization');
     sessionStorage.removeItem('mfaSessionToken');
-    
+
     this.currentUserSubject.next(null);
     this.currentOrganizationSubject.next(null);
     this.currentUser.set(null);
@@ -261,11 +261,11 @@ export class AuthService {
     // In a real app, you'd validate the token with the server
     const storedUser = localStorage.getItem('user');
     const storedOrganization = localStorage.getItem('organization');
-    
+
     if (storedUser && storedOrganization) {
       const user = JSON.parse(storedUser);
       const organization = JSON.parse(storedOrganization);
-      
+
       this.currentUserSubject.next(user);
       this.currentOrganizationSubject.next(organization);
       this.currentUser.set(user);

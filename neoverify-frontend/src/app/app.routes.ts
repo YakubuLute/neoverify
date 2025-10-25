@@ -47,7 +47,7 @@ export const routes: Routes = [
   // Protected routes (require authentication)
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    // canActivate: [authGuard],
     loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)
   },
 

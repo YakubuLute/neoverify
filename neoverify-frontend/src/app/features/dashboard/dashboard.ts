@@ -42,6 +42,7 @@ export class Dashboard implements OnInit {
 
   readonly currentUser = signal<any>(null);
   readonly userRole = signal<UserRole | null>(null);
+  readonly UserRole = UserRole; // Make enum available in template
 
   // Platform Admin Dashboard Data
   readonly platformAdminStats = signal<DashboardCard[]>([
@@ -170,7 +171,7 @@ export class Dashboard implements OnInit {
     // Get current user and role from auth service
     const user = this.authService.getCurrentUser();
     this.currentUser.set(user);
-    this.userRole.set(user?.role || UserRole.VIEWER);
+    this.userRole.set(user?.role || UserRole.VERIFIER);
   }
 
   navigateTo(route: string): void {

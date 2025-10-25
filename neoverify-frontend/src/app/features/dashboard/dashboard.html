@@ -124,7 +124,7 @@
         </div>
 
         <!-- Additional Role-Specific Sections -->
-        @if (userRole() === 'PLATFORM_ADMIN') {
+        @if (userRole() === UserRole.PLATFORM_ADMIN) {
         <!-- Platform Admin Specific Content -->
         <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- System Health -->
@@ -179,7 +179,7 @@
         </div>
         }
 
-        @if (userRole() === 'ORG_ADMIN') {
+        @if (userRole() === UserRole.ORG_ADMIN) {
         <!-- Organization Admin Specific Content -->
         <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Team Performance -->
