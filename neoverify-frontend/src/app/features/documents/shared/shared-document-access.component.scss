@@ -1,0 +1,377 @@
+.shared-document-access {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--surface-50) 100%);
+    padding: 2rem 1rem;
+
+    .access-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    // Common card styles
+    .loading-card,
+    .password-card,
+    .document-card,
+    .error-card,
+    .share-info {
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            justify-content: center;
+
+            .header-icon {
+                font-size: 2.5rem;
+                color: var(--primary-500);
+            }
+
+            &.error-header .header-icon {
+                color: var(--red-500);
+            }
+
+            h2 {
+                margin: 0;
+                color: var(--text-color);
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+        }
+    }
+
+    // Loading card
+    .loading-card {
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            text-align: center;
+
+            h3 {
+                margin: 0;
+                color: var(--text-color);
+                font-size: 1.25rem;
+            }
+
+            p {
+                margin: 0;
+                color: var(--text-color-secondary);
+            }
+        }
+    }
+
+    // Password card
+    .password-card {
+        .password-content {
+            padding: 1.5rem;
+
+            .password-message {
+                text-align: center;
+                color: var(--text-color-secondary);
+                margin-bottom: 2rem;
+            }
+
+            .password-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+
+                .password-field {
+                    label {
+                        display: block;
+                        margin-bottom: 0.5rem;
+                        font-weight: 600;
+                        color: var(--text-color);
+                    }
+                }
+
+                .password-actions {
+                    display: flex;
+                    justify-content: center;
+                }
+            }
+
+            .error-message {
+                margin-top: 1rem;
+            }
+        }
+    }
+
+    // Document card
+    .document-card {
+        .document-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+
+            .document-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 4rem;
+                height: 4rem;
+                background: var(--primary-100);
+                border-radius: 12px;
+                color: var(--primary-600);
+
+                .pi {
+                    font-size: 2rem;
+                }
+            }
+
+            .document-info {
+                flex: 1;
+
+                h2 {
+                    margin: 0 0 0.5rem 0;
+                    color: var(--text-color);
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                }
+
+                .document-filename {
+                    margin: 0 0 0.75rem 0;
+                    color: var(--text-color-secondary);
+                    font-size: 0.95rem;
+                }
+
+                .document-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+
+                    .file-size {
+                        color: var(--text-color-secondary);
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+        }
+
+        .document-content {
+            padding: 0 1.5rem 1.5rem;
+
+            .document-description {
+                margin-bottom: 1.5rem;
+
+                h4 {
+                    margin: 0 0 0.5rem 0;
+                    color: var(--text-color);
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                }
+
+                p {
+                    margin: 0;
+                    color: var(--text-color-secondary);
+                    line-height: 1.5;
+                }
+            }
+
+            .document-details {
+                margin-bottom: 1.5rem;
+
+                .detail-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0.5rem 0;
+                    border-bottom: 1px solid var(--surface-200);
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    .detail-label {
+                        font-weight: 600;
+                        color: var(--text-color);
+                    }
+
+                    .detail-value {
+                        color: var(--text-color-secondary);
+                    }
+                }
+            }
+
+            .share-permissions {
+                h4 {
+                    margin: 0 0 1rem 0;
+                    color: var(--text-color);
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                }
+
+                .permissions-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+
+                    .permission-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        padding: 0.75rem;
+                        background: var(--surface-100);
+                        border-radius: 8px;
+                        border: 1px solid var(--surface-200);
+
+                        .permission-icon {
+                            color: var(--primary-500);
+                            font-size: 1.1rem;
+                        }
+
+                        span {
+                            color: var(--text-color);
+                            font-weight: 500;
+                        }
+                    }
+                }
+            }
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            justify-content: center;
+        }
+    }
+
+    // Error card
+    .error-card {
+        .error-content {
+            padding: 1.5rem;
+            text-align: center;
+
+            .error-actions {
+                margin-top: 1.5rem;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    }
+
+    // Share info
+    .share-info {
+        .share-details {
+            padding: 1.5rem;
+
+            h4 {
+                margin: 0 0 1rem 0;
+                color: var(--text-color);
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .share-message {
+                margin: 0 0 1rem 0;
+                color: var(--text-color-secondary);
+                line-height: 1.5;
+            }
+
+            .share-warning {
+                margin-top: 1rem;
+            }
+        }
+    }
+}
+
+// Dark mode adjustments
+:host-context(.dark) {
+    .shared-document-access {
+        background: linear-gradient(135deg, var(--surface-900) 0%, var(--surface-800) 100%);
+
+        .document-card {
+            .document-header {
+                .document-icon {
+                    background: var(--primary-900);
+                    color: var(--primary-300);
+                }
+            }
+
+            .document-content {
+                .document-details {
+                    .detail-row {
+                        border-bottom-color: var(--surface-700);
+                    }
+                }
+
+                .share-permissions {
+                    .permissions-list {
+                        .permission-item {
+                            background: var(--surface-800);
+                            border-color: var(--surface-700);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .shared-document-access {
+        padding: 1rem 0.5rem;
+
+        .access-container {
+            gap: 1rem;
+        }
+
+        .document-card {
+            .document-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+
+                .document-info {
+                    .document-meta {
+                        justify-content: center;
+                    }
+                }
+            }
+
+            .document-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        .password-card {
+            .password-content {
+                padding: 1rem;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .shared-document-access {
+        .document-card {
+            .document-content {
+                .document-details {
+                    .detail-row {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.25rem;
+                    }
+                }
+
+                .share-permissions {
+                    .permissions-list {
+                        .permission-item {
+                            padding: 0.5rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

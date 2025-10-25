@@ -13,6 +13,7 @@ export * from './components/status-history/status-history.component';
 export * from './components/status-management-dialog/status-management-dialog.component';
 export * from './components/verification-status-display/verification-status-display.component';
 export * from './components/permission-denied/permission-denied.component';
+export * from './components/document-sharing-dialog/document-sharing-dialog.component';
 export * from './directives/has-permission.directive';
 
 // Import array for standalone components
@@ -84,6 +85,7 @@ import { StatusHistoryComponent } from './components/status-history/status-histo
 import { StatusManagementDialogComponent } from './components/status-management-dialog/status-management-dialog.component';
 import { VerificationStatusDisplayComponent } from './components/verification-status-display/verification-status-display.component';
 import { PermissionDeniedComponent } from './components/permission-denied/permission-denied.component';
+import { DocumentSharingDialogComponent } from './components/document-sharing-dialog/document-sharing-dialog.component';
 import { HasPermissionDirective } from './directives/has-permission.directive';
 
 export const SHARED_IMPORTS = [
@@ -157,5 +159,6 @@ export const SHARED_IMPORTS = [
   StatusManagementDialogComponent,
   VerificationStatusDisplayComponent,
   PermissionDeniedComponent,
+  DocumentSharingDialogComponent,
   HasPermissionDirective
 ];

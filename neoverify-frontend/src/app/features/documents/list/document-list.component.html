@@ -10,10 +10,11 @@
             </div>
 
             <div class="header-actions">
-                @if (canUpload()) {
-                <p-button label="Upload Document" icon="pi pi-upload" (onClick)="onUploadClick()" class="upload-btn">
-                </p-button>
-                }
+                <div *hasPermission="{ action: 'created', resource: 'document' }">
+                    <p-button label="Upload Document" icon="pi pi-upload" (onClick)="onUploadClick()"
+                        class="upload-btn">
+                    </p-button>
+                </div>
 
                 <p-button icon="pi pi-refresh" [text]="true" (onClick)="refreshDocuments()"
                     pTooltip="Refresh documents">
@@ -40,18 +41,19 @@
 </div>
 
 <!-- Bulk Actions Bar -->
-@if (hasSelection() && canBulkEdit()) {
-<div class="bulk-actions-bar">
+@if (hasSelection()) {
+<div class="bulk-actions-bar" *hasPermission="'documents:edit:org'">
     <div class="selection-info">
         <span>{{ selectedDocuments().length }} document(s) selected</span>
     </div>
 
     <div class="bulk-actions">
         <p-button label="Delete" icon="pi pi-trash" severity="danger" [text]="true"
-            (onClick)="onBulkAction(BulkActionType.DELETE)">
+            (onClick)="onBulkAction(BulkActionType.DELETE)" [disabled]="!canPerformBulkOperation('delete')">
         </p-button>
 
-        <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction(BulkActionType.ADD_TAGS)">
+        <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction(BulkActionType.ADD_TAGS)"
+            [disabled]="!canPerformBulkOperation('add_tags')">
         </p-button>
 
         <p-button label="Export" icon="pi pi-download" [text]="true"
@@ -96,10 +98,10 @@
         </p-button>
         } @else {
         <p>You haven't uploaded any documents yet.</p>
-        @if (canUpload()) {
-        <p-button label="Upload Your First Document" icon="pi pi-upload" (onClick)="onUploadClick()">
-        </p-button>
-        }
+        <div *hasPermission="{ action: 'created', resource: 'document' }">
+            <p-button label="Upload Your First Document" icon="pi pi-upload" (onClick)="onUploadClick()">
+            </p-button>
+        </div>
         }
     </div>
 </div>
@@ -111,7 +113,7 @@
 
     <!-- List Header with Selection and Sorting -->
     <div class="list-header">
-        <div class="selection-controls">
+        <div class="selection-controls" *hasPermission="'documents:edit:org'">
             <p-checkbox [binary]="true" [ngModel]="isAllSelected()" [indeterminate]="hasSelection() && !isAllSelected()"
                 (onChange)="onSelectAll()" label="Select all">
             </p-checkbox>
@@ -138,10 +140,12 @@
     @if (viewMode() === 'grid') {
     <div class="documents-grid">
         @for (document of filteredDocuments(); track document.id) {
-        <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
-            [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
-            (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
-        </app-document-card>
+        <div *hasPermission="{ action: 'viewed', resource: 'document' }; hasPermissionDocument: document">
+            <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
+                [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
+                (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
+            </app-document-card>
+        </div>
         }
     </div>
     }
@@ -153,13 +157,11 @@
 
             <ng-template pTemplate="header">
                 <tr>
-                    @if (canBulkEdit()) {
-                    <th style="width: 3rem">
+                    <th style="width: 3rem" *hasPermission="'documents:edit:org'">
                         <p-checkbox [binary]="true" [ngModel]="isAllSelected()"
                             [indeterminate]="hasSelection() && !isAllSelected()" (onChange)="onSelectAll()">
                         </p-checkbox>
                     </th>
-                    }
                     <th>Document</th>
                     <th>Type</th>
                     <th>Status</th>
@@ -172,13 +174,11 @@
 
             <ng-template pTemplate="body" let-document>
                 <tr>
-                    @if (canBulkEdit()) {
-                    <td>
+                    <td *hasPermission="'documents:edit:org'">
                         <p-checkbox [binary]="true" [ngModel]="selectedDocuments().includes(document.id)"
                             (onChange)="onDocumentSelect(document.id, $event.checked)">
                         </p-checkbox>
                     </td>
-                    }
                     <td>
                         <div class="document-info">
                             <div class="document-thumbnail">
@@ -213,11 +213,14 @@
                     <td>
                         <div class="action-buttons">
                             <p-button icon="pi pi-eye" [text]="true" size="small" (onClick)="onDocumentClick(document)"
-                                pTooltip="View details">
+                                pTooltip="View details"
+                                *hasPermission="{ action: 'viewed', resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
-                            <p-button icon="pi pi-download" [text]="true" size="small" pTooltip="Download">
+                            <p-button icon="pi pi-download" [text]="true" size="small" pTooltip="Download"
+                                *hasPermission="{ action: 'downloaded', resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
-                            <p-button icon="pi pi-share-alt" [text]="true" size="small" pTooltip="Share">
+                            <p-button icon="pi pi-share-alt" [text]="true" size="small" pTooltip="Share"
+                                *hasPermission="{ action: 'shared', resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
                         </div>
                     </td>

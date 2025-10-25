@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent, HasPermissionDirective } from '../../../shared';
+import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent, HasPermissionDirective, DocumentSharingDialogComponent } from '../../../shared';
 import { DocumentService } from '../../../core/services/document.service';
 import { DocumentStatusService } from '../../../core/services/document-status.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -17,7 +17,8 @@ import {
   VerificationStatus,
   BulkAction,
   BulkActionType,
-  ExportFormat
+  ExportFormat,
+  AuditAction
 } from '../../../shared/models/document.models';
 import { UserRole } from '../../../shared/models/auth.models';
 
@@ -31,7 +32,8 @@ import { UserRole } from '../../../shared/models/auth.models';
     BulkOperationsComponent,
     StatusManagementDialogComponent,
     StatusHistoryComponent,
-    HasPermissionDirective
+    HasPermissionDirective,
+    DocumentSharingDialogComponent
   ],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss'
@@ -67,6 +69,10 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly showStatusDialog = signal(false);
   readonly showHistoryDialog = signal(false);
   readonly selectedDocumentForStatus = signal<Document | null>(null);
+
+  // Sharing dialog signals
+  readonly showSharingDialog = signal(false);
+  readonly selectedDocumentForSharing = signal<Document | null>(null);
 
   // User permissions
   readonly currentUser = computed(() => this.authService.getCurrentUser());
@@ -367,6 +373,49 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   getFilterCount(): number {
     const currentFilters = this.filters();
     return Object.keys(currentFilters).length;
+  }
+
+  // Permission checking methods
+  canViewDocument(document: Document): boolean {
+    return this.permissionsService.canPerformDocumentOperation(
+      { action: AuditAction.VIEWED, resource: 'document' },
+      document
+    ).allowed;
+  }
+
+  canEditDocument(document: Document): boolean {
+    return this.permissionsService.canPerformDocumentOperation(
+      { action: AuditAction.UPDATED, resource: 'document' },
+      document
+    ).allowed;
+  }
+
+  canDeleteDocument(document: Document): boolean {
+    return this.permissionsService.canPerformDocumentOperation(
+      { action: AuditAction.DELETED, resource: 'document' },
+      document
+    ).allowed;
+  }
+
+  canShareDocument(document: Document): boolean {
+    return this.permissionsService.canPerformDocumentOperation(
+      { action: AuditAction.SHARED, resource: 'document' },
+      document
+    ).allowed;
+  }
+
+  canDownloadDocument(document: Document): boolean {
+    return this.permissionsService.canPerformDocumentOperation(
+      { action: AuditAction.DOWNLOADED, resource: 'document' },
+      document
+    ).allowed;
+  }
+
+  canPerformBulkOperation(operation: string): boolean {
+    const selectedDocs = this.documents().filter(doc =>
+      this.selectedDocuments().includes(doc.id)
+    );
+    return this.permissionsService.canPerformBulkOperation(operation, selectedDocs).allowed;
   }
 
   // Status management methods

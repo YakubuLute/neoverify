@@ -49,6 +49,10 @@ export const routes: Routes = [
     path: 'documents/verify',
     loadComponent: () => import('./features/documents/verify/document-verify.component').then(m => m.DocumentVerifyComponent)
   },
+  {
+    path: 'documents/shared/:token',
+    loadComponent: () => import('./features/documents/shared/shared-document-access.component').then(m => m.SharedDocumentAccessComponent)
+  },
 
   // Protected routes with dashboard layout
   {

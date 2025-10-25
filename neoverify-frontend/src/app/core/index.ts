@@ -8,6 +8,7 @@ export * from './services/template.service';
 export * from './services/upload.service';
 export * from './services/audit.service';
 export * from './services/permissions.service';
+export * from './services/document-sharing.service';
 
 // Guards
 export * from './guards/auth.guard';
