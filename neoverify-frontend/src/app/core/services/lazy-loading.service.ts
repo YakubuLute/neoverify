@@ -266,6 +266,42 @@ export class LazyLoadingService {
         return this.cacheService.getStats();
     }
 
+    /**
+     * Get lazy loading statistics
+     */
+    getLoadStats(): Observable<LazyLoadStats> {
+        return this.loadStats.asObservable();
+    }
+
+    /**
+     * Get performance metrics
+     */
+    getPerformanceMetrics(): any {
+        return {
+            averageLoadTime: this.calculateAverageLoadTime(),
+            loadTimePercentiles: this.calculateLoadTimePercentiles(),
+            cacheEfficiency: this.calculateCacheEfficiency(),
+            queueEfficiency: this.calculateQueueEfficiency(),
+            concurrentLoads: this.concurrentLoads,
+            maxConcurrentLoads: this.defaultConfig.maxConcurrentLoads
+        };
+    }
+
+    /**
+     * Optimize cache based on usage patterns
+     */
+    optimizeCache(): void {
+        // Warm up frequently accessed items
+        const frequentItems = this.getFrequentlyAccessedItems();
+        this.cacheService.warmUp(frequentItems);
+
+        // Clear expired entries
+        this.cacheService.clearExpired();
+
+        // Prefetch related items
+        this.prefetchRelatedItems();
+    }
+
     private initializeIntersectionObserver(config?: LazyLoadConfig): void {
         if (typeof IntersectionObserver === 'undefined') {
             console.warn('IntersectionObserver not supported, lazy loading disabled');
@@ -328,7 +364,20 @@ export class LazyLoadingService {
             return;
         }
 
+        // Check concurrent load limit
+        if (this.concurrentLoads >= (this.defaultConfig.maxConcurrentLoads || 6)) {
+            // Re-queue the item for later processing
+            setTimeout(() => {
+                const currentQueue = this.loadQueue.value;
+                if (!currentQueue.some(existing => existing.id === item.id && existing.type === item.type)) {
+                    this.loadQueue.next([...currentQueue, item]);
+                }
+            }, 100);
+            return;
+        }
+
         this.loadingItems.add(key);
+        this.concurrentLoads++;
 
         let loadObservable: Observable<any>;
 
@@ -342,18 +391,111 @@ export class LazyLoadingService {
             default:
                 console.warn(`Unknown lazy load type: ${item.type}`);
                 this.loadingItems.delete(key);
+                this.concurrentLoads--;
                 return;
         }
 
         loadObservable.subscribe({
             next: () => {
                 this.loadingItems.delete(key);
+                this.concurrentLoads--;
             },
             error: (error) => {
                 console.error(`Failed to load ${item.type} for ${item.id}:`, error);
                 this.loadingItems.delete(key);
+                this.concurrentLoads--;
+
+                // Retry logic
+                const retryCount = (item.retryCount || 0) + 1;
+                if (retryCount <= (this.defaultConfig.retryAttempts || 3)) {
+                    setTimeout(() => {
+                        const retryItem = { ...item, retryCount };
+                        const currentQueue = this.loadQueue.value;
+                        this.loadQueue.next([...currentQueue, retryItem]);
+                    }, (this.defaultConfig.retryDelay || 1000) * retryCount);
+                }
             }
         });
+    }
+
+    // Helper methods for performance tracking
+    private updateStats(type: 'request' | 'success' | 'failure' | 'cacheHit'): void {
+        const current = this.loadStats.value;
+        const updates: Partial<LazyLoadStats> = {};
+
+        switch (type) {
+            case 'request':
+                updates.totalRequests = current.totalRequests + 1;
+                break;
+            case 'success':
+                updates.successfulLoads = current.successfulLoads + 1;
+                break;
+            case 'failure':
+                updates.failedLoads = current.failedLoads + 1;
+                break;
+            case 'cacheHit':
+                updates.cacheHits = current.cacheHits + 1;
+                break;
+        }
+
+        // Update average load time
+        if (this.loadTimes.length > 0) {
+            updates.averageLoadTime = this.calculateAverageLoadTime();
+        }
+
+        this.loadStats.next({ ...current, ...updates });
+    }
+
+    private updateQueueSize(size: number): void {
+        const current = this.loadStats.value;
+        this.loadStats.next({ ...current, queueSize: size });
+    }
+
+    private trackLoadTime(time: number): void {
+        this.loadTimes.push(time);
+        if (this.loadTimes.length > this.maxLoadTimeHistory) {
+            this.loadTimes.shift();
+        }
+    }
+
+    private calculateAverageLoadTime(): number {
+        if (this.loadTimes.length === 0) return 0;
+        return this.loadTimes.reduce((sum, time) => sum + time, 0) / this.loadTimes.length;
+    }
+
+    private calculateLoadTimePercentiles(): { p50: number; p90: number; p95: number } {
+        if (this.loadTimes.length === 0) return { p50: 0, p90: 0, p95: 0 };
+
+        const sorted = [...this.loadTimes].sort((a, b) => a - b);
+        const len = sorted.length;
+
+        return {
+            p50: sorted[Math.floor(len * 0.5)],
+            p90: sorted[Math.floor(len * 0.9)],
+            p95: sorted[Math.floor(len * 0.95)]
+        };
+    }
+
+    private calculateCacheEfficiency(): number {
+        const stats = this.loadStats.value;
+        const totalRequests = stats.totalRequests + stats.cacheHits;
+        return totalRequests > 0 ? (stats.cacheHits / totalRequests) * 100 : 0;
+    }
+
+    private calculateQueueEfficiency(): number {
+        const stats = this.loadStats.value;
+        return stats.totalRequests > 0 ? (stats.successfulLoads / stats.totalRequests) * 100 : 0;
+    }
+
+    private getFrequentlyAccessedItems(): Array<{ key: string; factory: () => Observable<any>; config?: any }> {
+        // This would typically be based on actual usage analytics
+        // For now, return empty array as placeholder
+        return [];
+    }
+
+    private prefetchRelatedItems(): void {
+        // Implement predictive prefetching based on user behavior patterns
+        // This is a placeholder for future enhancement
     }
 
     /**

@@ -220,17 +220,65 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
   private setupPerformanceOptimizations(): void {
     // Enable virtual scrolling for large datasets
-    if (this.totalCount() > 50) {
+    if (this.totalCount() > 20) { // Lower threshold for better performance
       this.enableVirtualScroll.set(true);
     }
 
     // Preload thumbnails for visible items
     this.preloadVisibleThumbnails();
 
-    // Setup cache cleanup interval
+    // Setup cache optimization interval
     setInterval(() => {
       this.cacheService.clearExpired();
-    }, 5 * 60 * 1000); // Every 5 minutes
+      this.lazyLoadingService.optimizeCache();
+      this.searchService.optimizeSearchPerformance();
+    }, 3 * 60 * 1000); // Every 3 minutes
+
+    // Setup performance monitoring
+    this.setupPerformanceMonitoring();
+
+    // Warm up cache with frequently accessed items
+    this.warmUpCache();
+  }
+
+  private setupPerformanceMonitoring(): void {
+    // Monitor cache performance
+    this.cacheService.getStats().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(stats => {
+      if (stats.hitRate < 50) { // Less than 50% hit rate
+        console.warn('Low cache hit rate detected:', stats.hitRate);
+        // Could trigger cache optimization here
+      }
+    });
+
+    // Monitor search performance
+    this.searchService.getPerformanceMetrics().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(metrics => {
+      if (metrics.averageSearchTime > 1000) { // More than 1 second
+        console.warn('Slow search performance detected:', metrics.averageSearchTime);
+      }
+    });
+  }
+
+  private warmUpCache(): void {
+    // Preload common document types and statuses
+    const commonFilters = [
+      { documentType: [DocumentType.DEGREE] },
+      { documentType: [DocumentType.CERTIFICATE] },
+      { status: [DocumentStatus.ACTIVE] },
+      { verificationStatus: [VerificationStatus.VERIFIED] }
+    ];
+
+    commonFilters.forEach(filter => {
+      const cacheKey = `documents:1:${this.pageSize()}:${JSON.stringify(filter)}`;
+      // Warm up cache in background
+      setTimeout(() => {
+        this.filters.set(filter);
+        this.loadDocuments();
+      }, Math.random() * 5000); // Stagger requests
+    });
   }
 
   private preloadVisibleThumbnails(): void {
@@ -318,9 +366,20 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.searchQuery.set(query);
     this.currentPage.set(1);
 
-    // Use optimized search service
+    // Use optimized search service with predictive caching
     this.searchService.setSearchQuery(query);
     this.searchService.setSearchFilters(this.filters());
+
+    // Prefetch related search results
+    if (query.length >= 3) {
+      const predictiveSuggestions = this.searchService.getPredictiveSearchSuggestions(query);
+      predictiveSuggestions.slice(0, 2).forEach(suggestion => {
+        // Prefetch in background
+        setTimeout(() => {
+          this.searchService.instantSearch(suggestion, this.filters()).subscribe();
+        }, 500);
+      });
+    }
   }
 
   onFilterChange(newFilters: DocumentFilters): void {
@@ -438,6 +497,21 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   onVirtualScrollViewportChange(viewport: VirtualScrollViewport): void {
     this.virtualViewport.set(viewport);
     this.preloadVisibleThumbnails();
+
+    // Predictive preloading based on scroll direction
+    const currentIndex = Math.floor(viewport.startIndex + viewport.visibleItems.length / 2);
+    this.lazyLoadingService.preloadViewport(
+      viewport.visibleItems,
+      this.filteredDocuments(),
+      currentIndex
+    );
+  }
+
+  onVirtualScrollPerformanceMetrics(metrics: any): void {
+    // Monitor virtual scroll performance
+    if (metrics.renderTime > 16) { // More than one frame (60fps)
+      console.warn('Virtual scroll render time exceeded 16ms:', metrics.renderTime);
+    }
   }
 
   onVirtualScrollEnd(): void {

@@ -17,6 +17,9 @@ export interface VirtualScrollConfig {
     itemHeight: number;
     bufferSize?: number;
     threshold?: number;
+    enableSmoothScrolling?: boolean;
+    dynamicHeight?: boolean;
+    overscan?: number; // Additional items to render outside viewport
 }
 
 export interface VirtualScrollViewport {
@@ -25,6 +28,16 @@ export interface VirtualScrollViewport {
     visibleItems: any[];
     totalHeight: number;
     offsetY: number;
+    scrollTop: number;
+    containerHeight: number;
+}
+
+export interface VirtualScrollPerformanceMetrics {
+    renderTime: number;
+    scrollEvents: number;
+    visibleItemCount: number;
+    totalItemCount: number;
+    memoryUsage: number;
 }
 
 @Directive({
@@ -37,19 +50,34 @@ export class VirtualScrollDirective implements OnInit, OnDestroy {
     private readonly destroy$ = new Subject<void>();
 
     @Input() items: any[] = [];
-    @Input() config: VirtualScrollConfig = { itemHeight: 100, bufferSize: 5, threshold: 50 };
+    @Input() config: VirtualScrollConfig = {
+        itemHeight: 100,
+        bufferSize: 5,
+        threshold: 50,
+        enableSmoothScrolling: true,
+        dynamicHeight: false,
+        overscan: 3
+    };
 
     @Output() viewportChange = new EventEmitter<VirtualScrollViewport>();
     @Output() scrollEnd = new EventEmitter<void>();
+    @Output() performanceMetrics = new EventEmitter<VirtualScrollPerformanceMetrics>();
 
     private containerHeight = signal(0);
     private scrollTop = signal(0);
+    private itemHeights = new Map<number, number>(); // For dynamic height support
+    private lastRenderTime = 0;
+    private scrollEventCount = 0;
+    private isScrolling = false;
+    private scrollTimeout?: number;
 
     readonly viewport = computed(() => {
+        const startTime = performance.now();
         const containerH = this.containerHeight();
         const scrollT = this.scrollTop();
         const itemHeight = this.config.itemHeight;
         const bufferSize = this.config.bufferSize || 5;
+        const overscan = this.config.overscan || 3;
 
         if (!containerH || !this.items.length) {
             return {
@@ -57,27 +85,71 @@ export class VirtualScrollDirective implements OnInit, OnDestroy {
                 endIndex: 0,
                 visibleItems: [],
                 totalHeight: 0,
-                offsetY: 0
+                offsetY: 0,
+                scrollTop: scrollT,
+                containerHeight: containerH
             };
         }
 
-        const visibleCount = Math.ceil(containerH / itemHeight);
-        const startIndex = Math.max(0, Math.floor(scrollT / itemHeight) - bufferSize);
-        const endIndex = Math.min(
-            this.items.length - 1,
-            startIndex + visibleCount + (bufferSize * 2)
-        );
+        let totalHeight = 0;
+        let offsetY = 0;
+        let startIndex = 0;
+        let endIndex = 0;
+
+        if (this.config.dynamicHeight && this.itemHeights.size > 0) {
+            // Calculate with dynamic heights
+            let currentHeight = 0;
+            let foundStart = false;
+
+            for (let i = 0; i < this.items.length; i++) {
+                const height = this.itemHeights.get(i) || itemHeight;
+
+                if (!foundStart && currentHeight + height > scrollT) {
+                    startIndex = Math.max(0, i - bufferSize - overscan);
+                    foundStart = true;
+                }
+
+                if (foundStart && currentHeight > scrollT + containerH) {
+                    endIndex = Math.min(this.items.length - 1, i + bufferSize + overscan);
+                    break;
+                }
+
+                currentHeight += height;
+            }
+
+            // Calculate offset for dynamic heights
+            for (let i = 0; i < startIndex; i++) {
+                offsetY += this.itemHeights.get(i) || itemHeight;
+            }
+
+            totalHeight = currentHeight;
+        } else {
+            // Fixed height calculation (optimized)
+            const visibleCount = Math.ceil(containerH / itemHeight);
+            startIndex = Math.max(0, Math.floor(scrollT / itemHeight) - bufferSize - overscan);
+            endIndex = Math.min(
+                this.items.length - 1,
+                startIndex + visibleCount + (bufferSize * 2) + (overscan * 2)
+            );
+
+            totalHeight = this.items.length * itemHeight;
+            offsetY = startIndex * itemHeight;
+        }
 
         const visibleItems = this.items.slice(startIndex, endIndex + 1);
-        const totalHeight = this.items.length * itemHeight;
-        const offsetY = startIndex * itemHeight;
+
+        // Track performance
+        this.lastRenderTime = performance.now() - startTime;
+        this.emitPerformanceMetrics();
 
         return {
             startIndex,
             endIndex,
             visibleItems,
             totalHeight,
-            offsetY
+            offsetY,
+            scrollTop: scrollT,
+            containerHeight: containerH
         };
     });
 
@@ -97,14 +169,40 @@ export class VirtualScrollDirective implements OnInit, OnDestroy {
 
         fromEvent(element, 'scroll')
             .pipe(
-                throttleTime(16), // ~60fps
+                throttleTime(8), // ~120fps for smoother scrolling
                 takeUntil(this.destroy$)
             )
             .subscribe(() => {
+                this.scrollEventCount++;
+                this.isScrolling = true;
+
+                // Clear existing timeout
+                if (this.scrollTimeout) {
+                    clearTimeout(this.scrollTimeout);
+                }
+
+                // Set scroll end timeout
+                this.scrollTimeout = window.setTimeout(() => {
+                    this.isScrolling = false;
+                    this.optimizeAfterScroll();
+                }, 150);
+
                 this.scrollTop.set(element.scrollTop);
                 this.checkScrollEnd();
                 this.emitViewportChange();
             });
+
+        // Add passive scroll listener for better performance
+        element.addEventListener('scroll', this.onPassiveScroll.bind(this), { passive: true });
+    }
+
+    private onPassiveScroll(): void {
+        // Lightweight scroll handler for immediate feedback
+        if (this.config.enableSmoothScrolling) {
+            requestAnimationFrame(() => {
+                this.cdr.detectChanges();
+            });
+        }
     }
 
     private setupResizeObserver(): void {
@@ -180,5 +278,62 @@ export class VirtualScrollDirective implements OnInit, OnDestroy {
      */
     setScrollPosition(position: number): void {
         this.elementRef.nativeElement.scrollTop = position;
+    }
+
+    /**
+     * Update item height for dynamic sizing
+     */
+    updateItemHeight(index: number, height: number): void {
+        if (this.config.dynamicHeight) {
+            this.itemHeights.set(index, height);
+            // Trigger viewport recalculation
+            this.emitViewportChange();
+        }
+    }
+
+    /**
+     * Get performance metrics
+     */
+    getPerformanceMetrics(): VirtualScrollPerformanceMetrics {
+        const viewport = this.viewport();
+        return {
+            renderTime: this.lastRenderTime,
+            scrollEvents: this.scrollEventCount,
+            visibleItemCount: viewport.visibleItems.length,
+            totalItemCount: this.items.length,
+            memoryUsage: this.estimateMemoryUsage()
+        };
+    }
+
+    /**
+     * Optimize performance after scrolling stops
+     */
+    private optimizeAfterScroll(): void {
+        // Clean up unused item heights
+        if (this.config.dynamicHeight && this.itemHeights.size > this.items.length * 1.5) {
+            const validIndices = new Set(Array.from({ length: this.items.length }, (_, i) => i));
+            for (const [index] of this.itemHeights) {
+                if (!validIndices.has(index)) {
+                    this.itemHeights.delete(index);
+                }
+            }
+        }
+
+        // Reset scroll event counter periodically
+        if (this.scrollEventCount > 1000) {
+            this.scrollEventCount = 0;
+        }
+    }
+
+    private emitPerformanceMetrics(): void {
+        if (this.scrollEventCount % 10 === 0) { // Emit every 10th scroll event
+            this.performanceMetrics.emit(this.getPerformanceMetrics());
+        }
+    }
+
+    private estimateMemoryUsage(): number {
+        const viewport = this.viewport();
+        const itemSize = 1000; // Estimated bytes per item
+        return viewport.visibleItems.length * itemSize;
     }
 }

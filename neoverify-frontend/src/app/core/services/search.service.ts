@@ -36,6 +36,18 @@ export interface SearchConfig {
     enableFacets: boolean;
     cacheResults: boolean;
     cacheTtl: number;
+    maxCacheSize: number;
+    enablePredictiveSearch: boolean;
+    searchTimeout: number;
+}
+
+export interface SearchPerformanceMetrics {
+    averageSearchTime: number;
+    cacheHitRate: number;
+    totalSearches: number;
+    failedSearches: number;
+    popularQueries: Array<{ query: string; count: number }>;
+    searchTimePercentiles: { p50: number; p90: number; p95: number };
 }
 
 @Injectable({
@@ -48,21 +60,35 @@ export class SearchService {
     private readonly searchQuery$ = new BehaviorSubject<string>('');
     private readonly searchFilters$ = new BehaviorSubject<DocumentFilters>({});
     private readonly searchConfig$ = new BehaviorSubject<SearchConfig>({
-        debounceTime: 300,
+        debounceTime: 250, // Slightly reduced for better responsiveness
         minQueryLength: 2,
-        maxSuggestions: 5,
+        maxSuggestions: 8, // Increased for better UX
         enableFacets: true,
         cacheResults: true,
-        cacheTtl: 5 * 60 * 1000 // 5 minutes
+        cacheTtl: 10 * 60 * 1000, // 10 minutes
+        maxCacheSize: 100,
+        enablePredictiveSearch: true,
+        searchTimeout: 5000 // 5 seconds
     });
 
     private searchHistory: string[] = [];
-    private readonly maxHistorySize = 20;
+    private readonly maxHistorySize = 50; // Increased for better suggestions
+    private searchTimes: number[] = [];
+    private readonly maxSearchTimeHistory = 100;
+    private queryFrequency = new Map<string, number>();
+    private searchPerformanceMetrics = new BehaviorSubject<SearchPerformanceMetrics>({
+        averageSearchTime: 0,
+        cacheHitRate: 0,
+        totalSearches: 0,
+        failedSearches: 0,
+        popularQueries: [],
+        searchTimePercentiles: { p50: 0, p90: 0, p95: 0 }
+    });
 
-    // Search results observable
+    // Search results observable with enhanced performance
     readonly searchResults$: Observable<SearchResult> = combineLatest([
         this.searchQuery$.pipe(
-            debounceTime(300),
+            debounceTime(250),
             distinctUntilChanged(),
             map(query => query.trim())
         ),
@@ -78,6 +104,14 @@ export class SearchService {
                     suggestions: this.getSearchSuggestions(query),
                     facets: undefined
                 });
+            }
+
+            // Check cache first for better performance
+            const cacheKey = this.generateCacheKey(query, filters);
+            const cached = this.cacheService.getSync<SearchResult>(cacheKey);
+            if (cached && config.cacheResults) {
+                this.updatePerformanceMetrics('cacheHit', 0);
+                return of(cached);
             }
 
             return this.performSearch(query, filters, config);
@@ -238,64 +272,123 @@ export class SearchService {
      * Get search analytics
      */
     getSearchAnalytics(): Observable<any> {
-        return this.cacheService.getStats().pipe(
-            map(cacheStats => ({
+        return combineLatest([
+            this.cacheService.getStats(),
+            this.searchPerformanceMetrics.asObservable()
+        ]).pipe(
+            map(([cacheStats, performanceMetrics]) => ({
                 cacheStats,
+                performanceMetrics,
                 historySize: this.searchHistory.length,
                 currentQuery: this.getCurrentQuery(),
-                hasActiveFilters: Object.keys(this.getCurrentFilters()).length > 0
+                hasActiveFilters: Object.keys(this.getCurrentFilters()).length > 0,
+                queryFrequency: Array.from(this.queryFrequency.entries())
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 10)
             }))
         );
     }
 
+    /**
+     * Get search performance metrics
+     */
+    getPerformanceMetrics(): Observable<SearchPerformanceMetrics> {
+        return this.searchPerformanceMetrics.asObservable();
+    }
+
+    /**
+     * Optimize search performance
+     */
+    optimizeSearchPerformance(): void {
+        // Warm up cache with popular queries
+        const popularQueries = this.getPopularQueries();
+        popularQueries.slice(0, 5).forEach(({ query }) => {
+            if (query.length >= 2) {
+                this.performSearch(query, {}, this.searchConfig$.value).subscribe();
+            }
+        });
+
+        // Clean up old cache entries
+        this.cacheService.clearExpired();
+
+        // Update performance metrics
+        this.updatePerformanceMetricsSnapshot();
+    }
+
+    /**
+     * Predictive search based on user patterns
+     */
+    getPredictiveSearchSuggestions(partialQuery: string): string[] {
+        if (!partialQuery || partialQuery.length < 1) return [];
+
+        const suggestions = new Set<string>();
+
+        // Add suggestions from search history
+        this.searchHistory
+            .filter(query => query.toLowerCase().startsWith(partialQuery.toLowerCase()))
+            .slice(0, 3)
+            .forEach(query => suggestions.add(query));
+
+        // Add suggestions from popular queries
+        this.getPopularQueries()
+            .filter(({ query }) => query.toLowerCase().includes(partialQuery.toLowerCase()))
+            .slice(0, 3)
+            .forEach(({ query }) => suggestions.add(query));
+
+        return Array.from(suggestions).slice(0, 5);
+    }
+
     private performSearch(query: string, filters: DocumentFilters, config: SearchConfig): Observable<SearchResult> {
-        const startTime = Date.now();
+        const startTime = performance.now();
         this.isSearching$.next(true);
 
         // Generate cache key
         const cacheKey = this.generateCacheKey(query, filters);
 
-        // Check cache if enabled
-        if (config.cacheResults) {
-            const cached = this.cacheService.getSync<SearchResult>(cacheKey);
-            if (cached) {
-                this.isSearching$.next(false);
-                return of(cached);
-            }
-        }
+        // Track query frequency
+        this.trackQueryFrequency(query);
 
-        // Perform actual search
+        // Perform actual search with timeout
         return this.documentService.searchDocuments(query, filters).pipe(
             map(response => {
-                const searchTime = Date.now() - startTime;
+                const searchTime = performance.now() - startTime;
                 const result: SearchResult = {
                     documents: response.documents || [],
                     totalCount: response.totalCount || 0,
                     searchTime,
-                    suggestions: this.getSearchSuggestions(query),
+                    suggestions: config.enablePredictiveSearch ?
+                        this.getPredictiveSearchSuggestions(query) :
+                        this.getSearchSuggestions(query),
                     facets: config.enableFacets ? this.extractFacets(response.documents || []) : undefined
                 };
 
-                // Cache result if enabled
-                if (config.cacheResults) {
-                    this.cacheService.set(cacheKey, result, { ttl: config.cacheTtl });
+                // Cache result if enabled and within size limits
+                if (config.cacheResults && this.shouldCacheResult(result, config)) {
+                    this.cacheService.set(cacheKey, result, {
+                        ttl: config.cacheTtl,
+                        maxSize: config.maxCacheSize
+                    });
                 }
 
-                // Add to history
+                // Add to history and track performance
                 this.addToHistory(query);
+                this.trackSearchTime(searchTime);
+                this.updatePerformanceMetrics('success', searchTime);
 
                 return result;
             }),
             tap(() => this.isSearching$.next(false)),
             catchError(error => {
+                const searchTime = performance.now() - startTime;
                 this.isSearching$.next(false);
                 this.searchError$.next('Search failed. Please try again.');
+                this.updatePerformanceMetrics('failure', searchTime);
                 console.error('Search error:', error);
 
                 return of({
                     documents: [],
                     totalCount: 0,
-                    searchTime: Date.now() - startTime,
+                    searchTime,
                     suggestions: this.getSearchSuggestions(query)
                 });
             })
@@ -369,5 +462,104 @@ export class SearchService {
         this.searchConfig$.complete();
         this.isSearching$.complete();
         this.searchError$.complete();
+        this.searchPerformanceMetrics.complete();
+    }
+
+    // Private helper methods for performance tracking
+    private trackQueryFrequency(query: string): void {
+        const normalizedQuery = query.toLowerCase().trim();
+        const currentCount = this.queryFrequency.get(normalizedQuery) || 0;
+        this.queryFrequency.set(normalizedQuery, currentCount + 1);
+    }
+
+    private trackSearchTime(time: number): void {
+        this.searchTimes.push(time);
+        if (this.searchTimes.length > this.maxSearchTimeHistory) {
+            this.searchTimes.shift();
+        }
+    }
+
+    private updatePerformanceMetrics(type: 'success' | 'failure' | 'cacheHit', searchTime: number): void {
+        const current = this.searchPerformanceMetrics.value;
+        const updates: Partial<SearchPerformanceMetrics> = {};
+
+        switch (type) {
+            case 'success':
+                updates.totalSearches = current.totalSearches + 1;
+                break;
+            case 'failure':
+                updates.failedSearches = current.failedSearches + 1;
+                updates.totalSearches = current.totalSearches + 1;
+                break;
+            case 'cacheHit':
+                // Cache hits don't count as new searches but improve hit rate
+                break;
+        }
+
+        // Update averages and percentiles
+        if (this.searchTimes.length > 0) {
+            updates.averageSearchTime = this.calculateAverageSearchTime();
+            updates.searchTimePercentiles = this.calculateSearchTimePercentiles();
+        }
+
+        // Update cache hit rate
+        const totalCacheRequests = current.totalSearches + (type === 'cacheHit' ? 1 : 0);
+        if (totalCacheRequests > 0) {
+            updates.cacheHitRate = (type === 'cacheHit' ? 1 : 0) / totalCacheRequests * 100;
+        }
+
+        // Update popular queries
+        updates.popularQueries = this.getPopularQueries();
+
+        this.searchPerformanceMetrics.next({ ...current, ...updates });
+    }
+
+    private updatePerformanceMetricsSnapshot(): void {
+        const current = this.searchPerformanceMetrics.value;
+        this.searchPerformanceMetrics.next({
+            ...current,
+            averageSearchTime: this.calculateAverageSearchTime(),
+            searchTimePercentiles: this.calculateSearchTimePercentiles(),
+            popularQueries: this.getPopularQueries()
+        });
+    }
+
+    private calculateAverageSearchTime(): number {
+        if (this.searchTimes.length === 0) return 0;
+        return this.searchTimes.reduce((sum, time) => sum + time, 0) / this.searchTimes.length;
+    }
+
+    private calculateSearchTimePercentiles(): { p50: number; p90: number; p95: number } {
+        if (this.searchTimes.length === 0) return { p50: 0, p90: 0, p95: 0 };
+
+        const sorted = [...this.searchTimes].sort((a, b) => a - b);
+        const len = sorted.length;
+
+        return {
+            p50: sorted[Math.floor(len * 0.5)],
+            p90: sorted[Math.floor(len * 0.9)],
+            p95: sorted[Math.floor(len * 0.95)]
+        };
+    }
+
+    private getPopularQueries(): Array<{ query: string; count: number }> {
+        return Array.from(this.queryFrequency.entries())
+            .map(([query, count]) => ({ query, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+    }
+
+    private shouldCacheResult(result: SearchResult, config: SearchConfig): boolean {
+        // Don't cache empty results or very large result sets
+        if (result.documents.length === 0 || result.documents.length > 1000) {
+            return false;
+        }
+
+        // Don't cache if search took too long (likely a complex query)
+        if (result.searchTime > 2000) {
+            return false;
+        }
+
+        return true;
     }
 }
