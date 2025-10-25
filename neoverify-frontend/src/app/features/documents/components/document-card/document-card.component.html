@@ -66,6 +66,16 @@
                         <i class="pi pi-share-alt"></i>
                         <span>Share</span>
                     </button>
+                    <button class="action-item" (click)="onViewStatusHistory()">
+                        <i class="pi pi-history"></i>
+                        <span>Status History</span>
+                    </button>
+                    @if (document.verificationStatus === VerificationStatus.FAILED) {
+                    <button class="action-item" (click)="onRetryVerification()">
+                        <i class="pi pi-refresh"></i>
+                        <span>Retry Verification</span>
+                    </button>
+                    }
                     <div class="action-divider"></div>
                     <button class="action-item danger" (click)="onQuickAction('delete', $event)">
                         <i class="pi pi-trash"></i>
@@ -119,6 +129,14 @@
             @if (document.tags.length > 3) {
             <span class="more-tags">+{{ document.tags.length - 3 }} more</span>
             }
+        </div>
+        }
+
+        <!-- Verification Progress -->
+        @if (showVerificationProgress && verificationProgress()) {
+        <div class="verification-progress-section">
+            <app-verification-progress [documentId]="document.id" [progress]="verificationProgress()">
+            </app-verification-progress>
         </div>
         }
     </div>

@@ -7,6 +7,10 @@ export * from './utils/form.utils';
 export * from './utils/date.utils';
 export * from './components/loading-spinner/loading-spinner.component';
 export * from './components/confirmation-dialog/confirmation-dialog.component';
+export * from './components/status-badge/status-badge.component';
+export * from './components/verification-progress/verification-progress.component';
+export * from './components/status-history/status-history.component';
+export * from './components/status-management-dialog/status-management-dialog.component';
 
 // Import array for standalone components
 import { CommonModule } from '@angular/common';
@@ -64,11 +68,17 @@ import { TieredMenuModule } from 'primeng/tieredmenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { DockModule } from 'primeng/dock';
-import { ChipsModule } from 'primeng/chips';
+import { TimelineModule } from 'primeng/timeline';
+import { TextareaModule } from 'primeng/textarea';
+import { MessageModule } from 'primeng/message';
 
 // Shared Components
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
+import { StatusBadgeComponent } from './components/status-badge/status-badge.component';
+import { VerificationProgressComponent } from './components/verification-progress/verification-progress.component';
+import { StatusHistoryComponent } from './components/status-history/status-history.component';
+import { StatusManagementDialogComponent } from './components/status-management-dialog/status-management-dialog.component';
 
 export const SHARED_IMPORTS = [
   // Angular modules
@@ -128,9 +138,15 @@ export const SHARED_IMPORTS = [
   ContextMenuModule,
   MegaMenuModule,
   DockModule,
-  ChipsModule,
+  TimelineModule,
+  TextareaModule,
+  MessageModule,
 
   // Shared components
   LoadingSpinnerComponent,
-  ConfirmationDialogComponent
+  ConfirmationDialogComponent,
+  StatusBadgeComponent,
+  VerificationProgressComponent,
+  StatusHistoryComponent,
+  StatusManagementDialogComponent
 ];
