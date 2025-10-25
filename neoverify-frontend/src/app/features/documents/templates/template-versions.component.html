@@ -184,61 +184,61 @@
         </div>
 
         <div class="comparison-body">
-            <p-tabs value="0">
-                <p-tabList>
-                    <p-tab value="0">Field Changes</p-tab>
-                    <p-tab value="1">Validation Changes</p-tab>
-                </p-tabList>
-                <p-tabPanels>
-                    <p-tabPanel value="0">
-                        <div class="changes-list">
-                            @for (change of comparison.fieldChanges; track change.fieldName) {
-                            <div class="change-item">
-                                <div class="change-header">
-                                    <i [class]="getChangeTypeIcon(change.type)"></i>
-                                    <span class="change-type">
-                                        <p-tag [value]="change.type.toUpperCase()"
-                                            [severity]="getChangeTypeSeverity(change.type) as any"></p-tag>
-                                        </p-tag>
-                                    </span>
-                                    <span class="field-name">{{ change.fieldName }}</span>
-                                </div>
+            <p-accordion>
+                <p-accordionTab header="Field Changes">
+                    <div class="changes-list">
+                        @for (change of comparison.fieldChanges; track change.fieldName) {
+                        <div class="change-item">
+                            <div class="change-header">
+                                <i [class]="getChangeTypeIcon(change.type)"></i>
+                                <span class="change-type">
+                                    <p-tag [value]="change.type.toUpperCase()"
+                                        [severity]="getChangeTypeSeverity(change.type)">
+                                    </p-tag>
+                                </span>
+                                <span class="field-name">{{ change.fieldName }}</span>
+                            </div>
 
-                                @if (change.changes && change.changes.length > 0) {
-                                <div class="change-details">
-                                    <ul>
-                                        @for (changeDetail of change.changes; track changeDetail) {
-                                        <li>{{ changeDetail }}</li>
-                                        }
-                                    </ul>
-                                </div>
-                                }
-
-                                @if (change.type === 'added' && change.newField) {
-                                <div class="field-preview">
-                                    <strong>New Field:</strong>
-                                    <code>{{ change.newField.name }} ({{ change.newField.type }})</code>
-                                </div>
-                                }
-
-                                @if (change.type === 'removed' && change.oldField) {
-                                <div class="field-preview">
-                                    <strong>Removed Field:</strong>
-                                    <code>{{ change.oldField.name }} ({{ change.oldField.type }})</code>
-                                </div>
-                                }
+                            @if (change.changes && change.changes.length > 0) {
+                            <div class="change-details">
+                                <ul>
+                                    @for (changeDetail of change.changes; track changeDetail) {
+                                    <li>{{ changeDetail }}</li>
+                                    }
+                                </ul>
                             </div>
                             }
 
-                            @if (comparison.fieldChanges.length === 0) {
-                            <div class="no-changes">
-                                <p>No field changes between these versions</p>
+                            @if (change.type === 'added' && change.newField) {
+                            <div class="field-preview">
+                                <strong>New Field:</strong>
+                                <code>{{ change.newField.name }} ({{ change.newField.type }})</code>
+                            </div>
+                            }
+
+                            @if (change.type === 'removed' && change.oldField) {
+                            <div class="field-preview">
+                                <strong>Removed Field:</strong>
+                                <code>{{ change.oldField.name }} ({{ change.oldField.type }})</code>
                             </div>
                             }
                         </div>
-                    </p-tabPanel>
+                        }
 
-                    <p-tabPanel value="1">
+                        @if (comparison.fieldChanges.length === 0) {
+                        <div class="no-changes">
+                            <p>No field changes between these versions</p>
+                        </div>
+                        }
+                    </div>
+                </p-accordionTab>
+
+                <p-accordionTab header="Validation Changes">
+                    <div class="changes-list">
+                        @for (change of comparison.ruleChanges; track change.ruleName) {
+                        <div class="change-item">
+                            <div class="change-header">
+                                <i [class>
                         <div class="changes-list">
                             @for (change of comparison.ruleChanges; track change.ruleName) {
                             <div class="change-item">
@@ -246,7 +246,7 @@
                                     <i [class]="getChangeTypeIcon(change.type)"></i>
                                     <span class="change-type">
                                         <p-tag [value]="change.type.toUpperCase()"
-                                            [severity]="getChangeTypeSeverity(change.type) as any">
+                                            [severity]="getChangeTypeSeverity(change.type)">
                                         </p-tag>
                                     </span>
                                     <span class="rule-name">{{ change.ruleName }}</span>

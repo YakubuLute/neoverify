@@ -79,15 +79,15 @@
     - Build version publishing workflow with approval process
     - _Requirements: 3.4_
 
-- [-] 5. Add document status tracking and verification
-  - [-] 5.1 Implement document status management
+- [x] 5. 4.2 Build template creation and editing functionality
+  - [x] 5.1 Implement document status management
     - Create status tracking system with state transitions
     - Build status update notifications and user alerts
     - Implement automated status changes based on verification results
     - Add status history tracking with timestamps and user attribution
     - _Requirements: 4.1, 4.2_
 
-  - [ ] 5.2 Build verification status display
+  - [x] 5.2 Build verification status display
     - Create verification badges and status indicators for document cards
     - Implement verification progress tracking with detailed status messages
     - Add verification failure handling with error details and remediation steps
