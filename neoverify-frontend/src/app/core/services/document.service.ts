@@ -3,14 +3,15 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
-import { 
-  Document as DocumentModel, 
-  VerificationRequest, 
-  VerificationResult, 
-  BulkIssuanceRequest, 
+import {
+  Document as DocumentModel,
+  VerificationRequest,
+  VerificationResult,
+  BulkIssuanceRequest,
   BulkIssuanceResult,
   DocumentMetadata,
-  DocumentType 
+  DocumentType,
+  DocumentStatus
 } from '../../shared/models/document.models';
 import { PaginatedResponse, QueryParams } from '../../shared/models/common.models';
 
@@ -128,22 +129,22 @@ export class DocumentService {
         const formData = new FormData();
         formData.append('file', request.file!);
         formData.append('runForensics', String(request.runForensics || false));
-        
+
         return this.apiService.post<VerificationResult>(`${endpoint}/file`, formData).pipe(
           map(response => response.data)
         );
 
       case 'hash':
-        body = { 
-          hash: request.hash, 
-          runForensics: request.runForensics || false 
+        body = {
+          hash: request.hash,
+          runForensics: request.runForensics || false
         };
         break;
 
       case 'id':
-        body = { 
-          verificationId: request.verificationId, 
-          runForensics: request.runForensics || false 
+        body = {
+          verificationId: request.verificationId,
+          runForensics: request.runForensics || false
         };
         break;
     }
@@ -162,12 +163,12 @@ export class DocumentService {
    */
   bulkIssuance(request: BulkIssuanceRequest): Observable<BulkIssuanceResult> {
     const formData = new FormData();
-    
+
     request.documents.forEach((doc, index) => {
       formData.append(`files[${index}]`, doc.file);
       formData.append(`metadata[${index}]`, JSON.stringify(doc.metadata));
     });
-    
+
     formData.append('documentType', request.documentType);
     if (request.template) {
       formData.append('template', request.template);
@@ -216,5 +217,214 @@ export class DocumentService {
       observer.next(blob);
       observer.complete();
     });
+  }
+
+  // Document Management System Methods
+
+  /**
+   * Update document metadata
+   */
+  updateDocument(documentId: string, updates: Partial<DocumentModel>): Observable<DocumentModel> {
+    return this.apiService.put<DocumentModel>(`documents/${documentId}`, updates).pipe(
+      map(response => response.data),
+      tap(document => {
+        this.notificationService.success(`Document "${document.originalFileName}" updated successfully`);
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to update document. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Delete document
+   */
+  deleteDocument(documentId: string): Observable<void> {
+    return this.apiService.delete<void>(`documents/${documentId}`).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Document deleted successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to delete document. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Search documents with advanced filtering
+   */
+  searchDocuments(query: string, filters?: any, params?: QueryParams): Observable<any> {
+    const searchParams = {
+      ...params,
+      query,
+      ...filters
+    };
+
+    return this.apiService.get<any>('documents/search', searchParams as any).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.notificationService.error('Search failed. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Add tags to document
+   */
+  addTags(documentId: string, tags: string[]): Observable<DocumentModel> {
+    return this.apiService.post<DocumentModel>(`documents/${documentId}/tags`, { tags }).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Tags added successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to add tags. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Remove tags from document
+   */
+  removeTags(documentId: string, tags: string[]): Observable<DocumentModel> {
+    return this.apiService.delete<DocumentModel>(`documents/${documentId}/tags`, { tags }).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Tags removed successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to remove tags. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Share document with users
+   */
+  shareDocument(documentId: string, userIds: string[], permissions: any): Observable<void> {
+    return this.apiService.post<void>(`documents/${documentId}/share`, { userIds, permissions }).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Document shared successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to share document. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update document permissions
+   */
+  updateDocumentPermissions(documentId: string, permissions: any): Observable<DocumentModel> {
+    return this.apiService.put<DocumentModel>(`documents/${documentId}/permissions`, permissions).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Document permissions updated successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to update permissions. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get document audit trail
+   */
+  getDocumentAuditTrail(documentId: string): Observable<any[]> {
+    return this.apiService.get<any[]>(`documents/${documentId}/audit-trail`).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.notificationService.error('Failed to load audit trail');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Perform bulk operations on documents
+   */
+  bulkOperation(operation: any): Observable<any> {
+    return this.apiService.post<any>('documents/bulk-operation', operation).pipe(
+      map(response => response.data),
+      tap(result => {
+        this.notificationService.success(`Bulk operation completed. ${result.successCount} items processed successfully.`);
+      }),
+      catchError(error => {
+        this.notificationService.error('Bulk operation failed. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Export documents
+   */
+  exportDocuments(documentIds: string[], format: string, options?: any): Observable<Blob> {
+    const exportData = {
+      documentIds,
+      format,
+      ...options
+    };
+
+    return this.apiService.post<Blob>('documents/export', exportData, { responseType: 'blob' }).pipe(
+      tap(() => {
+        this.notificationService.success('Export completed successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Export failed. Please try again.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get document statistics
+   */
+  getDocumentStats(): Observable<any> {
+    return this.apiService.get<any>('documents/stats').pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.notificationService.error('Failed to load document statistics');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Generate document thumbnail
+   */
+  generateThumbnail(documentId: string): Observable<string> {
+    return this.apiService.post<{ thumbnailUrl: string }>(`documents/${documentId}/thumbnail`, {}).pipe(
+      map(response => response.data.thumbnailUrl),
+      catchError(error => {
+        this.notificationService.error('Failed to generate thumbnail');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update document status
+   */
+  updateDocumentStatus(documentId: string, status: DocumentStatus): Observable<DocumentModel> {
+    return this.apiService.put<DocumentModel>(`documents/${documentId}/status`, { status }).pipe(
+      map(response => response.data),
+      tap(() => {
+        this.notificationService.success('Document status updated successfully');
+      }),
+      catchError(error => {
+        this.notificationService.error('Failed to update document status. Please try again.');
+        return throwError(() => error);
+      })
+    );
   }
 }

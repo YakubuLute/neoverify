@@ -15,6 +15,21 @@ export interface Document {
   updatedAt: Date;
   revokedAt?: Date;
   revocationReason?: string;
+  // Document Management System fields
+  title: string;
+  description?: string;
+  fileUrl: string;
+  thumbnailUrl?: string;
+  fileSize: number;
+  mimeType: string;
+  uploadedBy: string;
+  uploadedAt: Date;
+  verifiedAt?: Date;
+  verificationStatus: VerificationStatus;
+  tags: string[];
+  permissions: DocumentPermissions;
+  auditTrail: AuditEntry[];
+  templateId?: string;
 }
 
 export enum DocumentType {
