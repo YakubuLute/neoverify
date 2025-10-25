@@ -529,7 +529,7 @@ export class DocumentSharingDialogComponent implements OnInit {
   readonly shareLinks = signal<ShareLink[]>([]);
 
   // Computed properties
-  readonly minExpirationDate = computed(() => new Date());
+  readonly minExpirationDate = new Date();
 
   ngOnInit() {
     if (this.document) {
@@ -602,7 +602,8 @@ export class DocumentSharingDialogComponent implements OnInit {
       });
   }
 
-  addUserToShare(user: User) {
+  addUserToShare(event: any) {
+    const user = event.value as User;
     const current = this.selectedUsers();
     if (!current.find(u => u.email === user.email)) {
       this.selectedUsers.set([...current, user]);
