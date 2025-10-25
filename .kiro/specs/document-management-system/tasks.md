@@ -35,7 +35,7 @@
     - Add bulk operation progress tracking and result notifications
     - _Requirements: 1.1, 7.2, 7.3, 7.4_
 
-- [-] 3. Create document upload functionality
+- [x] 3. Create document upload functionality
   - [x] 3.1 Build single document upload component
     - Create drag-and-drop upload interface with file validation
     - Implement file format and size validation with clear error messages
@@ -50,7 +50,7 @@
     - Add bulk upload results summary with success/failure breakdown
     - _Requirements: 7.1, 7.3, 7.4_
 
-  - [-] 3.3 Add template integration to upload process
+  - [x] 3.3 Add template integration to upload process
     - Integrate template selection into upload workflow
     - Pre-populate metadata fields based on selected template
     - Implement template field validation and required field enforcement

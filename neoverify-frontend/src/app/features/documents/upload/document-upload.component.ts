@@ -1352,7 +1352,7 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
     });
 
     controlsToRemove.forEach(controlName => {
-      this.uploadForm.removeControl(controlName);
+      (this.uploadForm as any).removeControl(controlName);
     });
   }
 
