@@ -310,11 +310,11 @@ import { NotificationService } from '../../../core/services/notification.service
           <!-- Recipients -->
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Email Recipients</label>
-            <p-chips
+            <input
+              pInputText
               formControlName="recipients"
-              placeholder="Enter email addresses"
-              styleClass="w-full"
-              [allowDuplicate]="false"
+              placeholder="Enter email addresses (comma-separated)"
+              class="w-full"
             />
             <small class="text-gray-400">
               Press Enter to add each email address
@@ -398,11 +398,12 @@ import { NotificationService } from '../../../core/services/notification.service
         <div class="space-y-4">
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Test Recipients</label>
-            <p-chips
+            <input
+              pInputText
               [(ngModel)]="testEmails"
-              placeholder="Enter email addresses"
-              styleClass="w-full"
-              [allowDuplicate]="false"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Enter email addresses (comma-separated)"
+              class="w-full"
             />
           </div>
 

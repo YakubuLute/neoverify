@@ -774,7 +774,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (blob) => {
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
+          const a = window.document.createElement('a');
           a.href = url;
           a.download = document.originalFileName;
           a.click();

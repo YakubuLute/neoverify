@@ -9,8 +9,8 @@ import { of, Subject, combineLatest } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
@@ -48,8 +48,8 @@ interface AuditFilters {
     TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
-    CalendarModule,
+    SelectModule,
+    DatePickerModule,
     MultiSelectModule,
     TagModule,
     TooltipModule,
@@ -380,7 +380,7 @@ interface AuditFilters {
         <div class="space-y-4">
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Export Format</label>
-            <p-dropdown
+            <p-select
               [(ngModel)]="exportFormat"
               [options]="exportFormatOptions"
               optionLabel="label"
@@ -417,7 +417,7 @@ interface AuditFilters {
         <div class="space-y-4">
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
-            <p-dropdown
+            <p-select
               [(ngModel)]="reportType"
               [options]="reportTypeOptions"
               optionLabel="label"

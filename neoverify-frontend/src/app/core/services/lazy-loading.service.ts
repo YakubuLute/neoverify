@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, switchMap, catchError, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+import { map, switchMap, catchError, distinctUntilChanged, debounceTime, tap } from 'rxjs/operators';
 import { CacheService } from './cache.service';
 import { DocumentService } from './document.service';
 
