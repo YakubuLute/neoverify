@@ -315,9 +315,7 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
     }
 
     onViewVersions(template: DocumentTemplate): void {
-        this.selectedTemplate.set(template);
-        this.loadTemplateVersions(template.id);
-        this.showVersionDialog.set(true);
+        this.router.navigate(['/documents/templates', template.id, 'versions']);
     }
 
     onToggleTemplateStatus(template: DocumentTemplate): void {

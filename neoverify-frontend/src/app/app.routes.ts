@@ -74,7 +74,24 @@ export const routes: Routes = [
             path: 'templates',
             canActivate: [roleGuard],
             data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
-            loadComponent: () => import('./features/documents/templates/templates-list.component').then(m => m.TemplatesListComponent)
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('./features/documents/templates/templates-list.component').then(m => m.TemplatesListComponent)
+              },
+              {
+                path: 'create',
+                loadComponent: () => import('./features/documents/templates/template-builder.component').then(m => m.TemplateBuilderComponent)
+              },
+              {
+                path: ':id/edit',
+                loadComponent: () => import('./features/documents/templates/template-builder.component').then(m => m.TemplateBuilderComponent)
+              },
+              {
+                path: ':id/versions',
+                loadComponent: () => import('./features/documents/templates/template-versions.component').then(m => m.TemplateVersionsComponent)
+              }
+            ]
           },
           {
             path: ':id',

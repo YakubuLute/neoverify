@@ -1,0 +1,352 @@
+<div class="template-versions-container">
+    <!-- Header Section -->
+    <div class="versions-header">
+        <div class="header-content">
+            <div class="title-section">
+                <div class="breadcrumb">
+                    <p-button icon="pi pi-arrow-left" (onClick)="onBackToTemplates()"
+                        styleClass="p-button-text p-button-sm" pTooltip="Back to templates">
+                    </p-button>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item">Templates</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">{{ template()?.name || 'Template' }}</span>
+                </div>
+                <h1 class="page-title">Version History</h1>
+                <p class="page-subtitle">Manage and compare template versions</p>
+            </div>
+            <div class="header-actions">
+                @if (canManageVersions()) {
+                <p-button label="Create Version" icon="pi pi-plus" (onClick)="onCreateNewVersion()"
+                    styleClass="p-button-primary">
+                </p-button>
+                }
+                <p-button label="Edit Template" icon="pi pi-pencil" (onClick)="onEditTemplate()"
+                    styleClass="p-button-outlined">
+                </p-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Info Section -->
+    @if (template()) {
+    <div class="template-info-section">
+        <div class="template-info-content">
+            <div class="template-details">
+                <h2>{{ template()!.name }}</h2>
+                <p>{{ template()!.description }}</p>
+                <div class="template-meta">
+                    <div class="meta-item">
+                        <i class="pi pi-tag"></i>
+                        <span>{{ template()!.category }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="pi pi-code"></i>
+                        <span>Current: v{{ template()!.version }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="pi pi-chart-line"></i>
+                        <span>{{ template()!.usageCount }} uses</span>
+                    </div>
+                </div>
+            </div>
+            <div class="template-status">
+                @if (activeVersion()) {
+                <p-tag [value]="'Active: v' + activeVersion()!.version" severity="success">
+                </p-tag>
+                }
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Version Actions Bar -->
+    @if (selectedVersions().length > 0) {
+    <div class="version-actions-bar">
+        <div class="selection-info">
+            {{ selectedVersions().length }} version(s) selected
+        </div>
+        <div class="version-actions">
+            @if (canCompareVersions()) {
+            <p-button label="Compare Versions" icon="pi pi-clone" (onClick)="onCompareVersions()"
+                styleClass="p-button-outlined">
+            </p-button>
+            }
+            @if (canRollback()) {
+            <p-button label="Rollback to Version" icon="pi pi-history"
+                (onClick)="onRollbackToVersion(selectedVersions()[0])" styleClass="p-button-outlined">
+            </p-button>
+            }
+            <p-button label="Clear Selection" (onClick)="selectedVersions.set([])" styleClass="p-button-text">
+            </p-button>
+        </div>
+    </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+    <div class="loading-container">
+        <div class="loading-content">
+            <p-progressSpinner></p-progressSpinner>
+            <p>Loading template versions...</p>
+        </div>
+    </div>
+    }
+
+    <!-- Error State -->
+    @else if (error()) {
+    <div class="error-container">
+        <div class="error-content">
+            <i class="pi pi-exclamation-triangle error-icon"></i>
+            <h3>Error Loading Versions</h3>
+            <p>{{ error() }}</p>
+            <p-button label="Try Again" icon="pi pi-refresh" (onClick)="loadVersions(templateId()!)">
+            </p-button>
+        </div>
+    </div>
+    }
+
+    <!-- Versions List -->
+    @else {
+    <div class="versions-content">
+        <div class="versions-list">
+            @for (version of sortedVersions(); track version.id) {
+            <div class="version-item" [class.selected]="selectedVersions().some(v => v.id === version.id)">
+                <div class="version-header">
+                    <div class="version-selection">
+                        <p-checkbox [binary]="true" [ngModel]="selectedVersions().some(v => v.id === version.id)"
+                            (ngModelChange)="onVersionSelect(version, $event)"
+                            [disabled]="!$event && selectedVersions().length >= 2">
+                        </p-checkbox>
+                    </div>
+                    <div class="version-info">
+                        <div class="version-title">
+                            <h3>Version {{ version.version }}</h3>
+                            @if (version.isActive) {
+                            <p-tag value="Active" severity="success"></p-tag>
+                            }
+                        </div>
+                        <div class="version-meta">
+                            <span class="version-author">{{ version.createdBy }}</span>
+                            <span class="version-date">{{ formatDate(version.createdAt) }}</span>
+                        </div>
+                    </div>
+                    <div class="version-actions">
+                        <p-button icon="pi pi-eye" (onClick)="onViewVersion(version)"
+                            styleClass="p-button-text p-button-sm" pTooltip="View version">
+                        </p-button>
+                        @if (!version.isActive && canManageVersions()) {
+                        <p-button icon="pi pi-history" (onClick)="onRollbackToVersion(version)"
+                            styleClass="p-button-text p-button-sm" pTooltip="Rollback to this version">
+                        </p-button>
+                        }
+                    </div>
+                </div>
+
+                <div class="version-changes">
+                    <p>{{ version.changes }}</p>
+                </div>
+            </div>
+            }
+
+            @if (sortedVersions().length === 0) {
+            <div class="no-versions">
+                <i class="pi pi-history"></i>
+                <h3>No Version History</h3>
+                <p>This template doesn't have any version history yet.</p>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>
+
+<!-- Version Comparison Dialog -->
+<p-dialog header="Version Comparison" [modal]="true" [visible]="showComparison()" (onHide)="showComparison.set(false)"
+    [style]="{width: '90vw', height: '80vh'}" [maximizable]="true">
+
+    @if (versionComparison(); as comparison) {
+    <div class="comparison-content">
+        <div class="comparison-header">
+            <div class="version-info">
+                <h4>Version {{ comparison.version1.version }}</h4>
+                <p>{{ formatDate(comparison.version1.createdAt) }}</p>
+                <p>{{ comparison.version1.createdBy }}</p>
+            </div>
+            <div class="comparison-separator">
+                <i class="pi pi-arrow-right"></i>
+            </div>
+            <div class="version-info">
+                <h4>Version {{ comparison.version2.version }}</h4>
+                <p>{{ formatDate(comparison.version2.createdAt) }}</p>
+                <p>{{ comparison.version2.createdBy }}</p>
+            </div>
+        </div>
+
+        <div class="comparison-body">
+            <p-tabView>
+                <p-tabPanel header="Field Changes">
+                    <div class="changes-list">
+                        @for (change of comparison.fieldChanges; track change.fieldName) {
+                        <div class="change-item">
+                            <div class="change-header">
+                                <i [class]="getChangeTypeIcon(change.type)"></i>
+                                <span class="change-type">
+                                    <p-tag [value]="change.type.toUpperCase()"
+                                        [severity]="getChangeTypeSeverity(change.type)">
+                                    </p-tag>
+                                </span>
+                                <span class="field-name">{{ change.fieldName }}</span>
+                            </div>
+
+                            @if (change.changes && change.changes.length > 0) {
+                            <div class="change-details">
+                                <ul>
+                                    @for (changeDetail of change.changes; track changeDetail) {
+                                    <li>{{ changeDetail }}</li>
+                                    }
+                                </ul>
+                            </div>
+                            }
+
+                            @if (change.type === 'added' && change.newField) {
+                            <div class="field-preview">
+                                <strong>New Field:</strong>
+                                <code>{{ change.newField.name }} ({{ change.newField.type }})</code>
+                            </div>
+                            }
+
+                            @if (change.type === 'removed' && change.oldField) {
+                            <div class="field-preview">
+                                <strong>Removed Field:</strong>
+                                <code>{{ change.oldField.name }} ({{ change.oldField.type }})</code>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        @if (comparison.fieldChanges.length === 0) {
+                        <div class="no-changes">
+                            <p>No field changes between these versions</p>
+                        </div>
+                        }
+                    </div>
+                </p-tabPanel>
+
+                <p-tabPanel header="Validation Changes">
+                    <div class="changes-list">
+                        @for (change of comparison.ruleChanges; track change.ruleName) {
+                        <div class="change-item">
+                            <div class="change-header">
+                                <i [class]="getChangeTypeIcon(change.type)"></i>
+                                <span class="change-type">
+                                    <p-tag [value]="change.type.toUpperCase()"
+                                        [severity]="getChangeTypeSeverity(change.type)">
+                                    </p-tag>
+                                </span>
+                                <span class="rule-name">{{ change.ruleName }}</span>
+                            </div>
+
+                            @if (change.changes && change.changes.length > 0) {
+                            <div class="change-details">
+                                <ul>
+                                    @for (changeDetail of change.changes; track changeDetail) {
+                                    <li>{{ changeDetail }}</li>
+                                    }
+                                </ul>
+                            </div>
+                            }
+
+                            @if (change.type === 'added' && change.newRule) {
+                            <div class="rule-preview">
+                                <strong>New Rule:</strong>
+                                <code>{{ change.newRule.type }}: {{ change.newRule.message }}</code>
+                            </div>
+                            }
+
+                            @if (change.type === 'removed' && change.oldRule) {
+                            <div class="rule-preview">
+                                <strong>Removed Rule:</strong>
+                                <code>{{ change.oldRule.type }}: {{ change.oldRule.message }}</code>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        @if (comparison.ruleChanges.length === 0) {
+                        <div class="no-changes">
+                            <p>No validation rule changes between these versions</p>
+                        </div>
+                        }
+                    </div>
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+    </div>
+    }
+
+    <ng-template pTemplate="footer">
+        <p-button label="Close" (onClick)="showComparison.set(false)" styleClass="p-button-text">
+        </p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- Create New Version Dialog -->
+<p-dialog header="Create New Version" [modal]="true" [visible]="showCreateVersionDialog()"
+    (onHide)="showCreateVersionDialog.set(false)" [style]="{width: '500px'}">
+
+    <div class="create-version-content">
+        <p>Create a new version of this template with your recent changes.</p>
+
+        <div class="form-group">
+            <label for="versionChanges">Describe the changes *</label>
+            <textarea id="versionChanges" pInputTextarea [(ngModel)]="newVersionChanges"
+                placeholder="Describe what changed in this version..." rows="4" class="w-full">
+      </textarea>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" (onClick)="showCreateVersionDialog.set(false)" styleClass="p-button-text">
+        </p-button>
+        <p-button label="Create Version" (onClick)="onSaveNewVersion()" [loading]="creatingVersion()"
+            [disabled]="!newVersionChanges().trim()">
+        </p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- Rollback Confirmation Dialog -->
+<p-dialog header="Confirm Rollback" [modal]="true" [visible]="showRollbackDialog()"
+    (onHide)="showRollbackDialog.set(false)" [style]="{width: '500px'}">
+
+    @if (rollbackVersion(); as version) {
+    <div class="rollback-content">
+        <div class="warning-message">
+            <i class="pi pi-exclamation-triangle"></i>
+            <p>Are you sure you want to rollback to version <strong>{{ version.version }}</strong>?</p>
+        </div>
+
+        <div class="rollback-details">
+            <h4>Version Details:</h4>
+            <ul>
+                <li><strong>Version:</strong> {{ version.version }}</li>
+                <li><strong>Created:</strong> {{ formatDate(version.createdAt) }}</li>
+                <li><strong>Author:</strong> {{ version.createdBy }}</li>
+                <li><strong>Changes:</strong> {{ version.changes }}</li>
+            </ul>
+        </div>
+
+        <div class="rollback-warning">
+            <p><strong>Warning:</strong> This will make this version the active template version. The current active
+                version will be preserved in the version history.</p>
+        </div>
+    </div>
+    }
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" (onClick)="showRollbackDialog.set(false)" styleClass="p-button-text">
+        </p-button>
+        <p-button label="Confirm Rollback" (onClick)="onConfirmRollback()" styleClass="p-button-danger">
+        </p-button>
+    </ng-template>
+</p-dialog>
