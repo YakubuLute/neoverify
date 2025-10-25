@@ -68,7 +68,7 @@ import { SHARED_IMPORTS, FormUtils } from '../../../shared';
                   placeholder="Enter your password"
                   [toggleMask]="true"
                   [feedback]="false"
-                  styleClass="w-full"
+                  class="w-full"
                   inputStyleClass="w-full pl-14 pr-14 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-400"
                   [class.ng-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
                 ></p-password>
@@ -186,15 +186,17 @@ export class LoginComponent {
     }
 
     this.loading.set(true);
-    const { email, password, rememberMe } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
 
-    // Mock login - replace with actual authentication
-    setTimeout(() => {
-      console.log('Login attempt:', { email, password, rememberMe });
-      this.loading.set(false);
-      // Navigate to dashboard on successful login
-      this.router.navigate(['/dashboard']);
-    }, 1500);
+    this.authService.login({ email: email!, password: password! }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        // Navigation is handled in the auth service
+      },
+      error: () => {
+        this.loading.set(false);
+      }
+    });
   }
 
   forgotPassword(): void {

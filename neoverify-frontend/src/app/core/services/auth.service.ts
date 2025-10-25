@@ -12,7 +12,8 @@ import {
   MfaVerificationRequest,
   AuthResponse,
   UserRole,
-  InviteUserRequest
+  InviteUserRequest,
+  BillingPlan
 } from '../../shared/models/auth.models';
 
 @Injectable({
@@ -114,27 +115,26 @@ export class AuthService {
     const testUser: User = {
       id: 'test-user-id',
       email: 'test@email.com',
+      name: 'Test Admin',
       firstName: 'Test',
       lastName: 'Admin',
-      role: UserRole.ADMIN,
-      isEmailVerified: true,
-      isMfaEnabled: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      role: UserRole.ORG_ADMIN,
+      organizationId: 'test-org-id',
+      organizationName: 'Test Organization',
+      mfaEnabled: false,
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     const testOrganization: Organization = {
       id: 'test-org-id',
       name: 'Test Organization',
       domain: 'test.com',
-      isVerified: true,
-      settings: {
-        requireMfa: false,
-        allowInvites: true,
-        maxUsers: 100
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      isActive: true,
+      plan: BillingPlan.PROFESSIONAL,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     const authResponse: AuthResponse = {
