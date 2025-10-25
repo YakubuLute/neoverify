@@ -287,7 +287,7 @@ export enum AuditAction {
   PERMISSION_CHANGED = 'permission_changed'
 }
 
-export interface UploadProgress {
+export interface DocumentUploadProgress {
   fileId: string;
   fileName: string;
   progress: number; // 0-100

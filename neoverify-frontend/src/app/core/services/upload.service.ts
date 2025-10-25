@@ -8,7 +8,7 @@ import {
     Document as DocumentModel,
     DocumentMetadata,
     DocumentType,
-    UploadProgress,
+    DocumentUploadProgress,
     UploadStatus,
     BulkIssuanceRequest,
     BulkIssuanceResult
@@ -22,7 +22,7 @@ export class UploadService {
     private readonly apiService = inject(ApiService);
     private readonly notificationService = inject(NotificationService);
 
-    private uploadProgressSubject = new BehaviorSubject<Map<string, UploadProgress>>(new Map());
+    private uploadProgressSubject = new BehaviorSubject<Map<string, DocumentUploadProgress>>(new Map());
     public uploadProgress$ = this.uploadProgressSubject.asObservable();
 
     private activeUploads = new Map<string, Subject<void>>();
