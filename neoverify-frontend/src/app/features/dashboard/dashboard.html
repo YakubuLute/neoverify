@@ -1,238 +1,219 @@
-<!-- Dashboard Container -->
-<div class="min-h-screen bg-gray-900 p-6">
-    <div class="max-w-7xl mx-auto">
+<!-- Dashboard Content -->
+<div class="dashboard-content">
 
-        <!-- Header Section -->
-        <div class="mb-8">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-white mb-2">{{ dashboardTitle() }}</h1>
+        <p class="text-gray-300 font-normal">{{ welcomeMessage() }}</p>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        @for (stat of currentStats(); track stat.title) {
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
+            (click)="stat.route && navigateTo(stat.route)">
             <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h1 class="text-3xl font-semibold text-white mb-2">{{ dashboardTitle() }}</h1>
-                    <p class="text-gray-300 font-normal">{{ welcomeMessage() }}</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
-                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <span class="text-gray-300 text-sm font-normal">System Online</span>
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-12 h-12 bg-gray-700/50 rounded-lg flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
+                        <i [class]="stat.icon + ' text-xl ' + stat.color"></i>
                     </div>
-                    <button
-                        class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 shadow-lg shadow-cyan-500/25"
-                        (click)="navigateTo('/documents/verify')">
-                        <i class="pi pi-search mr-2"></i>
-                        Quick Verify
+                    <div>
+                        <p class="text-gray-400 text-sm font-normal">{{ stat.title }}</p>
+                        <p class="text-2xl font-semibold text-white">{{ stat.value }}</p>
+                    </div>
+                </div>
+            </div>
+            @if (stat.trend) {
+            <div class="flex items-center space-x-2">
+                <i [class]="stat.trendIcon + ' text-sm ' + stat.color"></i>
+                <span [class]="'text-sm font-normal ' + stat.color">{{ stat.trend }}</span>
+                <span class="text-gray-500 text-sm">vs last period</span>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Quick Actions -->
+        <div class="lg:col-span-2">
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-white">Quick Actions</h2>
+                    <i class="pi pi-bolt text-cyan-400"></i>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @for (action of currentActions(); track action.title) {
+                    <div class="bg-gray-900/50 rounded-lg border border-gray-700 p-4 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
+                        (click)="navigateTo(action.route)">
+                        <div class="flex items-start space-x-4">
+                            <div
+                                [class]="'w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ' + action.color">
+                                <i [class]="action.icon + ' text-white text-xl'"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3
+                                    class="text-white font-semibold text-base mb-1 group-hover:text-cyan-400 transition-colors">
+                                    {{ action.title }}</h3>
+                                <p class="text-gray-400 text-sm font-normal leading-relaxed">{{ action.description }}
+                                </p>
+                            </div>
+                            <i class="pi pi-arrow-right text-gray-500 group-hover:text-cyan-400 transition-colors"></i>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="lg:col-span-1">
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-white">Recent Activity</h2>
+                    <i class="pi pi-history text-purple-400"></i>
+                </div>
+
+                <div class="space-y-4">
+                    @for (activity of recentActivities(); track activity.title) {
+                    <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-900/50 transition-colors">
+                        <div
+                            [class]="'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ' + getActivityTypeClass(activity.type)">
+                            <i [class]="activity.icon + ' text-sm'"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-sm font-medium">{{ activity.title }}</p>
+                            <p class="text-gray-400 text-xs font-normal mt-1 leading-relaxed">{{ activity.description }}
+                            </p>
+                            <p class="text-gray-500 text-xs font-normal mt-2">{{ activity.time }}</p>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <button class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
+                        View All Activity
+                        <i class="pi pi-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
         </div>
-
-        <!-- Stats Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            @for (stat of currentStats(); track stat.title) {
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
-                (click)="stat.route && navigateTo(stat.route)">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <div
-                            class="w-12 h-12 bg-gray-700/50 rounded-lg flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-                            <i [class]="stat.icon + ' text-xl ' + stat.color"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-400 text-sm font-normal">{{ stat.title }}</p>
-                            <p class="text-2xl font-semibold text-white">{{ stat.value }}</p>
-                        </div>
-                    </div>
-                </div>
-                @if (stat.trend) {
-                <div class="flex items-center space-x-2">
-                    <i [class]="stat.trendIcon + ' text-sm ' + stat.color"></i>
-                    <span [class]="'text-sm font-normal ' + stat.color">{{ stat.trend }}</span>
-                    <span class="text-gray-500 text-sm">vs last period</span>
-                </div>
-                }
-            </div>
-            }
-        </div>
-
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <!-- Quick Actions -->
-            <div class="lg:col-span-2">
-                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-semibold text-white">Quick Actions</h2>
-                        <i class="pi pi-bolt text-cyan-400"></i>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @for (action of currentActions(); track action.title) {
-                        <div class="bg-gray-900/50 rounded-lg border border-gray-700 p-4 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
-                            (click)="navigateTo(action.route)">
-                            <div class="flex items-start space-x-4">
-                                <div
-                                    [class]="'w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ' + action.color">
-                                    <i [class]="action.icon + ' text-white text-xl'"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3
-                                        class="text-white font-semibold text-base mb-1 group-hover:text-cyan-400 transition-colors">
-                                        {{ action.title }}</h3>
-                                    <p class="text-gray-400 text-sm font-normal leading-relaxed">{{ action.description
-                                        }}</p>
-                                </div>
-                                <i
-                                    class="pi pi-arrow-right text-gray-500 group-hover:text-cyan-400 transition-colors"></i>
-                            </div>
-                        </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="lg:col-span-1">
-                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-semibold text-white">Recent Activity</h2>
-                        <i class="pi pi-history text-purple-400"></i>
-                    </div>
-
-                    <div class="space-y-4">
-                        @for (activity of recentActivities(); track activity.title) {
-                        <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-900/50 transition-colors">
-                            <div
-                                [class]="'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ' + getActivityTypeClass(activity.type)">
-                                <i [class]="activity.icon + ' text-sm'"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-white text-sm font-medium">{{ activity.title }}</p>
-                                <p class="text-gray-400 text-xs font-normal mt-1 leading-relaxed">{{
-                                    activity.description }}</p>
-                                <p class="text-gray-500 text-xs font-normal mt-2">{{ activity.time }}</p>
-                            </div>
-                        </div>
-                        }
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-gray-700">
-                        <button class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
-                            View All Activity
-                            <i class="pi pi-arrow-right ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Role-Specific Sections -->
-        @if (userRole() === UserRole.PLATFORM_ADMIN) {
-        <!-- Platform Admin Specific Content -->
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- System Health -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">System Health</h2>
-                    <i class="pi pi-heart text-cyan-400"></i>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">API Response Time</span>
-                        <span class="text-cyan-400 font-medium">127ms</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">Database Performance</span>
-                        <span class="text-cyan-400 font-medium">Optimal</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">Active Connections</span>
-                        <span class="text-cyan-400 font-medium">2,847</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Organizations -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">Top Organizations</h2>
-                    <i class="pi pi-building text-purple-400"></i>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                                <span class="text-gray-900 font-semibold text-sm">TC</span>
-                            </div>
-                            <span class="text-white font-medium">TechCorp Industries</span>
-                        </div>
-                        <span class="text-cyan-400 font-medium">12.5K docs</span>
-                    </div>
-                    <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">GF</span>
-                            </div>
-                            <span class="text-white font-medium">Global Finance Ltd</span>
-                        </div>
-                        <span class="text-purple-400 font-medium">8.3K docs</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        }
-
-        @if (userRole() === UserRole.ORG_ADMIN) {
-        <!-- Organization Admin Specific Content -->
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Team Performance -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">Team Performance</h2>
-                    <i class="pi pi-users text-cyan-400"></i>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">Documents Issued This Month</span>
-                        <span class="text-cyan-400 font-medium">1,847</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">Average Processing Time</span>
-                        <span class="text-cyan-400 font-medium">2.3 hours</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-300 font-normal">Success Rate</span>
-                        <span class="text-cyan-400 font-medium">98.7%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Team Activity -->
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">Team Activity</h2>
-                    <i class="pi pi-clock text-purple-400"></i>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                        <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                            <span class="text-gray-900 font-semibold text-sm">JS</span>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-white text-sm font-medium">John Smith issued 12 documents</p>
-                            <p class="text-gray-400 text-xs">2 hours ago</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-semibold text-sm">AD</span>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-white text-sm font-medium">Alice Davis verified 8 documents</p>
-                            <p class="text-gray-400 text-xs">4 hours ago</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        }
-
     </div>
+
+    <!-- Additional Role-Specific Sections -->
+    @if (userRole() === UserRole.PLATFORM_ADMIN) {
+    <!-- Platform Admin Specific Content -->
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- System Health -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">System Health</h2>
+                <i class="pi pi-heart text-cyan-400"></i>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">API Response Time</span>
+                    <span class="text-cyan-400 font-medium">127ms</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">Database Performance</span>
+                    <span class="text-cyan-400 font-medium">Optimal</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">Active Connections</span>
+                    <span class="text-cyan-400 font-medium">2,847</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Organizations -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Top Organizations</h2>
+                <i class="pi pi-building text-purple-400"></i>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+                            <span class="text-gray-900 font-semibold text-sm">TC</span>
+                        </div>
+                        <span class="text-white font-medium">TechCorp Industries</span>
+                    </div>
+                    <span class="text-cyan-400 font-medium">12.5K docs</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold text-sm">GF</span>
+                        </div>
+                        <span class="text-white font-medium">Global Finance Ltd</span>
+                    </div>
+                    <span class="text-purple-400 font-medium">8.3K docs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (userRole() === UserRole.ORG_ADMIN) {
+    <!-- Organization Admin Specific Content -->
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Team Performance -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Team Performance</h2>
+                <i class="pi pi-users text-cyan-400"></i>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">Documents Issued This Month</span>
+                    <span class="text-cyan-400 font-medium">1,847</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">Average Processing Time</span>
+                    <span class="text-cyan-400 font-medium">2.3 hours</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 font-normal">Success Rate</span>
+                    <span class="text-cyan-400 font-medium">98.7%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Team Activity -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Team Activity</h2>
+                <i class="pi pi-clock text-purple-400"></i>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
+                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+                        <span class="text-gray-900 font-semibold text-sm">JS</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-white text-sm font-medium">John Smith issued 12 documents</p>
+                        <p class="text-gray-400 text-xs">2 hours ago</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
+                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span class="text-white font-semibold text-sm">AD</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-white text-sm font-medium">Alice Davis verified 8 documents</p>
+                        <p class="text-gray-400 text-xs">4 hours ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
 </div>
