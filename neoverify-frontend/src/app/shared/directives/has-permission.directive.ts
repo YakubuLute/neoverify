@@ -29,7 +29,7 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
         this.authService.currentUser$
             .pipe(takeUntil(this.destroy$))
             .subscribe(() => {
-                this.checkPermission(this.currentPermission);
+                this.checkPermission(this.currentPermission!);
             });
     }
 
