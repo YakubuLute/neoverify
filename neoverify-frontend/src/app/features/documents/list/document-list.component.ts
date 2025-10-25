@@ -1,8 +1,9 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { SHARED_IMPORTS } from '../../../shared';
+import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent } from '../../../shared';
 import { DocumentService } from '../../../core/services/document.service';
+import { DocumentStatusService } from '../../../core/services/document-status.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocumentCardComponent } from '../components/document-card/document-card.component';
 import { DocumentSearchComponent } from '../components/document-search/document-search.component';
@@ -22,12 +23,20 @@ import { UserRole } from '../../../shared/models/auth.models';
 @Component({
   selector: 'app-document-list',
   standalone: true,
-  imports: [SHARED_IMPORTS, DocumentCardComponent, DocumentSearchComponent, BulkOperationsComponent],
+  imports: [
+    ...SHARED_IMPORTS,
+    DocumentCardComponent,
+    DocumentSearchComponent,
+    BulkOperationsComponent,
+    StatusManagementDialogComponent,
+    StatusHistoryComponent
+  ],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss'
 })
 export class DocumentListComponent implements OnInit, OnDestroy {
   private readonly documentService = inject(DocumentService);
+  private readonly statusService = inject(DocumentStatusService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
@@ -50,6 +59,11 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly sortBy = signal<string>('uploadedAt');
   readonly sortOrder = signal<'asc' | 'desc'>('desc');
+
+  // Status management signals
+  readonly showStatusDialog = signal(false);
+  readonly showHistoryDialog = signal(false);
+  readonly selectedDocumentForStatus = signal<Document | null>(null);
 
   // User permissions
   readonly currentUser = computed(() => this.authService.getCurrentUser());
@@ -344,6 +358,122 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Status management methods
+  onQuickAction(event: { action: string; document: Document }): void {
+    const { action, document } = event;
+
+    switch (action) {
+      case 'view':
+        this.onDocumentClick(document);
+        break;
+      case 'download':
+        this.downloadDocument(document);
+        break;
+      case 'share':
+        this.shareDocument(document);
+        break;
+      case 'delete':
+        this.deleteDocument(document);
+        break;
+      case 'change-status':
+        this.openStatusDialog(document);
+        break;
+      case 'retry-verification':
+        this.retryVerification(document);
+        break;
+      case 'view-status-history':
+        this.openStatusHistoryDialog(document);
+        break;
+      default:
+        console.warn('Unknown action:', action);
+    }
+  }
+
+  openStatusDialog(document: Document): void {
+    this.selectedDocumentForStatus.set(document);
+    this.showStatusDialog.set(true);
+  }
+
+  openStatusHistoryDialog(document: Document): void {
+    this.selectedDocumentForStatus.set(document);
+    this.showHistoryDialog.set(true);
+  }
+
+  onStatusChanged(event: { document: Document; newStatus: DocumentStatus; reason?: string }): void {
+    // Update the document in the local state
+    const documents = this.documents();
+    const updatedDocuments = documents.map(doc =>
+      doc.id === event.document.id
+        ? { ...doc, status: event.newStatus, updatedAt: new Date() }
+        : doc
+    );
+    this.documents.set(updatedDocuments);
+
+    // Close the dialog
+    this.showStatusDialog.set(false);
+    this.selectedDocumentForStatus.set(null);
+  }
+
+  retryVerification(document: Document): void {
+    this.statusService.startVerification(document.id, { forensicsEnabled: true })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (verificationId) => {
+          console.log('Verification started:', verificationId);
+          // Update document status to processing
+          const documents = this.documents();
+          const updatedDocuments = documents.map(doc =>
+            doc.id === document.id
+              ? { ...doc, verificationStatus: VerificationStatus.PENDING, updatedAt: new Date() }
+              : doc
+          );
+          this.documents.set(updatedDocuments);
+        },
+        error: (error) => {
+          console.error('Failed to start verification:', error);
+        }
+      });
+  }
+
+  private downloadDocument(document: Document): void {
+    this.documentService.downloadDocument(document.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = document.originalFileName;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (error) => {
+          console.error('Download failed:', error);
+        }
+      });
+  }
+
+  private shareDocument(document: Document): void {
+    // TODO: Implement document sharing dialog
+    console.log('Share document:', document.id);
+  }
+
+  private deleteDocument(document: Document): void {
+    if (confirm(`Are you sure you want to delete "${document.title}"?`)) {
+      this.documentService.deleteDocument(document.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            const documents = this.documents();
+            this.documents.set(documents.filter(doc => doc.id !== document.id));
+          },
+          error: (error) => {
+            console.error('Delete failed:', error);
+          }
+        });
+    }
   }
 
   // Mock data for development

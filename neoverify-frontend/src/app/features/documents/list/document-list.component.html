@@ -139,7 +139,7 @@
         @for (document of filteredDocuments(); track document.id) {
         <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
             [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
-            (selectionChange)="onDocumentSelect(document.id, $event)">
+            (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
         </app-document-card>
         }
     </div>
@@ -243,3 +243,15 @@
     (bulkAction)="onBulkAction($event.type, $event.data)" (exportAction)="onExport($event)"
     (clearSelection)="selectedDocuments.set([])">
 </app-bulk-operations>
+<!--
+ Status Management Dialog -->
+<app-status-management-dialog [visible]="showStatusDialog()" [document]="selectedDocumentForStatus()"
+    (visibleChange)="showStatusDialog.set($event)" (statusChanged)="onStatusChanged($event)">
+</app-status-management-dialog>
+
+<!-- Status History Dialog -->
+<p-dialog header="Status History" [(visible)]="showHistoryDialog" [modal]="true" [closable]="true"
+    [style]="{ width: '800px', maxHeight: '90vh' }">
+    <app-status-history *ngIf="selectedDocumentForStatus()" [documentId]="selectedDocumentForStatus()!.id">
+    </app-status-history>
+</p-dialog>
