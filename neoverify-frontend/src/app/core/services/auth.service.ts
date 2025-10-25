@@ -82,6 +82,11 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this.setLoading(true);
 
+    // Hardcoded test account authentication
+    if (credentials.email === 'test@email.com' && credentials.password === 'Test@1234') {
+      return this.handleTestAccountLogin();
+    }
+
     return this.apiService.post<AuthResponse>('auth/login', credentials).pipe(
       map(response => response.data),
       tap(authData => {
@@ -97,6 +102,54 @@ export class AuthService {
       catchError(error => {
         this.notificationService.error('Login failed. Please check your credentials.');
         return throwError(() => error);
+      }),
+      tap(() => this.setLoading(false))
+    );
+  }
+
+  /**
+   * Handle hardcoded test account login
+   */
+  private handleTestAccountLogin(): Observable<AuthResponse> {
+    const testUser: User = {
+      id: 'test-user-id',
+      email: 'test@email.com',
+      firstName: 'Test',
+      lastName: 'Admin',
+      role: UserRole.ADMIN,
+      isEmailVerified: true,
+      isMfaEnabled: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const testOrganization: Organization = {
+      id: 'test-org-id',
+      name: 'Test Organization',
+      domain: 'test.com',
+      isVerified: true,
+      settings: {
+        requireMfa: false,
+        allowInvites: true,
+        maxUsers: 100
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const authResponse: AuthResponse = {
+      token: 'test-jwt-token',
+      refreshToken: 'test-refresh-token',
+      user: testUser,
+      organization: testOrganization,
+      requiresMfa: false
+    };
+
+    return of(authResponse).pipe(
+      tap(authData => {
+        this.setAuthData(authData);
+        this.notificationService.success('Login successful!');
+        this.router.navigate(['/dashboard']);
       }),
       tap(() => this.setLoading(false))
     );
@@ -257,7 +310,7 @@ export class AuthService {
   /**
    * Validate stored token
    */
-  private validateToken(token: string): void {
+  private validateToken(_token: string): void {
     // In a real app, you'd validate the token with the server
     const storedUser = localStorage.getItem('user');
     const storedOrganization = localStorage.getItem('organization');
