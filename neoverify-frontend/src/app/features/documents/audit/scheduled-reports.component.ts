@@ -9,45 +9,45 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
-import { ChipsModule } from 'primeng/chips';
-import { InputTextareaModule } from 'primeng/inputtextarea';
+import { ChipModule } from 'primeng/chip';
+import { TextareaModule } from 'primeng/textarea';
 
 // Services and Models
 import { AuditSchedulerService, ScheduledReport, ReportScheduleConfig } from '../../../core/services/audit-scheduler.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
-    selector: 'app-scheduled-reports',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CardModule,
-        ButtonModule,
-        TableModule,
-        DialogModule,
-        InputTextModule,
-        DropdownModule,
-        MultiSelectModule,
-        ToggleButtonModule,
-        CalendarModule,
-        TagModule,
-        TooltipModule,
-        ConfirmDialogModule,
-        ChipsModule,
-        InputTextareaModule
-    ],
-    providers: [ConfirmationService],
-    template: `
+  selector: 'app-scheduled-reports',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CardModule,
+    ButtonModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    SelectModule,
+    MultiSelectModule,
+    ToggleButtonModule,
+    DatePickerModule,
+    TagModule,
+    TooltipModule,
+    ConfirmDialogModule,
+    ChipModule,
+    TextareaModule
+  ],
+  providers: [ConfirmationService],
+  template: `
     <div class="scheduled-reports-container p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
@@ -269,7 +269,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
             <div>
               <label class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
-              <p-dropdown
+              <p-select
                 formControlName="type"
                 [options]="reportTypes"
                 optionLabel="label"
@@ -285,7 +285,7 @@ import { NotificationService } from '../../../core/services/notification.service
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Schedule</label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <p-dropdown
+              <p-select
                 [(ngModel)]="selectedScheduleTemplate"
                 [ngModelOptions]="{standalone: true}"
                 [options]="scheduleTemplates()"
@@ -325,7 +325,7 @@ import { NotificationService } from '../../../core/services/notification.service
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="text-sm font-medium text-gray-300 mb-2 block">Format</label>
-              <p-dropdown
+              <p-select
                 formControlName="format"
                 [options]="formatOptions"
                 optionLabel="label"
@@ -351,7 +351,7 @@ import { NotificationService } from '../../../core/services/notification.service
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="text-xs text-gray-400">Start Date</label>
-                <p-calendar
+                <p-datepicker
                   formControlName="startDate"
                   [showIcon]="true"
                   placeholder="Filter start date"
@@ -360,7 +360,7 @@ import { NotificationService } from '../../../core/services/notification.service
               </div>
               <div>
                 <label class="text-xs text-gray-400">End Date</label>
-                <p-calendar
+                <p-datepicker
                   formControlName="endDate"
                   [showIcon]="true"
                   placeholder="Filter end date"
@@ -426,7 +426,7 @@ import { NotificationService } from '../../../core/services/notification.service
       <p-confirmDialog />
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
       min-height: 100vh;
@@ -473,268 +473,268 @@ import { NotificationService } from '../../../core/services/notification.service
   `]
 })
 export class ScheduledReportsComponent implements OnInit {
-    private readonly schedulerService = inject(AuditSchedulerService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly confirmationService = inject(ConfirmationService);
-    private readonly fb = inject(FormBuilder);
+  private readonly schedulerService = inject(AuditSchedulerService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly fb = inject(FormBuilder);
 
-    // Signals
-    scheduledReports = signal<ScheduledReport[]>([]);
-    scheduleTemplates = signal<any[]>([]);
-    statistics = signal<any>(null);
-    loading = signal(false);
-    saving = signal(false);
-    testingEmail = signal(false);
-    editingReport = signal<ScheduledReport | null>(null);
+  // Signals
+  scheduledReports = signal<ScheduledReport[]>([]);
+  scheduleTemplates = signal<any[]>([]);
+  statistics = signal<any>(null);
+  loading = signal(false);
+  saving = signal(false);
+  testingEmail = signal(false);
+  editingReport = signal<ScheduledReport | null>(null);
 
-    // Dialog states
-    showCreateDialog = false;
-    showEmailTestDialog = false;
+  // Dialog states
+  showCreateDialog = false;
+  showEmailTestDialog = false;
 
-    // Form and data
-    reportForm: FormGroup;
-    selectedScheduleTemplate: string = '';
-    testEmails: string[] = [];
+  // Form and data
+  reportForm: FormGroup;
+  selectedScheduleTemplate: string = '';
+  testEmails: string[] = [];
 
-    // Options
-    reportTypes = [
-        { label: 'Daily', value: 'daily' },
-        { label: 'Weekly', value: 'weekly' },
-        { label: 'Monthly', value: 'monthly' },
-        { label: 'Quarterly', value: 'quarterly' },
-        { label: 'Annual', value: 'annual' }
-    ];
+  // Options
+  reportTypes = [
+    { label: 'Daily', value: 'daily' },
+    { label: 'Weekly', value: 'weekly' },
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Quarterly', value: 'quarterly' },
+    { label: 'Annual', value: 'annual' }
+  ];
 
-    formatOptions = [
-        { label: 'PDF', value: 'pdf' },
-        { label: 'CSV', value: 'csv' },
-        { label: 'Excel', value: 'excel' }
-    ];
+  formatOptions = [
+    { label: 'PDF', value: 'pdf' },
+    { label: 'CSV', value: 'csv' },
+    { label: 'Excel', value: 'excel' }
+  ];
 
-    constructor() {
-        this.reportForm = this.fb.group({
-            name: ['', Validators.required],
-            type: ['monthly', Validators.required],
-            schedule: ['', Validators.required],
-            recipients: [[], Validators.required],
-            format: ['pdf', Validators.required],
-            includeDetails: [false],
-            startDate: [null],
-            endDate: [null]
-        });
-    }
+  constructor() {
+    this.reportForm = this.fb.group({
+      name: ['', Validators.required],
+      type: ['monthly', Validators.required],
+      schedule: ['', Validators.required],
+      recipients: [[], Validators.required],
+      format: ['pdf', Validators.required],
+      includeDetails: [false],
+      startDate: [null],
+      endDate: [null]
+    });
+  }
 
-    ngOnInit() {
+  ngOnInit() {
+    this.loadScheduledReports();
+    this.loadScheduleTemplates();
+    this.loadStatistics();
+  }
+
+  loadScheduledReports() {
+    this.loading.set(true);
+
+    this.schedulerService.getScheduledReports().pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: (reports) => {
+        this.scheduledReports.set(reports);
+      },
+      error: (error) => {
+        console.error('Failed to load scheduled reports:', error);
+      }
+    });
+  }
+
+  loadScheduleTemplates() {
+    this.schedulerService.getScheduleTemplates().subscribe({
+      next: (templates) => {
+        this.scheduleTemplates.set(templates);
+      },
+      error: (error) => {
+        console.error('Failed to load schedule templates:', error);
+      }
+    });
+  }
+
+  loadStatistics() {
+    this.schedulerService.getReportStatistics().subscribe({
+      next: (stats) => {
+        this.statistics.set(stats);
+      },
+      error: (error) => {
+        console.error('Failed to load statistics:', error);
+      }
+    });
+  }
+
+  openCreateDialog() {
+    this.editingReport.set(null);
+    this.reportForm.reset({
+      type: 'monthly',
+      format: 'pdf',
+      includeDetails: false
+    });
+    this.selectedScheduleTemplate = '';
+    this.showCreateDialog = true;
+  }
+
+  editReport(report: ScheduledReport) {
+    this.editingReport.set(report);
+    this.reportForm.patchValue({
+      name: report.name,
+      type: report.type,
+      schedule: report.schedule,
+      recipients: report.recipients,
+      format: report.format,
+      includeDetails: report.includeDetails,
+      startDate: report.filters?.dateRange?.start || null,
+      endDate: report.filters?.dateRange?.end || null
+    });
+    this.showCreateDialog = true;
+  }
+
+  closeCreateDialog() {
+    this.showCreateDialog = false;
+    this.editingReport.set(null);
+    this.reportForm.reset();
+  }
+
+  saveReport() {
+    if (this.reportForm.invalid) return;
+
+    this.saving.set(true);
+    const formValue = this.reportForm.value;
+
+    const config: ReportScheduleConfig = {
+      name: formValue.name,
+      type: formValue.type,
+      schedule: formValue.schedule,
+      recipients: formValue.recipients,
+      format: formValue.format,
+      includeDetails: formValue.includeDetails,
+      filters: formValue.startDate && formValue.endDate ? {
+        dateRange: {
+          start: formValue.startDate,
+          end: formValue.endDate
+        }
+      } : undefined
+    };
+
+    const operation = this.editingReport()
+      ? this.schedulerService.updateScheduledReport(this.editingReport()!.id, config)
+      : this.schedulerService.createScheduledReport(config);
+
+    operation.pipe(
+      finalize(() => this.saving.set(false))
+    ).subscribe({
+      next: () => {
+        this.closeCreateDialog();
         this.loadScheduledReports();
-        this.loadScheduleTemplates();
         this.loadStatistics();
-    }
+      },
+      error: (error) => {
+        console.error('Failed to save scheduled report:', error);
+      }
+    });
+  }
 
-    loadScheduledReports() {
-        this.loading.set(true);
+  triggerReport(reportId: string) {
+    this.schedulerService.triggerScheduledReport(reportId).subscribe({
+      next: () => {
+        this.notificationService.success('Report generation started');
+      },
+      error: (error) => {
+        console.error('Failed to trigger report:', error);
+      }
+    });
+  }
 
-        this.schedulerService.getScheduledReports().pipe(
-            finalize(() => this.loading.set(false))
-        ).subscribe({
-            next: (reports) => {
-                this.scheduledReports.set(reports);
-            },
-            error: (error) => {
-                console.error('Failed to load scheduled reports:', error);
-            }
+  toggleReport(reportId: string, enabled: boolean) {
+    this.schedulerService.toggleScheduledReport(reportId, enabled).subscribe({
+      next: () => {
+        this.loadScheduledReports();
+      },
+      error: (error) => {
+        console.error('Failed to toggle report:', error);
+      }
+    });
+  }
+
+  deleteReport(reportId: string) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this scheduled report?',
+      header: 'Confirm Deletion',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.schedulerService.deleteScheduledReport(reportId).subscribe({
+          next: () => {
+            this.loadScheduledReports();
+            this.loadStatistics();
+          },
+          error: (error) => {
+            console.error('Failed to delete report:', error);
+          }
         });
+      }
+    });
+  }
+
+  viewHistory(reportId: string) {
+    // Navigate to history view or open dialog
+    console.log('View history for report:', reportId);
+  }
+
+  sendTestEmail() {
+    if (!this.testEmails || this.testEmails.length === 0) return;
+
+    this.testingEmail.set(true);
+
+    this.schedulerService.testEmailDelivery(this.testEmails).pipe(
+      finalize(() => this.testingEmail.set(false))
+    ).subscribe({
+      next: (result) => {
+        this.showEmailTestDialog = false;
+        this.testEmails = [];
+      },
+      error: (error) => {
+        console.error('Email test failed:', error);
+      }
+    });
+  }
+
+  onTypeChange(event: any) {
+    // Update schedule template based on type
+    const templates = this.scheduleTemplates();
+    const template = templates.find(t => t.type === event.value);
+    if (template) {
+      this.selectedScheduleTemplate = template.schedule;
+      this.reportForm.patchValue({ schedule: template.schedule });
     }
+  }
 
-    loadScheduleTemplates() {
-        this.schedulerService.getScheduleTemplates().subscribe({
-            next: (templates) => {
-                this.scheduleTemplates.set(templates);
-            },
-            error: (error) => {
-                console.error('Failed to load schedule templates:', error);
-            }
-        });
+  onScheduleTemplateChange(event: any) {
+    if (event.value) {
+      this.reportForm.patchValue({ schedule: event.value });
     }
+  }
 
-    loadStatistics() {
-        this.schedulerService.getReportStatistics().subscribe({
-            next: (stats) => {
-                this.statistics.set(stats);
-            },
-            error: (error) => {
-                console.error('Failed to load statistics:', error);
-            }
-        });
-    }
+  getSuccessRate(): number {
+    const stats = this.statistics();
+    if (!stats || stats.totalExecutions === 0) return 0;
+    return Math.round((stats.successfulExecutions / stats.totalExecutions) * 100);
+  }
 
-    openCreateDialog() {
-        this.editingReport.set(null);
-        this.reportForm.reset({
-            type: 'monthly',
-            format: 'pdf',
-            includeDetails: false
-        });
-        this.selectedScheduleTemplate = '';
-        this.showCreateDialog = true;
-    }
+  getLastExecutionTime(): string {
+    const stats = this.statistics();
+    if (!stats?.lastExecutionDate) return 'Never';
 
-    editReport(report: ScheduledReport) {
-        this.editingReport.set(report);
-        this.reportForm.patchValue({
-            name: report.name,
-            type: report.type,
-            schedule: report.schedule,
-            recipients: report.recipients,
-            format: report.format,
-            includeDetails: report.includeDetails,
-            startDate: report.filters?.dateRange?.start || null,
-            endDate: report.filters?.dateRange?.end || null
-        });
-        this.showCreateDialog = true;
-    }
+    const date = new Date(stats.lastExecutionDate);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
 
-    closeCreateDialog() {
-        this.showCreateDialog = false;
-        this.editingReport.set(null);
-        this.reportForm.reset();
-    }
-
-    saveReport() {
-        if (this.reportForm.invalid) return;
-
-        this.saving.set(true);
-        const formValue = this.reportForm.value;
-
-        const config: ReportScheduleConfig = {
-            name: formValue.name,
-            type: formValue.type,
-            schedule: formValue.schedule,
-            recipients: formValue.recipients,
-            format: formValue.format,
-            includeDetails: formValue.includeDetails,
-            filters: formValue.startDate && formValue.endDate ? {
-                dateRange: {
-                    start: formValue.startDate,
-                    end: formValue.endDate
-                }
-            } : undefined
-        };
-
-        const operation = this.editingReport()
-            ? this.schedulerService.updateScheduledReport(this.editingReport()!.id, config)
-            : this.schedulerService.createScheduledReport(config);
-
-        operation.pipe(
-            finalize(() => this.saving.set(false))
-        ).subscribe({
-            next: () => {
-                this.closeCreateDialog();
-                this.loadScheduledReports();
-                this.loadStatistics();
-            },
-            error: (error) => {
-                console.error('Failed to save scheduled report:', error);
-            }
-        });
-    }
-
-    triggerReport(reportId: string) {
-        this.schedulerService.triggerScheduledReport(reportId).subscribe({
-            next: () => {
-                this.notificationService.success('Report generation started');
-            },
-            error: (error) => {
-                console.error('Failed to trigger report:', error);
-            }
-        });
-    }
-
-    toggleReport(reportId: string, enabled: boolean) {
-        this.schedulerService.toggleScheduledReport(reportId, enabled).subscribe({
-            next: () => {
-                this.loadScheduledReports();
-            },
-            error: (error) => {
-                console.error('Failed to toggle report:', error);
-            }
-        });
-    }
-
-    deleteReport(reportId: string) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete this scheduled report?',
-            header: 'Confirm Deletion',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.schedulerService.deleteScheduledReport(reportId).subscribe({
-                    next: () => {
-                        this.loadScheduledReports();
-                        this.loadStatistics();
-                    },
-                    error: (error) => {
-                        console.error('Failed to delete report:', error);
-                    }
-                });
-            }
-        });
-    }
-
-    viewHistory(reportId: string) {
-        // Navigate to history view or open dialog
-        console.log('View history for report:', reportId);
-    }
-
-    sendTestEmail() {
-        if (!this.testEmails || this.testEmails.length === 0) return;
-
-        this.testingEmail.set(true);
-
-        this.schedulerService.testEmailDelivery(this.testEmails).pipe(
-            finalize(() => this.testingEmail.set(false))
-        ).subscribe({
-            next: (result) => {
-                this.showEmailTestDialog = false;
-                this.testEmails = [];
-            },
-            error: (error) => {
-                console.error('Email test failed:', error);
-            }
-        });
-    }
-
-    onTypeChange(event: any) {
-        // Update schedule template based on type
-        const templates = this.scheduleTemplates();
-        const template = templates.find(t => t.type === event.value);
-        if (template) {
-            this.selectedScheduleTemplate = template.schedule;
-            this.reportForm.patchValue({ schedule: template.schedule });
-        }
-    }
-
-    onScheduleTemplateChange(event: any) {
-        if (event.value) {
-            this.reportForm.patchValue({ schedule: event.value });
-        }
-    }
-
-    getSuccessRate(): number {
-        const stats = this.statistics();
-        if (!stats || stats.totalExecutions === 0) return 0;
-        return Math.round((stats.successfulExecutions / stats.totalExecutions) * 100);
-    }
-
-    getLastExecutionTime(): string {
-        const stats = this.statistics();
-        if (!stats?.lastExecutionDate) return 'Never';
-
-        const date = new Date(stats.lastExecutionDate);
-        const now = new Date();
-        const diff = now.getTime() - date.getTime();
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-
-        if (hours < 24) return `${hours}h ago`;
-        const days = Math.floor(hours / 24);
-        return `${days}d ago`;
-    }
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
 }

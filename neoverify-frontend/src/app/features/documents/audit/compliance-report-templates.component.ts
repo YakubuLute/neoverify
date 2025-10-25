@@ -9,8 +9,8 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { DropdownModule } from 'primeng/dropdown';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TagModule } from 'primeng/tag';
@@ -25,66 +25,66 @@ import { NotificationService } from '../../../core/services/notification.service
 import { ApiService } from '../../../core/services/api.service';
 
 interface ComplianceReportTemplate {
-    id: string;
-    name: string;
-    description: string;
-    category: 'regulatory' | 'internal' | 'audit' | 'security';
-    format: 'pdf' | 'html' | 'docx';
-    isActive: boolean;
-    isDefault: boolean;
-    sections: ReportSection[];
-    metadata: {
-        author: string;
-        version: string;
-        lastModified: Date;
-        tags: string[];
-    };
-    settings: {
-        includeCharts: boolean;
-        includeSummary: boolean;
-        includeRecommendations: boolean;
-        logoUrl?: string;
-        headerText?: string;
-        footerText?: string;
-    };
+  id: string;
+  name: string;
+  description: string;
+  category: 'regulatory' | 'internal' | 'audit' | 'security';
+  format: 'pdf' | 'html' | 'docx';
+  isActive: boolean;
+  isDefault: boolean;
+  sections: ReportSection[];
+  metadata: {
+    author: string;
+    version: string;
+    lastModified: Date;
+    tags: string[];
+  };
+  settings: {
+    includeCharts: boolean;
+    includeSummary: boolean;
+    includeRecommendations: boolean;
+    logoUrl?: string;
+    headerText?: string;
+    footerText?: string;
+  };
 }
 
 interface ReportSection {
-    id: string;
-    title: string;
-    type: 'text' | 'table' | 'chart' | 'metrics' | 'audit_trail';
-    order: number;
-    required: boolean;
-    content?: string;
-    dataSource?: string;
-    chartType?: 'line' | 'bar' | 'pie' | 'doughnut';
-    filters?: any;
+  id: string;
+  title: string;
+  type: 'text' | 'table' | 'chart' | 'metrics' | 'audit_trail';
+  order: number;
+  required: boolean;
+  content?: string;
+  dataSource?: string;
+  chartType?: 'line' | 'bar' | 'pie' | 'doughnut';
+  filters?: any;
 }
 
 @Component({
-    selector: 'app-compliance-report-templates',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CardModule,
-        ButtonModule,
-        TableModule,
-        DialogModule,
-        InputTextModule,
-        InputTextareaModule,
-        DropdownModule,
-        MultiSelectModule,
-        ToggleButtonModule,
-        TagModule,
-        TooltipModule,
-        ConfirmDialogModule,
-        EditorModule,
-        FileUploadModule
-    ],
-    providers: [ConfirmationService],
-    template: `
+  selector: 'app-compliance-report-templates',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CardModule,
+    ButtonModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    MultiSelectModule,
+    ToggleButtonModule,
+    TagModule,
+    TooltipModule,
+    ConfirmDialogModule,
+    EditorModule,
+    FileUploadModule
+  ],
+  providers: [ConfirmationService],
+  template: `
     <div class="compliance-templates-container p-6">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
@@ -180,7 +180,7 @@ interface ReportSection {
                   />
                   <p-tag
                     value="Default"
-                    severity="warning"
+                    severity="warn"
                     *ngIf="template.isDefault"
                   />
                 </div>
@@ -285,7 +285,7 @@ interface ReportSection {
 
             <div>
               <label class="text-sm font-medium text-gray-300 mb-2 block">Category</label>
-              <p-dropdown
+              <p-select
                 formControlName="category"
                 [options]="templateCategories"
                 optionLabel="label"
@@ -298,20 +298,19 @@ interface ReportSection {
 
           <div>
             <label class="text-sm font-medium text-gray-300 mb-2 block">Description</label>
-            <textarea
-              pInputTextarea
+            <p-textarea
               formControlName="description"
               placeholder="Enter template description"
               rows="3"
               class="w-full"
-            ></textarea>
+            ></p-textarea>
           </div>
 
           <!-- Format and Settings -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="text-sm font-medium text-gray-300 mb-2 block">Format</label>
-              <p-dropdown
+              <p-select
                 formControlName="format"
                 [options]="formatOptions"
                 optionLabel="label"
@@ -389,7 +388,7 @@ interface ReportSection {
                       placeholder="Section title"
                       class="w-full"
                     />
-                    <p-dropdown
+                    <p-select
                       [(ngModel)]="section.type"
                       [ngModelOptions]="{standalone: true}"
                       [options]="sectionTypes"
@@ -447,7 +446,7 @@ interface ReportSection {
                 <div *ngIf="section.type === 'chart'" class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="text-xs text-gray-400 mb-2 block">Chart Type</label>
-                    <p-dropdown
+                    <p-select
                       [(ngModel)]="section.chartType"
                       [ngModelOptions]="{standalone: true}"
                       [options]="chartTypes"
@@ -459,7 +458,7 @@ interface ReportSection {
                   </div>
                   <div>
                     <label class="text-xs text-gray-400 mb-2 block">Data Source</label>
-                    <p-dropdown
+                    <p-select
                       [(ngModel)]="section.dataSource"
                       [ngModelOptions]="{standalone: true}"
                       [options]="dataSources"
@@ -567,7 +566,7 @@ interface ReportSection {
       <p-confirmDialog />
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
       min-height: 100vh;
@@ -625,278 +624,278 @@ interface ReportSection {
   `]
 })
 export class ComplianceReportTemplatesComponent implements OnInit {
-    private readonly apiService = inject(ApiService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly confirmationService = inject(ConfirmationService);
-    private readonly fb = inject(FormBuilder);
+  private readonly apiService = inject(ApiService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly fb = inject(FormBuilder);
 
-    // Signals
-    templates = signal<ComplianceReportTemplate[]>([]);
-    filteredTemplates = signal<ComplianceReportTemplate[]>([]);
-    templateSections = signal<ReportSection[]>([]);
-    loading = signal(false);
-    saving = signal(false);
-    importing = signal(false);
-    editingTemplate = signal<ComplianceReportTemplate | null>(null);
+  // Signals
+  templates = signal<ComplianceReportTemplate[]>([]);
+  filteredTemplates = signal<ComplianceReportTemplate[]>([]);
+  templateSections = signal<ReportSection[]>([]);
+  loading = signal(false);
+  saving = signal(false);
+  importing = signal(false);
+  editingTemplate = signal<ComplianceReportTemplate | null>(null);
 
-    // Dialog states
-    showCreateDialog = false;
-    showImportDialog = false;
-    showPreviewDialog = false;
+  // Dialog states
+  showCreateDialog = false;
+  showImportDialog = false;
+  showPreviewDialog = false;
 
-    // Form and data
-    templateForm: FormGroup;
-    selectedCategory: string = 'all';
-    selectedFile: File | null = null;
-    previewUrl: string | null = null;
+  // Form and data
+  templateForm: FormGroup;
+  selectedCategory: string = 'all';
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
-    // Options
-    templateCategories = [
-        { label: 'All Categories', value: 'all', icon: 'pi pi-th-large' },
-        { label: 'Regulatory', value: 'regulatory', icon: 'pi pi-shield' },
-        { label: 'Internal Audit', value: 'internal', icon: 'pi pi-building' },
-        { label: 'External Audit', value: 'audit', icon: 'pi pi-eye' },
-        { label: 'Security', value: 'security', icon: 'pi pi-lock' }
-    ];
+  // Options
+  templateCategories = [
+    { label: 'All Categories', value: 'all', icon: 'pi pi-th-large' },
+    { label: 'Regulatory', value: 'regulatory', icon: 'pi pi-shield' },
+    { label: 'Internal Audit', value: 'internal', icon: 'pi pi-building' },
+    { label: 'External Audit', value: 'audit', icon: 'pi pi-eye' },
+    { label: 'Security', value: 'security', icon: 'pi pi-lock' }
+  ];
 
-    formatOptions = [
-        { label: 'PDF', value: 'pdf' },
-        { label: 'HTML', value: 'html' },
-        { label: 'Word Document', value: 'docx' }
-    ];
+  formatOptions = [
+    { label: 'PDF', value: 'pdf' },
+    { label: 'HTML', value: 'html' },
+    { label: 'Word Document', value: 'docx' }
+  ];
 
-    sectionTypes = [
-        { label: 'Text Content', value: 'text' },
-        { label: 'Data Table', value: 'table' },
-        { label: 'Chart/Graph', value: 'chart' },
-        { label: 'Key Metrics', value: 'metrics' },
-        { label: 'Audit Trail', value: 'audit_trail' }
-    ];
+  sectionTypes = [
+    { label: 'Text Content', value: 'text' },
+    { label: 'Data Table', value: 'table' },
+    { label: 'Chart/Graph', value: 'chart' },
+    { label: 'Key Metrics', value: 'metrics' },
+    { label: 'Audit Trail', value: 'audit_trail' }
+  ];
 
-    chartTypes = [
-        { label: 'Line Chart', value: 'line' },
-        { label: 'Bar Chart', value: 'bar' },
-        { label: 'Pie Chart', value: 'pie' },
-        { label: 'Doughnut Chart', value: 'doughnut' }
-    ];
+  chartTypes = [
+    { label: 'Line Chart', value: 'line' },
+    { label: 'Bar Chart', value: 'bar' },
+    { label: 'Pie Chart', value: 'pie' },
+    { label: 'Doughnut Chart', value: 'doughnut' }
+  ];
 
-    dataSources = [
-        { label: 'Audit Statistics', value: 'audit_stats' },
-        { label: 'Document Metrics', value: 'document_metrics' },
-        { label: 'User Activity', value: 'user_activity' },
-        { label: 'Compliance Scores', value: 'compliance_scores' }
-    ];
+  dataSources = [
+    { label: 'Audit Statistics', value: 'audit_stats' },
+    { label: 'Document Metrics', value: 'document_metrics' },
+    { label: 'User Activity', value: 'user_activity' },
+    { label: 'Compliance Scores', value: 'compliance_scores' }
+  ];
 
-    constructor() {
-        this.templateForm = this.fb.group({
-            name: ['', Validators.required],
-            description: [''],
-            category: ['regulatory', Validators.required],
-            format: ['pdf', Validators.required],
-            includeCharts: [true],
-            includeSummary: [true],
-            headerText: [''],
-            footerText: ['']
-        });
-    }
+  constructor() {
+    this.templateForm = this.fb.group({
+      name: ['', Validators.required],
+      description: [''],
+      category: ['regulatory', Validators.required],
+      format: ['pdf', Validators.required],
+      includeCharts: [true],
+      includeSummary: [true],
+      headerText: [''],
+      footerText: ['']
+    });
+  }
 
-    ngOnInit() {
-        this.loadTemplates();
-    }
+  ngOnInit() {
+    this.loadTemplates();
+  }
 
-    loadTemplates() {
-        this.loading.set(true);
+  loadTemplates() {
+    this.loading.set(true);
 
-        // Mock data - in real app, this would come from API
-        const mockTemplates: ComplianceReportTemplate[] = [
-            {
-                id: '1',
-                name: 'SOX Compliance Report',
-                description: 'Sarbanes-Oxley compliance reporting template',
-                category: 'regulatory',
-                format: 'pdf',
-                isActive: true,
-                isDefault: true,
-                sections: [
-                    {
-                        id: '1',
-                        title: 'Executive Summary',
-                        type: 'text',
-                        order: 1,
-                        required: true,
-                        content: 'Executive summary content...'
-                    },
-                    {
-                        id: '2',
-                        title: 'Audit Activity Overview',
-                        type: 'chart',
-                        order: 2,
-                        required: true,
-                        chartType: 'line',
-                        dataSource: 'audit_stats'
-                    }
-                ],
-                metadata: {
-                    author: 'System Admin',
-                    version: '1.0',
-                    lastModified: new Date(),
-                    tags: ['sox', 'regulatory', 'financial']
-                },
-                settings: {
-                    includeCharts: true,
-                    includeSummary: true,
-                    includeRecommendations: true,
-                    headerText: 'SOX Compliance Report',
-                    footerText: 'Confidential - Internal Use Only'
-                }
-            },
-            {
-                id: '2',
-                name: 'Internal Audit Summary',
-                description: 'Monthly internal audit summary template',
-                category: 'internal',
-                format: 'html',
-                isActive: true,
-                isDefault: false,
-                sections: [
-                    {
-                        id: '3',
-                        title: 'Monthly Overview',
-                        type: 'metrics',
-                        order: 1,
-                        required: true,
-                        dataSource: 'audit_stats'
-                    }
-                ],
-                metadata: {
-                    author: 'Audit Team',
-                    version: '2.1',
-                    lastModified: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                    tags: ['internal', 'monthly', 'summary']
-                },
-                settings: {
-                    includeCharts: true,
-                    includeSummary: false,
-                    includeRecommendations: true
-                }
-            }
-        ];
-
-        setTimeout(() => {
-            this.templates.set(mockTemplates);
-            this.filterTemplates();
-            this.loading.set(false);
-        }, 1000);
-    }
-
-    filterByCategory(category: string) {
-        this.selectedCategory = category;
-        this.filterTemplates();
-    }
-
-    filterTemplates() {
-        const templates = this.templates();
-        if (this.selectedCategory === 'all') {
-            this.filteredTemplates.set(templates);
-        } else {
-            this.filteredTemplates.set(templates.filter(t => t.category === this.selectedCategory));
-        }
-    }
-
-    getCategoryCount(category: string): number {
-        if (category === 'all') return this.templates().length;
-        return this.templates().filter(t => t.category === category).length;
-    }
-
-    getCategoryLabel(category: string): string {
-        const categoryObj = this.templateCategories.find(c => c.value === category);
-        return categoryObj?.label || category;
-    }
-
-    openCreateDialog() {
-        this.editingTemplate.set(null);
-        this.templateForm.reset({
-            category: 'regulatory',
-            format: 'pdf',
-            includeCharts: true,
-            includeSummary: true
-        });
-        this.templateSections.set([]);
-        this.showCreateDialog = true;
-    }
-
-    editTemplate(template: ComplianceReportTemplate) {
-        this.editingTemplate.set(template);
-        this.templateForm.patchValue({
-            name: template.name,
-            description: template.description,
-            category: template.category,
-            format: template.format,
-            includeCharts: template.settings.includeCharts,
-            includeSummary: template.settings.includeSummary,
-            headerText: template.settings.headerText,
-            footerText: template.settings.footerText
-        });
-        this.templateSections.set([...template.sections]);
-        this.showCreateDialog = true;
-    }
-
-    closeCreateDialog() {
-        this.showCreateDialog = false;
-        this.editingTemplate.set(null);
-        this.templateForm.reset();
-        this.templateSections.set([]);
-    }
-
-    saveTemplate() {
-        if (this.templateForm.invalid) return;
-
-        this.saving.set(true);
-
-        // Mock save - in real app, this would call API
-        setTimeout(() => {
-            this.saving.set(false);
-            this.closeCreateDialog();
-            this.loadTemplates();
-            this.notificationService.success('Template saved successfully');
-        }, 1000);
-    }
-
-    addSection() {
-        const sections = this.templateSections();
-        const newSection: ReportSection = {
-            id: Date.now().toString(),
-            title: 'New Section',
+    // Mock data - in real app, this would come from API
+    const mockTemplates: ComplianceReportTemplate[] = [
+      {
+        id: '1',
+        name: 'SOX Compliance Report',
+        description: 'Sarbanes-Oxley compliance reporting template',
+        category: 'regulatory',
+        format: 'pdf',
+        isActive: true,
+        isDefault: true,
+        sections: [
+          {
+            id: '1',
+            title: 'Executive Summary',
             type: 'text',
-            order: sections.length + 1,
-            required: false
-        };
-        this.templateSections.set([...sections, newSection]);
-    }
+            order: 1,
+            required: true,
+            content: 'Executive summary content...'
+          },
+          {
+            id: '2',
+            title: 'Audit Activity Overview',
+            type: 'chart',
+            order: 2,
+            required: true,
+            chartType: 'line',
+            dataSource: 'audit_stats'
+          }
+        ],
+        metadata: {
+          author: 'System Admin',
+          version: '1.0',
+          lastModified: new Date(),
+          tags: ['sox', 'regulatory', 'financial']
+        },
+        settings: {
+          includeCharts: true,
+          includeSummary: true,
+          includeRecommendations: true,
+          headerText: 'SOX Compliance Report',
+          footerText: 'Confidential - Internal Use Only'
+        }
+      },
+      {
+        id: '2',
+        name: 'Internal Audit Summary',
+        description: 'Monthly internal audit summary template',
+        category: 'internal',
+        format: 'html',
+        isActive: true,
+        isDefault: false,
+        sections: [
+          {
+            id: '3',
+            title: 'Monthly Overview',
+            type: 'metrics',
+            order: 1,
+            required: true,
+            dataSource: 'audit_stats'
+          }
+        ],
+        metadata: {
+          author: 'Audit Team',
+          version: '2.1',
+          lastModified: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          tags: ['internal', 'monthly', 'summary']
+        },
+        settings: {
+          includeCharts: true,
+          includeSummary: false,
+          includeRecommendations: true
+        }
+      }
+    ];
 
-    removeSection(index: number) {
-        const sections = this.templateSections();
-        sections.splice(index, 1);
-        this.templateSections.set([...sections]);
-    }
+    setTimeout(() => {
+      this.templates.set(mockTemplates);
+      this.filterTemplates();
+      this.loading.set(false);
+    }, 1000);
+  }
 
-    moveSectionUp(index: number) {
-        if (index === 0) return;
-        const sections = this.templateSections();
-        [sections[index], sections[index - 1]] = [sections[index - 1], sections[index]];
-        this.templateSections.set([...sections]);
-    }
+  filterByCategory(category: string) {
+    this.selectedCategory = category;
+    this.filterTemplates();
+  }
 
-    moveSectionDown(index: number) {
-        const sections = this.templateSections();
-        if (index === sections.length - 1) return;
-        [sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
-        this.templateSections.set([...sections]);
+  filterTemplates() {
+    const templates = this.templates();
+    if (this.selectedCategory === 'all') {
+      this.filteredTemplates.set(templates);
+    } else {
+      this.filteredTemplates.set(templates.filter(t => t.category === this.selectedCategory));
     }
+  }
 
-    previewTemplate(template: ComplianceReportTemplate) {
-        // Mock preview - in real app, this would generate preview
-        this.previewUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+  getCategoryCount(category: string): number {
+    if (category === 'all') return this.templates().length;
+    return this.templates().filter(t => t.category === category).length;
+  }
+
+  getCategoryLabel(category: string): string {
+    const categoryObj = this.templateCategories.find(c => c.value === category);
+    return categoryObj?.label || category;
+  }
+
+  openCreateDialog() {
+    this.editingTemplate.set(null);
+    this.templateForm.reset({
+      category: 'regulatory',
+      format: 'pdf',
+      includeCharts: true,
+      includeSummary: true
+    });
+    this.templateSections.set([]);
+    this.showCreateDialog = true;
+  }
+
+  editTemplate(template: ComplianceReportTemplate) {
+    this.editingTemplate.set(template);
+    this.templateForm.patchValue({
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      format: template.format,
+      includeCharts: template.settings.includeCharts,
+      includeSummary: template.settings.includeSummary,
+      headerText: template.settings.headerText,
+      footerText: template.settings.footerText
+    });
+    this.templateSections.set([...template.sections]);
+    this.showCreateDialog = true;
+  }
+
+  closeCreateDialog() {
+    this.showCreateDialog = false;
+    this.editingTemplate.set(null);
+    this.templateForm.reset();
+    this.templateSections.set([]);
+  }
+
+  saveTemplate() {
+    if (this.templateForm.invalid) return;
+
+    this.saving.set(true);
+
+    // Mock save - in real app, this would call API
+    setTimeout(() => {
+      this.saving.set(false);
+      this.closeCreateDialog();
+      this.loadTemplates();
+      this.notificationService.success('Template saved successfully');
+    }, 1000);
+  }
+
+  addSection() {
+    const sections = this.templateSections();
+    const newSection: ReportSection = {
+      id: Date.now().toString(),
+      title: 'New Section',
+      type: 'text',
+      order: sections.length + 1,
+      required: false
+    };
+    this.templateSections.set([...sections, newSection]);
+  }
+
+  removeSection(index: number) {
+    const sections = this.templateSections();
+    sections.splice(index, 1);
+    this.templateSections.set([...sections]);
+  }
+
+  moveSectionUp(index: number) {
+    if (index === 0) return;
+    const sections = this.templateSections();
+    [sections[index], sections[index - 1]] = [sections[index - 1], sections[index]];
+    this.templateSections.set([...sections]);
+  }
+
+  moveSectionDown(index: number) {
+    const sections = this.templateSections();
+    if (index === sections.length - 1) return;
+    [sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
+    this.templateSections.set([...sections]);
+  }
+
+  previewTemplate(template: ComplianceReportTemplate) {
+    // Mock preview - in real app, this would generate preview
+    this.previewUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
       <html>
         <head><title>${template.name} Preview</title></head>
         <body style="font-family: Arial, sans-serif; padding: 20px;">
@@ -915,14 +914,14 @@ export class ComplianceReportTemplatesComponent implements OnInit {
         </body>
       </html>
     `);
-        this.showPreviewDialog = true;
-    }
+    this.showPreviewDialog = true;
+  }
 
-    previewCurrentTemplate() {
-        const formValue = this.templateForm.value;
-        const sections = this.templateSections();
+  previewCurrentTemplate() {
+    const formValue = this.templateForm.value;
+    const sections = this.templateSections();
 
-        this.previewUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
+    this.previewUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(`
       <html>
         <head><title>${formValue.name} Preview</title></head>
         <body style="font-family: Arial, sans-serif; padding: 20px;">
@@ -941,62 +940,62 @@ export class ComplianceReportTemplatesComponent implements OnInit {
         </body>
       </html>
     `);
-        this.showPreviewDialog = true;
-    }
+    this.showPreviewDialog = true;
+  }
 
-    duplicateTemplate(template: ComplianceReportTemplate) {
-        // Mock duplicate - in real app, this would call API
-        this.notificationService.success('Template duplicated successfully');
+  duplicateTemplate(template: ComplianceReportTemplate) {
+    // Mock duplicate - in real app, this would call API
+    this.notificationService.success('Template duplicated successfully');
+    this.loadTemplates();
+  }
+
+  exportTemplate(template: ComplianceReportTemplate) {
+    const exportData = JSON.stringify(template, null, 2);
+    const blob = new Blob([exportData], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${template.name.replace(/\s+/g, '_')}_template.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.notificationService.success('Template exported successfully');
+  }
+
+  toggleDefault(templateId: string) {
+    // Mock toggle - in real app, this would call API
+    this.notificationService.success('Default template updated');
+    this.loadTemplates();
+  }
+
+  deleteTemplate(templateId: string) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this template?',
+      header: 'Confirm Deletion',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Mock delete - in real app, this would call API
+        this.notificationService.success('Template deleted successfully');
         this.loadTemplates();
-    }
+      }
+    });
+  }
 
-    exportTemplate(template: ComplianceReportTemplate) {
-        const exportData = JSON.stringify(template, null, 2);
-        const blob = new Blob([exportData], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${template.name.replace(/\s+/g, '_')}_template.json`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.notificationService.success('Template exported successfully');
-    }
+  onTemplateFileSelect(event: any) {
+    this.selectedFile = event.files[0];
+  }
 
-    toggleDefault(templateId: string) {
-        // Mock toggle - in real app, this would call API
-        this.notificationService.success('Default template updated');
-        this.loadTemplates();
-    }
+  importTemplate() {
+    if (!this.selectedFile) return;
 
-    deleteTemplate(templateId: string) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete this template?',
-            header: 'Confirm Deletion',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                // Mock delete - in real app, this would call API
-                this.notificationService.success('Template deleted successfully');
-                this.loadTemplates();
-            }
-        });
-    }
+    this.importing.set(true);
 
-    onTemplateFileSelect(event: any) {
-        this.selectedFile = event.files[0];
-    }
-
-    importTemplate() {
-        if (!this.selectedFile) return;
-
-        this.importing.set(true);
-
-        // Mock import - in real app, this would process the file
-        setTimeout(() => {
-            this.importing.set(false);
-            this.showImportDialog = false;
-            this.selectedFile = null;
-            this.notificationService.success('Template imported successfully');
-            this.loadTemplates();
-        }, 1000);
-    }
+    // Mock import - in real app, this would process the file
+    setTimeout(() => {
+      this.importing.set(false);
+      this.showImportDialog = false;
+      this.selectedFile = null;
+      this.notificationService.success('Template imported successfully');
+      this.loadTemplates();
+    }, 1000);
+  }
 }
