@@ -1,0 +1,298 @@
+<div class="template-builder-container">
+  <!-- Header Section -->
+  <div class="builder-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          {{ isEditMode() ? 'Edit Template' : 'Create Template' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode() ? 'Modify your document template' : 'Build a new document template' }}
+        </p>
+      </div>
+      <div class="header-actions">
+        <p-button 
+          label="Preview" 
+          icon="pi pi-eye"
+          (onClick)="onPreviewTemplate()"
+          styleClass="p-button-outlined">
+        </p-button>
+        <p-button 
+          label="Cancel" 
+          (onClick)="onCancel()"
+          styleClass="p-button-text">
+        </p-button>
+        <p-button 
+          [label]="isEditMode() ? 'Update Template' : 'Save Template'"
+          icon="pi pi-save"
+          (onClick)="onSaveTemplate()"
+          [loading]="saving()"
+          [disabled]="!templateForm().valid || !canSaveTemplate()"
+          styleClass="p-button-primary">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="loading-content">
+        <p-progressSpinner></p-progressSpinner>
+        <p>Loading template...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="error-container">
+      <div class="error-content">
+        <i class="pi pi-exclamation-triangle error-icon"></i>
+        <h3>Error Loading Template</h3>
+        <p>{{ error() }}</p>
+        <p-button 
+          label="Go Back" 
+          icon="pi pi-arrow-left"
+          (onClick)="onCancel()">
+        </p-button>
+      </div>
+    </div>
+  }
+
+  <!-- Main Builder Content -->
+  @else {
+    <div class="builder-content">
+      <!-- Left Sidebar - Template Settings -->
+      <div class="left-sidebar">
+        <div class="sidebar-section">
+          <h3>Template Settings</h3>
+          <form [formGroup]="templateForm()" class="template-form">
+            <div class="form-group">
+              <label for="name">Template Name *</label>
+              <input 
+                id="name"
+                type="text" 
+                pInputText 
+                formControlName="name"
+                placeholder="Enter template name"
+                class="w-full">
+              @if (templateForm().get('name')?.invalid && templateForm().get('name')?.touched) {
+                <small class="p-error">Template name is required (min 3 characters)</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="description">Description *</label>
+              <textarea 
+                id="description"
+                pInputTextarea 
+                formControlName="description"
+                placeholder="Describe the template purpose"
+                rows="3"
+                class="w-full">
+              </textarea>
+              @if (templateForm().get('description')?.invalid && templateForm().get('description')?.touched) {
+                <small class="p-error">Description is required (min 10 characters)</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="category">Category *</label>
+              <p-select 
+                id="category"
+                formControlName="category"
+                placeholder="Select category"
+                [options]="[
+                  {label: 'Education', value: 'Education'},
+                  {label: 'Professional', value: 'Professional'},
+                  {label: 'Government', value: 'Government'},
+                  {label: 'Healthcare', value: 'Healthcare'},
+                  {label: 'Legal', value: 'Legal'},
+                  {label: 'Other', value: 'Other'}
+                ]"
+                styleClass="w-full">
+              </p-select>
+            </div>
+
+            <div class="form-group">
+              <label for="version">Version</label>
+              <input 
+                id="version"
+                type="text" 
+                pInputText 
+                formControlName="version"
+                placeholder="1.0.0"
+                class="w-full">
+            </div>
+
+            <div class="form-group">
+              <p-checkbox 
+                formControlName="isActive"
+                label="Active Template"
+                [binary]="true">
+              </p-checkbox>
+            </div>
+          </form>
+        </div>
+
+        <!-- Field Types Palette -->
+        <div class="sidebar-section">
+          <h3>Field Types</h3>
+          <div class="field-palette">
+            @for (fieldType of fieldTypeOptions; track fieldType.value) {
+              <div 
+                class="field-type-item"
+                (click)="onAddField(fieldType.value)"
+                [pTooltip]="fieldType.description">
+                <i [class]="fieldType.icon"></i>
+                <span>{{ fieldType.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Canvas - Template Design Area -->
+      <div class="center-canvas">
+        <div class="canvas-toolbar">
+          <div class="canvas-controls">
+            <p-button 
+              icon="pi pi-search-plus" 
+              (onClick)="onZoomIn()"
+              styleClass="p-button-text p-button-sm"
+              pTooltip="Zoom In">
+            </p-button>
+            <span class="zoom-level">{{ (canvasScale() * 100).toFixed(0) }}%</span>
+            <p-button 
+              icon="pi pi-search-minus" 
+              (onClick)="onZoomOut()"
+              styleClass="p-button-text p-button-sm"
+              pTooltip="Zoom Out">
+            </p-button>
+            <p-button 
+              icon="pi pi-refresh" 
+              (onClick)="onResetZoom()"
+              styleClass="p-button-text p-button-sm"
+              pTooltip="Reset Zoom">
+            </p-button>
+          </div>
+          <div class="canvas-info">
+            <span>{{ fields().length }} field(s)</span>
+          </div>
+        </div>
+
+        <div 
+          class="canvas-container"
+          #canvasContainer
+          (drop)="onCanvasDrop($event)"
+          (dragover)="onCanvasDragOver($event)">
+          
+          <div 
+            class="canvas"
+            [style.transform]="'scale(' + canvasScale() + ') translate(' + canvasOffset().x + 'px, ' + canvasOffset().y + 'px)'">
+            
+            <!-- Template Background -->
+            <div class="template-background">
+              <div class="template-header">
+                <h2>{{ templateForm().get('name')?.value || 'Template Preview' }}</h2>
+                <p>{{ templateForm().get('description')?.value || 'Template description' }}</p>
+              </div>
+              
+              <!-- Template Fields -->
+              @for (field of fields(); track field.id) {
+                <div 
+                  class="template-field"
+                  [class.selected]="selectedField()?.id === field.id"
+                  [style.left.px]="field.position.x"
+                  [style.top.px]="field.position.y"
+                  (click)="onFieldClick(field)"
+                  draggable="true"
+                  (dragstart)="onFieldDragStart($event, field)">
+                  
+                  <div class="field-header">
+                    <i [class]="getFieldIcon(field.type)"></i>
+                    <span class="field-name">{{ field.name }}</span>
+                    @if (field.required) {
+                      <span class="required-indicator">*</span>
+                    }
+                    <button 
+                      class="delete-field-btn"
+                      (click)="onDeleteField(field.id); $event.stopPropagation()"
+                      pTooltip="Delete field">
+                      <i class="pi pi-times"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="field-preview">
+                    @switch (field.type) {
+                      @case (FieldType.TEXT) {
+                        <input 
+                          type="text" 
+                          [placeholder]="field.placeholder"
+                          [value]="field.defaultValue"
+                          readonly>
+                      }
+                      @case (FieldType.NUMBER) {
+                        <input 
+                          type="number" 
+                          [placeholder]="field.placeholder"
+                          [value]="field.defaultValue"
+                          readonly>
+                      }
+                      @case (FieldType.DATE) {
+                        <input 
+                          type="date" 
+                          [value]="field.defaultValue"
+                          readonly>
+                      }
+                      @case (FieldType.EMAIL) {
+                        <input 
+                          type="email" 
+                          [placeholder]="field.placeholder"
+                          [value]="field.defaultValue"
+                          readonly>
+                      }
+                      @case (FieldType.PHONE) {
+                        <input 
+                          type="tel" 
+                          [placeholder]="field.placeholder"
+                          [value]="field.defaultValue"
+                          readonly>
+                      }
+                      @case (FieldType.DROPDOWN) {
+                        <select readonly>
+                          <option>{{ field.placeholder }}</option>
+                          @for (option of field.options; track option) {
+                            <option>{{ option }}</option>
+                          }
+                        </select>
+                      }
+                      @case (FieldType.CHECKBOX) {
+                        <label class="checkbox-label">
+                          <input type="checkbox" [checked]="field.defaultValue" disabled>
+                          {{ field.placeholder }}
+                        </label>
+                      }
+                      @case (FieldType.TEXTAREA) {
+                        <textarea 
+                          [placeholder]="field.placeholder"
+                          [value]="field.defaultValue"
+                          readonly
+                          rows="3">
+                        </textarea>
+                      }
+                      @case (FieldType.FILE) {
+                        <div class="file-upload-preview">
+                          <i class="pi pi-upload"></i>
+                          <span>{{ field.placeholder }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                  
+                  <!-- Validation Rules Indicator -->
+                  @if (getFieldValidationRules(field.id).length > 0) {
+                    <div class="validation-indicator">
+                      <i class="pi pi-shield" pTooltip="Has validation rules"></i>
+                    
