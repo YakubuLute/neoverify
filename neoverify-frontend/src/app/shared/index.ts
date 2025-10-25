@@ -64,6 +64,7 @@ import { TieredMenuModule } from 'primeng/tieredmenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MegaMenuModule } from 'primeng/megamenu';
 import { DockModule } from 'primeng/dock';
+import { ChipsModule } from 'primeng/chips';
 
 // Shared Components
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
@@ -75,7 +76,7 @@ export const SHARED_IMPORTS = [
   FormsModule,
   ReactiveFormsModule,
   RouterModule,
-  
+
   // PrimeNG modules
   ButtonModule,
   CardModule,
@@ -127,7 +128,8 @@ export const SHARED_IMPORTS = [
   ContextMenuModule,
   MegaMenuModule,
   DockModule,
-  
+  ChipsModule,
+
   // Shared components
   LoadingSpinnerComponent,
   ConfirmationDialogComponent

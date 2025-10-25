@@ -36,21 +36,21 @@
     - _Requirements: 1.1, 7.2, 7.3, 7.4_
 
 - [-] 3. Create document upload functionality
-  - [-] 3.1 Build single document upload component
+  - [x] 3.1 Build single document upload component
     - Create drag-and-drop upload interface with file validation
     - Implement file format and size validation with clear error messages
     - Add upload progress tracking with cancel capability
     - Build metadata form with auto-completion and validation
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-  - [ ] 3.2 Implement bulk upload functionality
+  - [x] 3.2 Implement bulk upload functionality
     - Create bulk upload interface supporting up to 100 files
     - Build upload queue management with individual file progress tracking
     - Implement batch processing with background job status updates
     - Add bulk upload results summary with success/failure breakdown
     - _Requirements: 7.1, 7.3, 7.4_
 
-  - [ ] 3.3 Add template integration to upload process
+  - [-] 3.3 Add template integration to upload process
     - Integrate template selection into upload workflow
     - Pre-populate metadata fields based on selected template
     - Implement template field validation and required field enforcement

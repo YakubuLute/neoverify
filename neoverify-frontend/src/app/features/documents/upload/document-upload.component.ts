@@ -3,8 +3,9 @@ import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
 import { UploadService } from '../../../core/services/upload.service';
+import { TemplateService } from '../../../core/services/template.service';
 import { SHARED_IMPORTS } from '../../../shared';
-import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus } from '../../../shared/models/document.models';
+import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus, DocumentTemplate, TemplateField } from '../../../shared/models/document.models';
 import { FormUtils } from '../../../shared/utils/form.utils';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -17,12 +18,30 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
       <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
-            Upload Document
-          </h1>
-          <p class="text-surface-600 dark:text-surface-400">
-            Upload and register your document on the blockchain for verification
-          </p>
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                {{ uploadMode() === 'single' ? 'Upload Document' : 'Bulk Upload Documents' }}
+              </h1>
+              <p class="text-surface-600 dark:text-surface-400">
+                {{ uploadMode() === 'single' 
+                  ? 'Upload and register your document on the blockchain for verification'
+                  : 'Upload multiple documents at once (up to 100 files)'
+                }}
+              </p>
+            </div>
+            
+            <!-- Upload Mode Toggle -->
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-surface-600 dark:text-surface-400">Single</span>
+              <p-toggleSwitch
+                [(ngModel)]="isBulkModeValue"
+                (onChange)="toggleUploadMode()"
+                [disabled]="isUploading()"
+              ></p-toggleSwitch>
+              <span class="text-sm text-surface-600 dark:text-surface-400">Bulk</span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -50,41 +69,81 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     (drop)="onDrop($event)"
                     (click)="fileInput.click()"
                   >
-                    @if (!selectedFile()) {
-                      <div class="space-y-4">
-                        <div class="mx-auto w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center">
-                          <i class="pi pi-cloud-upload text-2xl text-surface-500"></i>
+                    @if (uploadMode() === 'single') {
+                      @if (!selectedFile()) {
+                        <div class="space-y-4">
+                          <div class="mx-auto w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center">
+                            <i class="pi pi-cloud-upload text-2xl text-surface-500"></i>
+                          </div>
+                          <div>
+                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-2">
+                              Drop your file here or click to browse
+                            </p>
+                            <p class="text-sm text-surface-500">
+                              Supported formats: PDF, DOCX, PNG, JPG, JPEG (Max: {{ maxFileSize / 1024 / 1024 }}MB)
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-2">
-                            Drop your file here or click to browse
-                          </p>
-                          <p class="text-sm text-surface-500">
-                            Supported formats: PDF, DOCX, PNG, JPG, JPEG (Max: {{ maxFileSize / 1024 / 1024 }}MB)
-                          </p>
+                      } @else {
+                        <div class="space-y-4">
+                          <div class="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                            <i class="pi pi-check text-2xl text-green-600 dark:text-green-400"></i>
+                          </div>
+                          <div>
+                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-1">
+                              {{ selectedFile()?.name }}
+                            </p>
+                            <p class="text-sm text-surface-500">
+                              {{ formatFileSize(selectedFile()?.size || 0) }}
+                            </p>
+                            <button 
+                              type="button" 
+                              class="mt-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              (click)="removeFile($event)"
+                            >
+                              Remove file
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      }
                     } @else {
-                      <div class="space-y-4">
-                        <div class="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                          <i class="pi pi-check text-2xl text-green-600 dark:text-green-400"></i>
+                      @if (selectedFiles().length === 0) {
+                        <div class="space-y-4">
+                          <div class="mx-auto w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center">
+                            <i class="pi pi-cloud-upload text-2xl text-surface-500"></i>
+                          </div>
+                          <div>
+                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-2">
+                              Drop multiple files here or click to browse
+                            </p>
+                            <p class="text-sm text-surface-500">
+                              Upload up to 100 files at once<br>
+                              Supported formats: PDF, DOCX, PNG, JPG, JPEG (Max: {{ maxFileSize / 1024 / 1024 }}MB each)
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-1">
-                            {{ selectedFile()?.name }}
-                          </p>
-                          <p class="text-sm text-surface-500">
-                            {{ formatFileSize(selectedFile()?.size || 0) }}
-                          </p>
-                          <button 
-                            type="button" 
-                            class="mt-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                            (click)="removeFile($event)"
-                          >
-                            Remove file
-                          </button>
+                      } @else {
+                        <div class="space-y-4">
+                          <div class="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                            <i class="pi pi-files text-2xl text-green-600 dark:text-green-400"></i>
+                          </div>
+                          <div>
+                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-1">
+                              {{ selectedFiles().length }} files selected
+                            </p>
+                            <p class="text-sm text-surface-500">
+                              Total size: {{ getTotalFileSize() }}
+                            </p>
+                            <button 
+                              type="button" 
+                              class="mt-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              (click)="clearAllFiles($event)"
+                            >
+                              Clear all files
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      }
                     }
                   </div>
 
@@ -94,6 +153,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     type="file" 
                     class="hidden" 
                     [accept]="acceptedFileTypes"
+                    [multiple]="uploadMode() === 'bulk'"
                     (change)="onFileInputChange($event)"
                   />
 
@@ -107,8 +167,8 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   }
                 </div>
 
-                <!-- File Preview -->
-                @if (selectedFile() && filePreview()) {
+                <!-- File Preview / Bulk File List -->
+                @if (uploadMode() === 'single' && selectedFile() && filePreview()) {
                   <div class="field">
                     <label class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
                       Preview
@@ -129,11 +189,45 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     </div>
                   </div>
                 }
+
+                @if (uploadMode() === 'bulk' && selectedFiles().length > 0) {
+                  <div class="field">
+                    <label class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                      Selected Files ({{ selectedFiles().length }})
+                    </label>
+                    <div class="border rounded-lg bg-surface-50 dark:bg-surface-800 max-h-64 overflow-y-auto">
+                      @for (file of selectedFiles(); track file.name; let i = $index) {
+                        <div class="flex items-center justify-between p-3 border-b border-surface-200 dark:border-surface-700 last:border-b-0">
+                          <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-surface-200 dark:bg-surface-600 rounded flex items-center justify-center">
+                              @if (isImageFile(file)) {
+                                <i class="pi pi-image text-sm text-surface-600 dark:text-surface-400"></i>
+                              } @else {
+                                <i class="pi pi-file-pdf text-sm text-red-500"></i>
+                              }
+                            </div>
+                            <div>
+                              <p class="text-sm font-medium text-surface-900 dark:text-surface-0">{{ file.name }}</p>
+                              <p class="text-xs text-surface-500">{{ formatFileSize(file.size) }}</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                            (click)="removeFileFromBulk(i)"
+                          >
+                            <i class="pi pi-times text-sm"></i>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
             </p-card>
 
             <!-- Upload Progress -->
-            @if (uploadProgress()) {
+            @if (uploadMode() === 'single' && uploadProgress()) {
               <p-card class="shadow-lg">
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
@@ -199,6 +293,109 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                 </div>
               </p-card>
             }
+
+            <!-- Bulk Upload Progress -->
+            @if (uploadMode() === 'bulk' && bulkUploadProgress().size > 0) {
+              <p-card class="shadow-lg">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-surface-900 dark:text-surface-0">
+                      Bulk Upload Progress
+                    </h3>
+                    <div class="text-sm text-surface-600 dark:text-surface-400">
+                      {{ totalBulkProgress() }}% Complete
+                    </div>
+                  </div>
+
+                  <!-- Overall Progress -->
+                  <div class="space-y-2">
+                    <p-progressBar 
+                      [value]="totalBulkProgress()"
+                      [showValue]="false"
+                      class="h-3"
+                    ></p-progressBar>
+                  </div>
+
+                  <!-- Individual File Progress -->
+                  <div class="max-h-48 overflow-y-auto space-y-2">
+                    @for (progress of Array.from(bulkUploadProgress().values()); track progress.fileId) {
+                      <div class="flex items-center justify-between p-2 bg-surface-100 dark:bg-surface-700 rounded">
+                        <div class="flex items-center space-x-2 flex-1 min-w-0">
+                          <div class="w-4 h-4 flex-shrink-0">
+                            @switch (progress.status) {
+                              @case (UploadStatus.UPLOADING) {
+                                <i class="pi pi-spin pi-spinner text-blue-500 text-xs"></i>
+                              }
+                              @case (UploadStatus.PROCESSING) {
+                                <i class="pi pi-spin pi-cog text-orange-500 text-xs"></i>
+                              }
+                              @case (UploadStatus.COMPLETED) {
+                                <i class="pi pi-check-circle text-green-500 text-xs"></i>
+                              }
+                              @case (UploadStatus.FAILED) {
+                                <i class="pi pi-exclamation-triangle text-red-500 text-xs"></i>
+                              }
+                              @case (UploadStatus.CANCELLED) {
+                                <i class="pi pi-times-circle text-gray-500 text-xs"></i>
+                              }
+                              @default {
+                                <i class="pi pi-clock text-gray-500 text-xs"></i>
+                              }
+                            }
+                          </div>
+                          <span class="text-sm text-surface-900 dark:text-surface-0 truncate">
+                            {{ progress.fileName }}
+                          </span>
+                        </div>
+                        <div class="flex items-center space-x-2 flex-shrink-0">
+                          <span class="text-xs text-surface-600 dark:text-surface-400">
+                            {{ progress.progress }}%
+                          </span>
+                          @if (progress.status === UploadStatus.UPLOADING || progress.status === UploadStatus.PROCESSING) {
+                            <button
+                              type="button"
+                              class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              (click)="cancelSingleUpload(progress.fileId)"
+                            >
+                              <i class="pi pi-times text-xs"></i>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Bulk Upload Results -->
+                  @if (bulkUploadResults()) {
+                    <div class="p-3 bg-surface-50 dark:bg-surface-800 rounded border">
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="font-medium text-surface-900 dark:text-surface-0">Upload Summary</span>
+                      </div>
+                      <div class="mt-2 grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div class="text-lg font-bold text-green-600 dark:text-green-400">
+                            {{ bulkUploadResults()?.success }}
+                          </div>
+                          <div class="text-xs text-surface-600 dark:text-surface-400">Success</div>
+                        </div>
+                        <div>
+                          <div class="text-lg font-bold text-red-600 dark:text-red-400">
+                            {{ bulkUploadResults()?.failed }}
+                          </div>
+                          <div class="text-xs text-surface-600 dark:text-surface-400">Failed</div>
+                        </div>
+                        <div>
+                          <div class="text-lg font-bold text-surface-900 dark:text-surface-0">
+                            {{ bulkUploadResults()?.total }}
+                          </div>
+                          <div class="text-xs text-surface-600 dark:text-surface-400">Total</div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </p-card>
+            }
           </div>
 
           <!-- Metadata Form -->
@@ -206,161 +403,253 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
             <p-card class="shadow-lg">
               <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="space-y-6">
 
-            <!-- Document Type -->
-            <div class="field">
-              <label for="documentType" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                Document Type *
-              </label>
-              <p-select
-                id="documentType"
-                formControlName="documentType"
-                [options]="documentTypeOptions"
-                placeholder="Select document type"
-                styleClass="w-full"
-                [class.ng-invalid]="isFieldInvalid('documentType')"
-              ></p-select>
-              @if (isFieldInvalid('documentType')) {
-                <small class="p-error block mt-1">
-                  {{ getErrorMessage(uploadForm.get('documentType'), 'Document type') }}
-                </small>
-              }
-            </div>
+                <h3 class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-4">
+                  Document Information
+                </h3>
 
-            <!-- Document Title -->
-            <div class="field">
-              <label for="title" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                Document Title *
-              </label>
-              <input
-                id="title"
-                type="text"
-                pInputText
-                formControlName="title"
-                placeholder="Enter document title"
-                class="w-full"
-                [class.ng-invalid]="isFieldInvalid('title')"
-              />
-              @if (isFieldInvalid('title')) {
-                <small class="p-error block mt-1">
-                  {{ getErrorMessage(uploadForm.get('title'), 'Title') }}
-                </small>
-              }
-            </div>
+                <!-- Document Type -->
+                <div class="field">
+                  <label for="documentType" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Document Type *
+                  </label>
+                  <p-select
+                    id="documentType"
+                    formControlName="documentType"
+                    [options]="documentTypeOptions"
+                    placeholder="Select document type"
+                    class="w-full"
+                    [class.ng-invalid]="isFieldInvalid('documentType')"
+                  ></p-select>
+                  @if (isFieldInvalid('documentType')) {
+                    <small class="p-error block mt-1">
+                      {{ getErrorMessage(uploadForm.get('documentType'), 'Document type') }}
+                    </small>
+                  }
+                </div>
 
-            <!-- Description -->
-            <div class="field">
-              <label for="description" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                Description
-              </label>
-              <textarea
-                id="description"
-                pInputTextarea
-                formControlName="description"
-                placeholder="Enter document description (optional)"
-                rows="3"
-                class="w-full"
-              ></textarea>
-            </div>
+                <!-- Document Title -->
+                <div class="field">
+                  <label for="title" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Document Title *
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    pInputText
+                    formControlName="title"
+                    placeholder="Enter document title"
+                    class="w-full"
+                    [class.ng-invalid]="isFieldInvalid('title')"
+                  />
+                  @if (titleSuggestions().length > 0) {
+                    <div class="mt-1">
+                      <small class="text-surface-500 block mb-1">Suggestions:</small>
+                      <div class="flex flex-wrap gap-1">
+                        @for (suggestion of titleSuggestions(); track suggestion) {
+                          <button
+                            type="button"
+                            class="px-2 py-1 text-xs bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-300 rounded hover:bg-surface-200 dark:hover:bg-surface-600"
+                            (click)="applySuggestion('title', suggestion)"
+                          >
+                            {{ suggestion }}
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @if (isFieldInvalid('title')) {
+                    <small class="p-error block mt-1">
+                      {{ getErrorMessage(uploadForm.get('title'), 'Title') }}
+                    </small>
+                  }
+                </div>
 
-            <!-- Recipient Name (conditional) -->
-            @if (showRecipientField()) {
-              <div class="field">
-                <label for="recipientName" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                  Recipient Name
-                </label>
-                <input
-                  id="recipientName"
-                  type="text"
-                  pInputText
-                  formControlName="recipientName"
-                  placeholder="Enter recipient name"
-                  class="w-full"
-                />
-              </div>
-            }
+                <!-- Description -->
+                <div class="field">
+                  <label for="description" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    pInputTextarea
+                    formControlName="description"
+                    placeholder="Enter document description (optional)"
+                    rows="3"
+                    class="w-full"
+                  ></textarea>
+                </div>
 
-            <!-- Issue Date -->
-            <div class="field">
-              <label for="issueDate" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                Issue Date
-              </label>
-              <p-datepicker
-                id="issueDate"
-                formControlName="issueDate"
-                placeholder="Select issue date"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-                [showIcon]="true"
-              ></p-datepicker>
-            </div>
+                <!-- Tags -->
+                <div class="field">
+                  <label for="tags" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Tags
+                  </label>
+                  <p-chips
+                    id="tags"
+                    formControlName="tags"
+                    placeholder="Add tags (press Enter to add)"
+                    class="w-full"
+                  ></p-chips>
+                  <small class="text-surface-500 mt-1 block">
+                    Add tags to help organize and search your documents
+                  </small>
+                </div>
 
-            <!-- Expiry Date -->
-            <div class="field">
-              <label for="expiryDate" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
-                Expiry Date
-              </label>
-              <p-datepicker
-                id="expiryDate"
-                formControlName="expiryDate"
-                placeholder="Select expiry date (optional)"
-                styleClass="w-full"
-                inputStyleClass="w-full"
-                [showIcon]="true"
-              ></p-datepicker>
-            </div>
+                <!-- Recipient Name (conditional) -->
+                @if (showRecipientField()) {
+                  <div class="field">
+                    <label for="recipientName" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                      Recipient Name *
+                    </label>
+                    <input
+                      id="recipientName"
+                      type="text"
+                      pInputText
+                      formControlName="recipientName"
+                      placeholder="Enter recipient name"
+                      class="w-full"
+                      [class.ng-invalid]="isFieldInvalid('recipientName')"
+                    />
+                    @if (isFieldInvalid('recipientName')) {
+                      <small class="p-error block mt-1">
+                        {{ getErrorMessage(uploadForm.get('recipientName'), 'Recipient name') }}
+                      </small>
+                    }
+                  </div>
+                }
 
-            <!-- Auto Register Option -->
-            <div class="field">
-              <div class="flex items-center">
-                <p-checkbox
-                  formControlName="autoRegister"
-                  inputId="autoRegister"
-                  [binary]="true"
-                  class="mr-2"
-                ></p-checkbox>
-                <label for="autoRegister" class="text-sm text-surface-600 dark:text-surface-400">
-                  Automatically register on blockchain after upload
-                </label>
-              </div>
-              <small class="text-surface-500 mt-1 block">
-                If unchecked, you can register manually later from the document details page
-              </small>
-            </div>
+                <!-- Issue Date -->
+                <div class="field">
+                  <label for="issueDate" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Issue Date
+                  </label>
+                  <p-datepicker
+                    id="issueDate"
+                    formControlName="issueDate"
+                    placeholder="Select issue date"
+                    class="w-full"
+                    [showIcon]="true"
+                    [maxDate]="today"
+                  ></p-datepicker>
+                </div>
 
-            <!-- Action Buttons -->
-            <div class="flex gap-4">
-              <p-button
-                type="button"
-                label="Cancel"
-                icon="pi pi-times"
-                [outlined]="true"
-                styleClass="flex-1"
-                (onClick)="cancel()"
-              ></p-button>
-              
-              <p-button
-                type="submit"
-                label="Upload Document"
-                icon="pi pi-upload"
-                [loading]="uploading()"
-                [disabled]="uploadForm.invalid || !selectedFile()"
-                styleClass="flex-1"
-              ></p-button>
-            </div>
-          </form>
-        </p-card>
+                <!-- Expiry Date -->
+                <div class="field">
+                  <label for="expiryDate" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                    Expiry Date
+                  </label>
+                  <p-datepicker
+                    id="expiryDate"
+                    formControlName="expiryDate"
+                    placeholder="Select expiry date (optional)"
+                    class="w-full"
+                    [showIcon]="true"
+                    [minDate]="minExpiryDate()"
+                  ></p-datepicker>
+                </div>
 
-        <!-- Upload Progress -->
-        @if (uploading()) {
-          <p-card class="mt-6">
-            <div class="text-center">
-              <p-progressSpinner strokeWidth="4" animationDuration="1s"></p-progressSpinner>
-              <p class="mt-4 text-surface-600 dark:text-surface-400">
-                {{ uploadStatus() }}
-              </p>
-            </div>
-          </p-card>
-        }
+                <!-- Custom Fields (if any) -->
+                @if (customFields().length > 0) {
+                  <div class="space-y-4">
+                    <h4 class="text-md font-medium text-surface-900 dark:text-surface-0">
+                      Additional Information
+                    </h4>
+                    @for (field of customFields(); track field.id) {
+                      <div class="field">
+                        <label [for]="field.id" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                          {{ field.name }}
+                          @if (field.required) {
+                            <span class="text-red-500">*</span>
+                          }
+                        </label>
+                        @switch (field.type) {
+                          @case ('text') {
+                            <input
+                              [id]="field.id"
+                              type="text"
+                              pInputText
+                              [formControlName]="'custom_' + field.id"
+                              [placeholder]="field.placeholder || 'Enter ' + field.name.toLowerCase()"
+                              class="w-full"
+                            />
+                          }
+                          @case ('textarea') {
+                            <textarea
+                              [id]="field.id"
+                              pInputTextarea
+                              [formControlName]="'custom_' + field.id"
+                              [placeholder]="field.placeholder || 'Enter ' + field.name.toLowerCase()"
+                              rows="3"
+                              class="w-full"
+                            ></textarea>
+                          }
+                          @case ('dropdown') {
+                            <p-select
+                              [id]="field.id"
+                              [formControlName]="'custom_' + field.id"
+                              [options]="getFieldOptions(field)"
+                              [placeholder]="'Select ' + field.name.toLowerCase()"
+                              class="w-full"
+                            ></p-select>
+                          }
+                          @case ('date') {
+                            <p-datepicker
+                              [id]="field.id"
+                              [formControlName]="'custom_' + field.id"
+                              [placeholder]="'Select ' + field.name.toLowerCase()"
+                              class="w-full"
+                              [showIcon]="true"
+                            ></p-datepicker>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+
+                <!-- Auto Register Option -->
+                <div class="field">
+                  <div class="flex items-center">
+                    <p-checkbox
+                      formControlName="autoRegister"
+                      inputId="autoRegister"
+                      [binary]="true"
+                      class="mr-2"
+                    ></p-checkbox>
+                    <label for="autoRegister" class="text-sm text-surface-600 dark:text-surface-400">
+                      Automatically register on blockchain after upload
+                    </label>
+                  </div>
+                  <small class="text-surface-500 mt-1 block">
+                    If unchecked, you can register manually later from the document details page
+                  </small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                  <p-button
+                    type="button"
+                    label="Cancel"
+                    icon="pi pi-times"
+                    [outlined]="true"
+                    class="flex-1"
+                    (onClick)="cancel()"
+                    [disabled]="isUploading()"
+                  ></p-button>
+                  
+                  <p-button
+                    type="submit"
+                    label="Upload Document"
+                    icon="pi pi-upload"
+                    [loading]="isUploading()"
+                    [disabled]="!canSubmit()"
+                    class="flex-1"
+                  ></p-button>
+                </div>
+              </form>
+            </p-card>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -370,20 +659,62 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
     }
     
     .field {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .drag-drop-zone {
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .drag-drop-zone:hover {
+      border-color: var(--primary-500);
+      background-color: var(--primary-50);
+    }
+
+    .drag-drop-zone.drag-over {
+      transform: scale(1.02);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .drag-drop-zone:hover {
+      background-color: var(--primary-900);
+      opacity: 0.2;
+    }
+
+    .suggestion-chip {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .suggestion-chip:hover {
+      transform: translateY(-1px);
     }
   `]
 })
-export class DocumentUploadComponent {
+export class DocumentUploadComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly documentService = inject(DocumentService);
+  private readonly uploadService = inject(UploadService);
+  private readonly templateService = inject(TemplateService);
   private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
 
   readonly maxFileSize = 10 * 1024 * 1024; // 10MB
+  readonly acceptedFileTypes = '.pdf,.docx,.png,.jpg,.jpeg';
+  readonly uploadMode = signal<'single' | 'bulk'>('single');
   readonly selectedFile = signal<File | null>(null);
+  readonly selectedFiles = signal<File[]>([]);
   readonly fileError = signal<string>('');
-  readonly uploading = signal<boolean>(false);
-  readonly uploadStatus = signal<string>('');
+  readonly isDragOver = signal<boolean>(false);
+  readonly filePreview = signal<string>('');
+  readonly uploadProgress = signal<DocumentUploadProgress | null>(null);
+  readonly bulkUploadProgress = signal<Map<string, DocumentUploadProgress>>(new Map());
+  readonly titleSuggestions = signal<string[]>([]);
+  readonly customFields = signal<any[]>([]);
+  readonly today = new Date();
+  readonly bulkUploadResults = signal<{ success: number; failed: number; total: number } | null>(null);
+
+  readonly UploadStatus = UploadStatus;
 
   readonly documentTypeOptions = [
     { label: 'Degree Certificate', value: DocumentType.DEGREE },
@@ -396,119 +727,534 @@ export class DocumentUploadComponent {
 
   readonly uploadForm = this.fb.group({
     documentType: ['', [Validators.required]],
-    title: ['', [Validators.required, Validators.minLength(3)]],
-    description: [''],
+    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+    description: ['', [Validators.maxLength(500)]],
     recipientName: [''],
     issueDate: [null as Date | null],
     expiryDate: [null as Date | null],
+    tags: [[] as string[]],
     autoRegister: [true]
   });
 
   readonly showRecipientField = signal<boolean>(false);
+  readonly minExpiryDate = computed(() => {
+    const issueDate = this.uploadForm.get('issueDate')?.value;
+    return issueDate ? new Date(issueDate) : new Date();
+  });
 
-  constructor() {
-    // Watch document type changes to show/hide recipient field
-    this.uploadForm.get('documentType')?.valueChanges.subscribe(type => {
-      const showRecipient = type && [DocumentType.DEGREE, DocumentType.CERTIFICATE, DocumentType.TRANSCRIPT].includes(type as DocumentType);
-      this.showRecipientField.set(!!showRecipient);
+  readonly isUploading = computed(() => {
+    const progress = this.uploadProgress();
+    return progress?.status === UploadStatus.UPLOADING || progress?.status === UploadStatus.PROCESSING;
+  });
 
-      if (showRecipient) {
-        this.uploadForm.get('recipientName')?.setValidators([Validators.required]);
-      } else {
-        this.uploadForm.get('recipientName')?.clearValidators();
-      }
-      this.uploadForm.get('recipientName')?.updateValueAndValidity();
-    });
+  readonly canSubmit = computed(() => {
+    const hasFiles = this.uploadMode() === 'single'
+      ? this.selectedFile()
+      : this.selectedFiles().length > 0;
+    return this.uploadForm.valid && hasFiles && !this.isUploading();
+  });
+
+  readonly isBulkMode = computed(() => this.uploadMode() === 'bulk');
+
+  // For template binding
+  get isBulkModeValue(): boolean {
+    return this.isBulkMode();
   }
 
-  onFileSelect(event: any): void {
-    const file = event.files[0] as File;
+  set isBulkModeValue(value: boolean) {
+    // This setter is needed for ngModel binding but we handle the change in toggleUploadMode
+  }
+  readonly totalBulkProgress = computed(() => {
+    const progressMap = this.bulkUploadProgress();
+    if (progressMap.size === 0) return 0;
 
-    if (!file) {
-      return;
+    const totalProgress = Array.from(progressMap.values())
+      .reduce((sum, progress) => sum + progress.progress, 0);
+    return Math.round(totalProgress / progressMap.size);
+  });
+
+  ngOnInit(): void {
+    this.setupFormWatchers();
+    this.subscribeToUploadProgress();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupFormWatchers(): void {
+    // Watch document type changes to show/hide recipient field
+    this.uploadForm.get('documentType')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(type => {
+        const showRecipient = type && [DocumentType.DEGREE, DocumentType.CERTIFICATE, DocumentType.TRANSCRIPT].includes(type as DocumentType);
+        this.showRecipientField.set(!!showRecipient);
+
+        if (showRecipient) {
+          this.uploadForm.get('recipientName')?.setValidators([Validators.required]);
+        } else {
+          this.uploadForm.get('recipientName')?.clearValidators();
+        }
+        this.uploadForm.get('recipientName')?.updateValueAndValidity();
+
+        // Generate title suggestions based on document type
+        this.generateTitleSuggestions(type || '');
+      });
+
+    // Watch title changes for auto-completion
+    this.uploadForm.get('title')?.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(title => {
+        if (title && title.length > 2) {
+          this.generateTitleSuggestions(this.uploadForm.get('documentType')?.value || '', title);
+        }
+      });
+
+    // Watch issue date changes to update expiry date minimum
+    this.uploadForm.get('issueDate')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(issueDate => {
+        const expiryDateControl = this.uploadForm.get('expiryDate');
+        if (issueDate && expiryDateControl?.value && expiryDateControl.value <= issueDate) {
+          expiryDateControl.setValue(null);
+        }
+      });
+  }
+
+  private subscribeToUploadProgress(): void {
+    this.uploadService.uploadProgress$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(progressMap => {
+        if (this.uploadMode() === 'single') {
+          const currentFile = this.selectedFile();
+          if (currentFile) {
+            // Find progress for current file
+            const progress = Array.from(progressMap.values())
+              .find(p => p.fileName === currentFile.name);
+            this.uploadProgress.set(progress || null);
+          }
+        } else {
+          // Update bulk upload progress
+          this.bulkUploadProgress.set(new Map(progressMap));
+
+          // Check if all uploads are complete
+          const allProgress = Array.from(progressMap.values());
+          const completed = allProgress.filter(p =>
+            p.status === UploadStatus.COMPLETED || p.status === UploadStatus.FAILED
+          );
+
+          if (allProgress.length > 0 && completed.length === allProgress.length) {
+            const success = allProgress.filter(p => p.status === UploadStatus.COMPLETED).length;
+            const failed = allProgress.filter(p => p.status === UploadStatus.FAILED).length;
+
+            this.bulkUploadResults.set({
+              success,
+              failed,
+              total: allProgress.length
+            });
+          }
+        }
+      });
+  }
+
+  // Drag and Drop Methods
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver.set(false);
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      if (this.uploadMode() === 'single') {
+        this.handleFileSelection(files[0]);
+      } else {
+        this.handleMultipleFileSelection(Array.from(files));
+      }
     }
+  }
 
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      this.fileError.set('Invalid file type. Please upload PDF, JPG, or PNG files only.');
-      return;
+  onFileInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      if (this.uploadMode() === 'single') {
+        this.handleFileSelection(input.files[0]);
+      } else {
+        this.handleMultipleFileSelection(Array.from(input.files));
+      }
     }
+  }
 
-    // Validate file size
-    if (file.size > this.maxFileSize) {
-      this.fileError.set(`File size exceeds ${this.maxFileSize / 1024 / 1024}MB limit.`);
+  private handleFileSelection(file: File): void {
+    // Validate file using upload service
+    const validation = this.uploadService.validateFile(file);
+
+    if (!validation.isValid) {
+      this.fileError.set(validation.errors.join(', '));
       return;
     }
 
     this.selectedFile.set(file);
     this.fileError.set('');
 
+    // Generate preview for images
+    if (this.isImageFile(file)) {
+      this.uploadService.generateThumbnail(file, 300, 200)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(thumbnail => {
+          this.filePreview.set(thumbnail);
+        });
+    } else {
+      this.filePreview.set('');
+    }
+
     // Auto-fill title if empty
     if (!this.uploadForm.get('title')?.value) {
       const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-      this.uploadForm.patchValue({ title: fileName });
+      const cleanTitle = fileName.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      this.uploadForm.patchValue({ title: cleanTitle });
     }
   }
 
-  onFileRemove(): void {
+  removeFile(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
     this.selectedFile.set(null);
+    this.fileError.set('');
+    this.filePreview.set('');
+  }
+
+  // Utility Methods
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  isImageFile(file: File): boolean {
+    return file.type.startsWith('image/');
+  }
+
+  // Title Suggestions
+  private generateTitleSuggestions(documentType?: string, currentTitle?: string): void {
+    const suggestions: string[] = [];
+
+    if (documentType) {
+      const baseSuggestions = this.getBaseSuggestions(documentType);
+
+      if (currentTitle && currentTitle.length > 2) {
+        // Filter suggestions based on current input
+        const filtered = baseSuggestions.filter(s =>
+          s.toLowerCase().includes(currentTitle.toLowerCase())
+        );
+        suggestions.push(...filtered);
+      } else {
+        suggestions.push(...baseSuggestions.slice(0, 5));
+      }
+    }
+
+    this.titleSuggestions.set(suggestions);
+  }
+
+  private getBaseSuggestions(documentType: string): string[] {
+    const suggestionMap: Record<string, string[]> = {
+      [DocumentType.DEGREE]: [
+        'Bachelor of Science Degree',
+        'Master of Arts Degree',
+        'Doctor of Philosophy Degree',
+        'Bachelor of Engineering Degree',
+        'Master of Business Administration'
+      ],
+      [DocumentType.CERTIFICATE]: [
+        'Professional Certification',
+        'Training Certificate',
+        'Completion Certificate',
+        'Achievement Certificate',
+        'Competency Certificate'
+      ],
+      [DocumentType.LICENSE]: [
+        'Professional License',
+        'Business License',
+        'Operating License',
+        'Practice License',
+        'Regulatory License'
+      ],
+      [DocumentType.TRANSCRIPT]: [
+        'Academic Transcript',
+        'Official Transcript',
+        'University Transcript',
+        'College Transcript',
+        'Grade Report'
+      ],
+      [DocumentType.ID_DOCUMENT]: [
+        'Identity Document',
+        'Identification Card',
+        'Official ID',
+        'Government ID',
+        'Personal Identification'
+      ]
+    };
+
+    return suggestionMap[documentType] || [];
+  }
+
+  applySuggestion(fieldName: string, suggestion: string): void {
+    this.uploadForm.patchValue({ [fieldName]: suggestion });
+    this.titleSuggestions.set([]);
+  }
+
+  // Custom Fields Support
+  getFieldOptions(field: any): any[] {
+    return field.options?.map((option: string) => ({ label: option, value: option })) || [];
+  }
+
+  // Upload Mode Management
+  toggleUploadMode(): void {
+    const newMode = this.uploadMode() === 'single' ? 'bulk' : 'single';
+    this.uploadMode.set(newMode);
+
+    // Clear files when switching modes
+    this.selectedFile.set(null);
+    this.selectedFiles.set([]);
+    this.fileError.set('');
+    this.filePreview.set('');
+    this.uploadProgress.set(null);
+    this.bulkUploadProgress.set(new Map());
+    this.bulkUploadResults.set(null);
+  }
+
+  // Bulk File Management
+  private handleMultipleFileSelection(files: File[]): void {
+    const validation = this.uploadService.validateFiles(files);
+
+    if (!validation.isValid) {
+      this.fileError.set(validation.errors.join('\n'));
+      return;
+    }
+
+    // Add valid files to existing selection (up to 100 total)
+    const currentFiles = this.selectedFiles();
+    const newFiles = [...currentFiles, ...validation.validFiles];
+
+    if (newFiles.length > 100) {
+      this.fileError.set('Maximum 100 files allowed for bulk upload');
+      return;
+    }
+
+    this.selectedFiles.set(newFiles);
     this.fileError.set('');
   }
 
-  onSubmit(): void {
-    if (this.uploadForm.valid && this.selectedFile()) {
-      this.uploading.set(true);
-      this.uploadStatus.set('Uploading document...');
+  removeFileFromBulk(index: number): void {
+    const files = this.selectedFiles();
+    files.splice(index, 1);
+    this.selectedFiles.set([...files]);
+  }
 
-      const formValue = this.uploadForm.value;
-      const metadata: DocumentMetadata = {
-        title: formValue.title!,
-        description: formValue.description || undefined,
-        recipientName: formValue.recipientName || undefined,
-        issueDate: formValue.issueDate || undefined,
-        expiryDate: formValue.expiryDate || undefined
-      };
+  clearAllFiles(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedFiles.set([]);
+    this.fileError.set('');
+  }
 
-      this.documentService.uploadDocument(
-        this.selectedFile()!,
-        metadata,
-        formValue.documentType as DocumentType
-      ).subscribe({
-        next: (document) => {
-          if (formValue.autoRegister) {
-            this.uploadStatus.set('Registering on blockchain...');
-            this.registerDocument(document.id);
-          } else {
-            this.uploading.set(false);
-            this.router.navigate(['/documents', document.id]);
-          }
-        },
-        error: (error) => {
-          console.error('Upload failed:', error);
-          this.uploading.set(false);
-          this.uploadStatus.set('');
-        }
-      });
-    } else {
-      FormUtils.markFormGroupTouched(this.uploadForm);
-      if (!this.selectedFile()) {
-        this.fileError.set('Please select a file to upload');
-      }
+  getTotalFileSize(): string {
+    const totalBytes = this.selectedFiles().reduce((sum, file) => sum + file.size, 0);
+    return this.formatFileSize(totalBytes);
+  }
+
+  // Upload Progress Management
+  cancelUpload(): void {
+    const progress = this.uploadProgress();
+    if (progress) {
+      this.uploadService.cancelUpload(progress.fileId);
     }
+  }
+
+  cancelSingleUpload(fileId: string): void {
+    this.uploadService.cancelUpload(fileId);
+  }
+
+  // Expose Array for template
+  Array = Array;
+
+  onSubmit(): void {
+    if (!this.canSubmit()) {
+      FormUtils.markFormGroupTouched(this.uploadForm);
+      const hasFiles = this.uploadMode() === 'single'
+        ? this.selectedFile()
+        : this.selectedFiles().length > 0;
+
+      if (!hasFiles) {
+        this.fileError.set('Please select file(s) to upload');
+      }
+      return;
+    }
+
+    if (this.uploadMode() === 'single') {
+      this.handleSingleUpload();
+    } else {
+      this.handleBulkUpload();
+    }
+  }
+
+  private handleSingleUpload(): void {
+    const formValue = this.uploadForm.value;
+    const file = this.selectedFile()!;
+
+    // Prepare metadata with custom fields
+    const metadata: DocumentMetadata = {
+      title: formValue.title!,
+      description: formValue.description || undefined,
+      recipientName: formValue.recipientName || undefined,
+      issueDate: formValue.issueDate || undefined,
+      expiryDate: formValue.expiryDate || undefined,
+      customFields: this.extractCustomFields(formValue)
+    };
+
+    // Add tags to metadata
+    if (formValue.tags && formValue.tags.length > 0) {
+      metadata.customFields = {
+        ...metadata.customFields,
+        tags: formValue.tags
+      };
+    }
+
+    // Use upload service for better progress tracking
+    this.uploadService.uploadDocument(
+      file,
+      metadata,
+      formValue.documentType as DocumentType
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (document) => {
+        if (document && formValue.autoRegister) {
+          this.registerDocument(document.id);
+        } else if (document) {
+          this.router.navigate(['/documents', document.id]);
+        }
+      },
+      error: (error) => {
+        console.error('Upload failed:', error);
+        // Error handling is managed by upload service
+      }
+    });
+  }
+
+  private handleBulkUpload(): void {
+    const formValue = this.uploadForm.value;
+    const files = this.selectedFiles();
+
+    // Clear previous results
+    this.bulkUploadResults.set(null);
+
+    // Prepare base metadata
+    const baseMetadata: DocumentMetadata = {
+      description: formValue.description || undefined,
+      recipientName: formValue.recipientName || undefined,
+      issueDate: formValue.issueDate || undefined,
+      expiryDate: formValue.expiryDate || undefined,
+      customFields: this.extractCustomFields(formValue)
+    };
+
+    // Add tags to metadata
+    if (formValue.tags && formValue.tags.length > 0) {
+      baseMetadata.customFields = {
+        ...baseMetadata.customFields,
+        tags: formValue.tags
+      };
+    }
+
+    // Create metadata array for each file
+    const metadataArray = files.map(file => ({
+      ...baseMetadata,
+      title: file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }));
+
+    // Use upload service for bulk upload
+    this.uploadService.uploadMultipleDocuments(
+      files,
+      metadataArray,
+      formValue.documentType as DocumentType
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (documents) => {
+        // Handle successful bulk upload
+        console.log('Bulk upload completed:', documents);
+
+        // If auto-register is enabled, register all documents
+        if (formValue.autoRegister) {
+          this.registerMultipleDocuments(documents.map(d => d.id));
+        } else {
+          // Navigate to documents list after successful bulk upload
+          setTimeout(() => {
+            this.router.navigate(['/documents']);
+          }, 2000);
+        }
+      },
+      error: (error) => {
+        console.error('Bulk upload failed:', error);
+        // Error handling is managed by upload service
+      }
+    });
+  }
+
+  private registerMultipleDocuments(documentIds: string[]): void {
+    // Register documents one by one (could be optimized with batch API)
+    const registrations = documentIds.map(id =>
+      this.documentService.registerOnChain(id).pipe(
+        takeUntil(this.destroy$)
+      )
+    );
+
+    // Wait for all registrations to complete
+    Promise.allSettled(registrations.map(obs => obs.toPromise()))
+      .then(() => {
+        // Navigate to documents list after all registrations
+        this.router.navigate(['/documents']);
+      });
+  }
+
+  private extractCustomFields(formValue: any): Record<string, any> {
+    const customFields: Record<string, any> = {};
+
+    Object.keys(formValue).forEach(key => {
+      if (key.startsWith('custom_')) {
+        const fieldId = key.replace('custom_', '');
+        customFields[fieldId] = formValue[key];
+      }
+    });
+
+    return customFields;
   }
 
   private registerDocument(documentId: string): void {
     this.documentService.registerOnChain(documentId).subscribe({
       next: (document) => {
-        this.uploading.set(false);
-        this.uploadStatus.set('');
         this.router.navigate(['/documents', document.id]);
       },
       error: (error) => {
         console.error('Registration failed:', error);
-        this.uploading.set(false);
-        this.uploadStatus.set('');
         // Still navigate to document page even if registration failed
         this.router.navigate(['/documents', documentId]);
       }
