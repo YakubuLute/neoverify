@@ -54,28 +54,22 @@
 
                 <div class="filter-group">
                     <label>Status</label>
-                    <p-select [options]="[
-                {label: 'All', value: undefined},
-                {label: 'Active', value: true},
-                {label: 'Inactive', value: false}
-              ]" placeholder="Select status" [ngModel]="filters().isActive"
-                        (ngModelChange)="onFilterChange({...filters(), isActive: $event})">
+                    <p-select [options]="getStatusOptions()" placeholder="Select status" [ngModel]="filters().isActive"
+                        (ngModelChange)="onStatusFilterChange($event)">
                     </p-select>
                 </div>
 
                 <div class="filter-group">
                     <label>Created By</label>
-                    <p-multiSelect [options]="availableCreators().map(creator => ({label: creator, value: creator}))"
-                        placeholder="Select creators" [ngModel]="filters().createdBy || []"
-                        (ngModelChange)="onFilterChange({...filters(), createdBy: $event})">
+                    <p-multiSelect [options]="getCreatorOptions()" placeholder="Select creators"
+                        [ngModel]="filters().createdBy || []" (ngModelChange)="onCreatedByFilterChange($event)">
                     </p-multiSelect>
                 </div>
 
                 <div class="filter-group">
                     <label>Date Range</label>
-                    <p-datePicker selectionMode="range" placeholder="Select date range"
-                        [ngModel]="filters().dateRange ? [filters().dateRange!.start, filters().dateRange!.end] : null"
-                        (ngModelChange)="onFilterChange({...filters(), dateRange: $event ? {start: $event[0], end: $event[1]} : undefined})">
+                    <p-datePicker selectionMode="range" placeholder="Select date range" [ngModel]="getDateRangeValue()"
+                        (ngModelChange)="onDateRangeFilterChange($event)">
                     </p-datePicker>
                 </div>
 
@@ -142,7 +136,7 @@
         <div class="empty-content">
             <i class="pi pi-file-o empty-icon"></i>
             <h3>No Templates Found</h3>
-            @if (searchQuery() || Object.keys(filters()).length > 0) {
+            @if (searchQuery() || hasActiveFilters()) {
             <p>No templates match your current search and filter criteria.</p>
             <p-button label="Clear Filters" icon="pi pi-filter-slash" (onClick)="clearFilters()">
             </p-button>
@@ -168,13 +162,8 @@
                 </p-checkbox>
             </div>
             <div class="sort-controls">
-                <p-select [options]="[
-              {label: 'Name', value: 'name'},
-              {label: 'Category', value: 'category'},
-              {label: 'Created Date', value: 'createdAt'},
-              {label: 'Updated Date', value: 'updatedAt'},
-              {label: 'Usage Count', value: 'usageCount'}
-            ]" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event, sortOrder())">
+                <p-select [options]="getSortOptions()" [ngModel]="sortBy()"
+                    (ngModelChange)="onSortChange($event, sortOrder())">
                 </p-select>
                 <p-button [icon]="sortOrder() === 'asc' ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'"
                     (onClick)="onSortChange(sortBy(), sortOrder() === 'asc' ? 'desc' : 'asc')"
@@ -376,7 +365,7 @@
         @if (viewMode() === 'grid' && totalCount() > pageSize()) {
         <div class="pagination-container">
             <p-paginator [rows]="pageSize()" [totalRecords]="totalCount()" [first]="(currentPage() - 1) * pageSize()"
-                (onPageChange)="onPageChange($event.page + 1)">
+                (onPageChange)="onPageChange(($event.page ?? 0) + 1)">
             </p-paginator>
         </div>
         }

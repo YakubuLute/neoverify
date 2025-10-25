@@ -243,6 +243,29 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
         this.loadTemplates();
     }
 
+    onCategoryFilterChange(categories: string[]): void {
+        const currentFilters = this.filters();
+        this.onFilterChange({ ...currentFilters, category: categories });
+    }
+
+    onStatusFilterChange(isActive: boolean | undefined): void {
+        const currentFilters = this.filters();
+        this.onFilterChange({ ...currentFilters, isActive });
+    }
+
+    onCreatedByFilterChange(createdBy: string[]): void {
+        const currentFilters = this.filters();
+        this.onFilterChange({ ...currentFilters, createdBy });
+    }
+
+    onDateRangeFilterChange(dateRange: Date[] | null): void {
+        const currentFilters = this.filters();
+        const newDateRange = dateRange && dateRange.length === 2
+            ? { start: dateRange[0], end: dateRange[1] }
+            : undefined;
+        this.onFilterChange({ ...currentFilters, dateRange: newDateRange });
+    }
+
     onSortChange(sortBy: string, sortOrder: 'asc' | 'desc'): void {
         this.sortBy.set(sortBy);
         this.sortOrder.set(sortOrder);
@@ -526,6 +549,42 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
             month: 'short',
             day: 'numeric'
         }).format(new Date(date));
+    }
+
+    getCategoryOptions(): { label: string; value: string }[] {
+        return this.availableCategories().map(cat => ({ label: cat, value: cat }));
+    }
+
+    getCreatorOptions(): { label: string; value: string }[] {
+        return this.availableCreators().map(creator => ({ label: creator, value: creator }));
+    }
+
+    getStatusOptions(): { label: string; value: boolean | undefined }[] {
+        return [
+            { label: 'All', value: undefined },
+            { label: 'Active', value: true },
+            { label: 'Inactive', value: false }
+        ];
+    }
+
+    getSortOptions(): { label: string; value: string }[] {
+        return [
+            { label: 'Name', value: 'name' },
+            { label: 'Category', value: 'category' },
+            { label: 'Created Date', value: 'createdAt' },
+            { label: 'Updated Date', value: 'updatedAt' },
+            { label: 'Usage Count', value: 'usageCount' }
+        ];
+    }
+
+    getDateRangeValue(): Date[] | null {
+        const dateRange = this.filters().dateRange;
+        return dateRange ? [dateRange.start, dateRange.end] : null;
+    }
+
+    hasActiveFilters(): boolean {
+        const currentFilters = this.filters();
+        return Object.keys(currentFilters).length > 0;
     }
 
     // Mock data for development
