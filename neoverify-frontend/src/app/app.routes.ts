@@ -102,6 +102,28 @@ export const routes: Routes = [
             ]
           },
           {
+            path: 'audit',
+            canActivate: [auditTrailGuard],
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('./features/documents/audit/audit-trail.component').then(m => m.AuditTrailComponent)
+              },
+              {
+                path: 'compliance',
+                loadComponent: () => import('./features/documents/audit/compliance-dashboard.component').then(m => m.ComplianceDashboardComponent)
+              },
+              {
+                path: 'entry/:id',
+                loadComponent: () => import('./features/documents/audit/audit-entry-detail.component').then(m => m.AuditEntryDetailComponent)
+              },
+              {
+                path: 'scheduled-reports',
+                loadComponent: () => import('./features/documents/audit/scheduled-reports.component').then(m => m.ScheduledReportsComponent)
+              }
+            ]
+          },
+          {
             path: ':id',
             canActivate: [documentPermissionGuard],
             data: { action: 'view', requireDocument: true },
