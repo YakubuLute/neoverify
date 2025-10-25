@@ -42,10 +42,14 @@ export enum DocumentType {
 }
 
 export enum DocumentStatus {
+  UPLOADED = 'uploaded',
+  PROCESSING = 'processing',
+  VERIFIED = 'verified',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired',
   PENDING = 'pending',
   ACTIVE = 'active',
-  REVOKED = 'revoked',
-  EXPIRED = 'expired'
+  REVOKED = 'revoked'
 }
 
 export interface DocumentMetadata {
@@ -273,6 +277,9 @@ export interface AuditEntry {
   ipAddress?: string;
   userAgent?: string;
   details?: Record<string, any>;
+  previousStatus?: DocumentStatus;
+  newStatus?: DocumentStatus;
+  reason?: string;
 }
 
 export enum AuditAction {
@@ -284,7 +291,11 @@ export enum AuditAction {
   DOWNLOADED = 'downloaded',
   VERIFIED = 'verified',
   REVOKED = 'revoked',
-  PERMISSION_CHANGED = 'permission_changed'
+  PERMISSION_CHANGED = 'permission_changed',
+  STATUS_CHANGED = 'status_changed',
+  VERIFICATION_STARTED = 'verification_started',
+  VERIFICATION_COMPLETED = 'verification_completed',
+  VERIFICATION_FAILED = 'verification_failed'
 }
 
 export interface DocumentUploadProgress {
