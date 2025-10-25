@@ -44,61 +44,105 @@ export const routes: Routes = [
     loadComponent: () => import('./features/documents/verify/document-verify.component').then(m => m.DocumentVerifyComponent)
   },
 
-  // Protected routes (require authentication)
+  // Protected routes with dashboard layout
   {
-    path: 'dashboard',
-    // canActivate: [authGuard],
-    loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)
-  },
-
-  // Document management routes
-  {
-    path: 'documents',
+    path: '',
     canActivate: [authGuard],
+    loadComponent: () => import('./layout/dashboard-layout/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
     children: [
+      // Dashboard home
       {
-        path: '',
-        loadComponent: () => import('./features/documents/list/document-list.component').then(m => m.DocumentListComponent)
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)
       },
+
+      // Document management routes
       {
-        path: 'upload',
+        path: 'documents',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/documents/list/document-list.component').then(m => m.DocumentListComponent)
+          },
+          {
+            path: 'upload',
+            canActivate: [roleGuard],
+            data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
+            loadComponent: () => import('./features/documents/upload/document-upload.component').then(m => m.DocumentUploadComponent)
+          },
+          {
+            path: 'templates',
+            canActivate: [roleGuard],
+            data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
+            loadComponent: () => import('./features/documents/list/document-list.component').then(m => m.DocumentListComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./features/documents/detail/document-detail.component').then(m => m.DocumentDetailComponent)
+          }
+        ]
+      },
+
+      // Organization management (Admin only)
+      {
+        path: 'organization',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN, UserRole.ISSUER] },
-        loadComponent: () => import('./features/documents/upload/document-upload.component').then(m => m.DocumentUploadComponent)
+        data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN] },
+        children: [
+          {
+            path: 'settings',
+            loadComponent: () => import('./features/organization/settings/org-settings.component').then(m => m.OrgSettingsComponent)
+          },
+          {
+            path: 'users',
+            loadComponent: () => import('./features/organization/users/user-management.component').then(m => m.UserManagementComponent)
+          },
+          {
+            path: 'api-keys',
+            loadComponent: () => import('./features/organization/api-keys/api-keys.component').then(m => m.ApiKeysComponent)
+          }
+        ]
       },
+
+      // Platform Admin routes
       {
-        path: ':id',
-        loadComponent: () => import('./features/documents/detail/document-detail.component').then(m => m.DocumentDetailComponent)
+        path: 'admin',
+        canActivate: [roleGuard],
+        data: { roles: [UserRole.PLATFORM_ADMIN] },
+        children: [
+          {
+            path: 'organizations',
+            loadComponent: () => import('./features/documents/list/document-list.component').then(m => m.DocumentListComponent) // Placeholder
+          },
+          {
+            path: 'users',
+            loadComponent: () => import('./features/organization/users/user-management.component').then(m => m.UserManagementComponent)
+          },
+          {
+            path: 'analytics',
+            loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard) // Placeholder
+          },
+          {
+            path: 'security',
+            loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard) // Placeholder
+          }
+        ]
+      },
+
+      // Analytics routes
+      {
+        path: 'analytics',
+        canActivate: [roleGuard],
+        data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN] },
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard) // Placeholder
+      },
+
+      // User profile
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
       }
     ]
-  },
-
-  // Organization management (Admin only)
-  {
-    path: 'organization',
-    canActivate: [roleGuard],
-    data: { roles: [UserRole.PLATFORM_ADMIN, UserRole.ORG_ADMIN] },
-    children: [
-      {
-        path: 'settings',
-        loadComponent: () => import('./features/organization/settings/org-settings.component').then(m => m.OrgSettingsComponent)
-      },
-      {
-        path: 'users',
-        loadComponent: () => import('./features/organization/users/user-management.component').then(m => m.UserManagementComponent)
-      },
-      {
-        path: 'api-keys',
-        loadComponent: () => import('./features/organization/api-keys/api-keys.component').then(m => m.ApiKeysComponent)
-      }
-    ]
-  },
-
-  // User profile
-  {
-    path: 'profile',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
   },
 
   // Error pages
