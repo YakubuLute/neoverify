@@ -10,7 +10,7 @@
             </div>
 
             <div class="header-actions">
-                <div *hasPermission="{ action: 'created', resource: 'document' }">
+                <div *hasPermission="{ action: AuditAction.CREATED, resource: 'document' }">
                     <p-button label="Upload Document" icon="pi pi-upload" (onClick)="onUploadClick()"
                         class="upload-btn">
                     </p-button>
@@ -98,7 +98,7 @@
         </p-button>
         } @else {
         <p>You haven't uploaded any documents yet.</p>
-        <div *hasPermission="{ action: 'created', resource: 'document' }">
+        <div *hasPermission="{ action: AuditAction.CREATED, resource: 'document' }">
             <p-button label="Upload Your First Document" icon="pi pi-upload" (onClick)="onUploadClick()">
             </p-button>
         </div>
@@ -140,7 +140,7 @@
     @if (viewMode() === 'grid') {
     <div class="documents-grid">
         @for (document of filteredDocuments(); track document.id) {
-        <div *hasPermission="{ action: 'viewed', resource: 'document' }; hasPermissionDocument: document">
+        <div *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
             <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
                 [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
                 (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
@@ -214,13 +214,13 @@
                         <div class="action-buttons">
                             <p-button icon="pi pi-eye" [text]="true" size="small" (onClick)="onDocumentClick(document)"
                                 pTooltip="View details"
-                                *hasPermission="{ action: 'viewed', resource: 'document' }; hasPermissionDocument: document">
+                                *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
                             <p-button icon="pi pi-download" [text]="true" size="small" pTooltip="Download"
-                                *hasPermission="{ action: 'downloaded', resource: 'document' }; hasPermissionDocument: document">
+                                *hasPermission="{ action: AuditAction.DOWNLOADED, resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
                             <p-button icon="pi pi-share-alt" [text]="true" size="small" pTooltip="Share"
-                                *hasPermission="{ action: 'shared', resource: 'document' }; hasPermissionDocument: document">
+                                *hasPermission="{ action: AuditAction.SHARED, resource: 'document' }; hasPermissionDocument: document">
                             </p-button>
                         </div>
                     </td>

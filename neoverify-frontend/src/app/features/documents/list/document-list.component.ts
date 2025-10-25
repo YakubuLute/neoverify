@@ -156,6 +156,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly VerificationStatus = VerificationStatus;
   readonly UserRole = UserRole;
   readonly BulkActionType = BulkActionType;
+  readonly AuditAction = AuditAction;
 
   ngOnInit(): void {
     this.loadDocuments();
