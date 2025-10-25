@@ -418,7 +418,8 @@ export class DocumentService {
   }
 
   /**
-   * Update document status
+   * Update document status (deprecated - use DocumentStatusService instead)
+   * @deprecated Use DocumentStatusService.updateDocumentStatus instead
    */
   updateDocumentStatus(documentId: string, status: DocumentStatus): Observable<DocumentModel> {
     return this.apiService.put<DocumentModel>(`documents/${documentId}/status`, { status }).pipe(

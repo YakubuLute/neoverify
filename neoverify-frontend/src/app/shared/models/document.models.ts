@@ -355,3 +355,140 @@ export interface FacetCount {
   value: string;
   count: number;
 }
+
+// Status Tracking and Verification Models
+
+export interface DocumentStatusHistory {
+  id: string;
+  documentId: string;
+  previousStatus: DocumentStatus;
+  newStatus: DocumentStatus;
+  reason?: string;
+  triggeredBy: StatusTrigger;
+  userId?: string;
+  userEmail?: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export enum StatusTrigger {
+  MANUAL = 'manual',
+  AUTOMATED = 'automated',
+  VERIFICATION_RESULT = 'verification_result',
+  SYSTEM = 'system',
+  SCHEDULED = 'scheduled'
+}
+
+export interface StatusTransition {
+  from: DocumentStatus;
+  to: DocumentStatus;
+  allowed: boolean;
+  requiresReason: boolean;
+  requiresPermission?: string;
+  conditions?: StatusCondition[];
+}
+
+export interface StatusCondition {
+  type: 'user_role' | 'document_age' | 'verification_status' | 'custom';
+  value: any;
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
+}
+
+export interface VerificationProgress {
+  documentId: string;
+  stage: VerificationStage;
+  progress: number; // 0-100
+  message: string;
+  startedAt: Date;
+  estimatedCompletion?: Date;
+  details?: VerificationStageDetail[];
+}
+
+export enum VerificationStage {
+  QUEUED = 'queued',
+  PREPROCESSING = 'preprocessing',
+  FORENSIC_ANALYSIS = 'forensic_analysis',
+  BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
+  SIGNATURE_VALIDATION = 'signature_validation',
+  METADATA_EXTRACTION = 'metadata_extraction',
+  FINAL_VALIDATION = 'final_validation',
+  COMPLETED = 'completed',
+  FAILED = 'failed'
+}
+
+export interface VerificationStageDetail {
+  stage: VerificationStage;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
+  startedAt?: Date;
+  completedAt?: Date;
+  progress: number;
+  message: string;
+  error?: VerificationError;
+}
+
+export interface VerificationError {
+  code: string;
+  message: string;
+  details?: string;
+  remediation?: RemediationStep[];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface RemediationStep {
+  id: string;
+  title: string;
+  description: string;
+  action?: RemediationAction;
+  priority: number;
+}
+
+export interface RemediationAction {
+  type: 'retry' | 'manual_review' | 'contact_support' | 'reupload' | 'update_metadata';
+  label: string;
+  endpoint?: string;
+  parameters?: Record<string, any>;
+}
+
+export interface VerificationHistoryEntry {
+  id: string;
+  documentId: string;
+  verificationId: string;
+  status: VerificationStatus;
+  startedAt: Date;
+  completedAt?: Date;
+  duration?: number; // in milliseconds
+  triggeredBy: string; // user ID or 'system'
+  result?: VerificationResult;
+  error?: VerificationError;
+  forensicsEnabled: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface StatusNotification {
+  id: string;
+  documentId: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  status: NotificationStatus;
+  createdAt: Date;
+  readAt?: Date;
+  actionUrl?: string;
+  metadata?: Record<string, any>;
+}
+
+export enum NotificationType {
+  STATUS_CHANGE = 'status_change',
+  VERIFICATION_COMPLETE = 'verification_complete',
+  VERIFICATION_FAILED = 'verification_failed',
+  DOCUMENT_EXPIRED = 'document_expired',
+  PERMISSION_CHANGED = 'permission_changed',
+  BULK_OPERATION_COMPLETE = 'bulk_operation_complete'
+}
+
+export enum NotificationStatus {
+  UNREAD = 'unread',
+  READ = 'read',
+  DISMISSED = 'dismissed'
+}
