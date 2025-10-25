@@ -1,14 +1,14 @@
 # Document Management System Implementation Plan
 
-- [-] 1. Set up core document models and services
+- [x] 1. Set up core document models and services
   - Create TypeScript interfaces for Document, DocumentTemplate, and related models
   - Implement DocumentService with CRUD operations and API integration
   - Create TemplateService for template management operations
   - Set up UploadService for file upload handling with progress tracking
   - _Requirements: 1.1, 2.1, 3.1, 4.1_
 
-- [ ] 2. Implement document list page with filtering and search
-  - [ ] 2.1 Create documents-list component with responsive grid layout
+- [-] 2. Implement document list page with filtering and search
+  - [-] 2.1 Create documents-list component with responsive grid layout
     - Build main documents list component with Angular signals for state management
     - Implement responsive grid layout matching dashboard styling (dark theme, glassmorphism)
     - Add loading states and empty state handling

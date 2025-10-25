@@ -272,14 +272,14 @@ export class UploadService {
     /**
      * Get upload progress for specific file
      */
-    getUploadProgress(fileId: string): UploadProgress | undefined {
+    getUploadProgress(fileId: string): DocumentUploadProgress | undefined {
         return this.uploadProgressSubject.value.get(fileId);
     }
 
     /**
      * Get all upload progress
      */
-    getAllUploadProgress(): UploadProgress[] {
+    getAllUploadProgress(): DocumentUploadProgress[] {
         return Array.from(this.uploadProgressSubject.value.values());
     }
 
@@ -310,7 +310,7 @@ export class UploadService {
     /**
      * Update upload progress
      */
-    private updateUploadProgress(fileId: string, progress: UploadProgress): void {
+    private updateUploadProgress(fileId: string, progress: DocumentUploadProgress): void {
         const currentProgress = new Map(this.uploadProgressSubject.value);
         currentProgress.set(fileId, progress);
         this.uploadProgressSubject.next(currentProgress);
