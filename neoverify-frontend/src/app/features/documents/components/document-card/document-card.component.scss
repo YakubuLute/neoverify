@@ -1,0 +1,264 @@
+// Document Card Component Styles
+.document-card {
+    @apply relative bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700;
+    @apply hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10;
+    @apply transition-all duration-300 cursor-pointer group overflow-hidden;
+    @apply flex flex-col h-full;
+
+    &.selected {
+        @apply border-cyan-500 shadow-lg shadow-cyan-500/20 bg-cyan-500/5;
+    }
+
+    &.expiring-soon {
+        @apply border-orange-500/50 shadow-lg shadow-orange-500/10;
+    }
+
+    // Selection Checkbox
+    .selection-checkbox {
+        @apply absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity;
+
+        ::ng-deep .p-checkbox {
+            .p-checkbox-box {
+                @apply bg-gray-700/80 backdrop-blur-sm border-gray-600;
+
+                &.p-highlight {
+                    @apply bg-cyan-500 border-cyan-500;
+                }
+            }
+        }
+    }
+
+    &.selected .selection-checkbox {
+        @apply opacity-100;
+    }
+
+    // Document Thumbnail
+    .document-thumbnail {
+        @apply relative h-48 bg-gray-900/50 flex items-center justify-center overflow-hidden;
+        @apply border-b border-gray-700;
+
+        .thumbnail-image {
+            @apply w-full h-full object-cover;
+        }
+
+        .thumbnail-placeholder {
+            @apply flex flex-col items-center justify-center text-gray-400;
+
+            .document-icon {
+                @apply text-4xl mb-2;
+            }
+
+            .file-extension {
+                @apply text-sm font-medium uppercase bg-gray-700/50 px-2 py-1 rounded;
+            }
+        }
+
+        // Document Type Badge
+        .document-type-badge {
+            @apply absolute top-3 right-3;
+
+            .type-tag {
+                ::ng-deep .p-tag {
+                    @apply text-xs font-medium;
+                }
+            }
+        }
+
+        // Verification Status Indicator
+        .verification-indicator {
+            @apply absolute bottom-3 right-3;
+
+            .verification-icon {
+                @apply text-lg p-2 rounded-full backdrop-blur-sm;
+
+                &.verified {
+                    @apply text-green-400 bg-green-500/20;
+                }
+
+                &.pending {
+                    @apply text-yellow-400 bg-yellow-500/20;
+                }
+
+                &.failed {
+                    @apply text-red-400 bg-red-500/20;
+                }
+            }
+        }
+    }
+
+    // Document Content
+    .document-content {
+        @apply flex-1 p-4 space-y-3;
+
+        // Document Header
+        .document-header {
+            @apply flex items-start justify-between;
+
+            .document-title {
+                @apply text-lg font-semibold text-white line-clamp-2 flex-1 mr-2;
+                @apply group-hover:text-cyan-400 transition-colors;
+            }
+
+            // Quick Actions Menu
+            .quick-actions-menu {
+                @apply relative;
+
+                .menu-trigger {
+                    @apply opacity-0 group-hover:opacity-100 transition-opacity;
+
+                    ::ng-deep .p-button {
+                        @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                    }
+                }
+
+                &.active .menu-trigger {
+                    @apply opacity-100;
+
+                    ::ng-deep .p-button {
+                        @apply text-cyan-400 bg-cyan-500/20;
+                    }
+                }
+
+                .actions-dropdown {
+                    @apply absolute top-full right-0 mt-1 w-48 z-20;
+                    @apply bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700;
+                    @apply shadow-xl shadow-black/20 py-2;
+
+                    .action-item {
+                        @apply w-full flex items-center space-x-3 px-4 py-2 text-left;
+                        @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
+                        @apply transition-colors text-sm;
+
+                        &.danger {
+                            @apply text-red-400 hover:text-red-300 hover:bg-red-500/20;
+                        }
+
+                        i {
+                            @apply text-sm;
+                        }
+                    }
+
+                    .action-divider {
+                        @apply border-t border-gray-700 my-1;
+                    }
+                }
+            }
+        }
+
+        // Document Description
+        .document-description {
+            @apply text-gray-400 text-sm line-clamp-2 leading-relaxed;
+        }
+
+        // Document Metadata
+        .document-metadata {
+            @apply space-y-2;
+
+            .metadata-item {
+                @apply flex items-center space-x-2 text-xs text-gray-400;
+
+                &.expiring {
+                    @apply text-orange-400;
+                }
+
+                .metadata-icon {
+                    @apply text-xs;
+                }
+
+                .metadata-text {
+                    @apply truncate;
+                }
+            }
+        }
+
+        // Document Tags
+        .document-tags {
+            @apply flex flex-wrap items-center gap-1;
+
+            .document-tag {
+                ::ng-deep .p-tag {
+                    @apply text-xs;
+                }
+            }
+
+            .more-tags {
+                @apply text-xs text-gray-500 font-medium;
+            }
+        }
+    }
+
+    // Document Footer
+    .document-footer {
+        @apply p-4 pt-0 flex items-center justify-between;
+
+        .status-badges {
+            @apply flex items-center space-x-2;
+
+            .status-tag,
+            .verification-tag {
+                ::ng-deep .p-tag {
+                    @apply text-xs;
+                }
+            }
+        }
+
+        .card-actions {
+            @apply flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity;
+
+            .action-btn {
+                ::ng-deep .p-button {
+                    @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                }
+            }
+        }
+    }
+
+    // Hover Overlay
+    .hover-overlay {
+        @apply absolute inset-0 bg-gray-900/80 backdrop-blur-sm;
+        @apply flex items-center justify-center opacity-0 group-hover:opacity-100;
+        @apply transition-opacity duration-300 pointer-events-none;
+
+        .overlay-content {
+            @apply pointer-events-auto;
+
+            .overlay-btn {
+                ::ng-deep .p-button {
+                    @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 text-white;
+                    @apply shadow-lg shadow-cyan-500/20;
+                }
+            }
+        }
+    }
+
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        .document-thumbnail {
+            @apply h-32;
+        }
+
+        .document-content {
+            @apply p-3 space-y-2;
+
+            .document-header .document-title {
+                @apply text-base;
+            }
+        }
+
+        .selection-checkbox {
+            @apply opacity-100;
+        }
+
+        .card-actions {
+            @apply opacity-100;
+        }
+    }
+}
+
+// Utility classes
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

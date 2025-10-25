@@ -7,28 +7,28 @@
   - Set up UploadService for file upload handling with progress tracking
   - _Requirements: 1.1, 2.1, 3.1, 4.1_
 
-- [-] 2. Implement document list page with filtering and search
-  - [-] 2.1 Create documents-list component with responsive grid layout
+- [x] 2. Implement document list page with filtering and search
+  - [x] 2.1 Create documents-list component with responsive grid layout
     - Build main documents list component with Angular signals for state management
     - Implement responsive grid layout matching dashboard styling (dark theme, glassmorphism)
     - Add loading states and empty state handling
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 2.2 Build document card component
+  - [x] 2.2 Build document card component
     - Create reusable document card component with thumbnail, title, status, and metadata
     - Implement status badges and verification indicators
     - Add hover effects and click handlers for navigation
     - Include quick actions menu (view, download, share, delete)
     - _Requirements: 1.4, 4.3_
 
-  - [ ] 2.3 Implement search and filtering functionality
+  - [x] 2.3 Implement search and filtering functionality
     - Create search component with debounced input and real-time results
     - Build advanced filters sidebar (document type, status, date range, issuer)
     - Implement filter state management and URL parameter synchronization
     - Add search result highlighting and relevance scoring display
     - _Requirements: 1.2, 1.3, 6.1, 6.2, 6.3_
 
-  - [ ] 2.4 Add pagination and bulk operations
+  - [x] 2.4 Add pagination and bulk operations
     - Implement infinite scroll pagination with virtual scrolling for performance
     - Create bulk selection functionality with select all/none options
     - Build bulk actions toolbar (delete, update status, export, tag)

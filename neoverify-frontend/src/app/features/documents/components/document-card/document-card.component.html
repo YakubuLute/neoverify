@@ -1,0 +1,162 @@
+<!-- Document Card -->
+<div class="document-card" [class.selected]="selected" [class.expiring-soon]="isExpiringSoon()"
+    (click)="onCardClick($event)">
+
+    <!-- Selection Checkbox -->
+    @if (canSelect) {
+    <div class="selection-checkbox">
+        <p-checkbox [binary]="true" [checked]="selected" (onChange)="onSelectionChange($event.checked)">
+        </p-checkbox>
+    </div>
+    }
+
+    <!-- Document Thumbnail -->
+    <div class="document-thumbnail">
+        @if (document.thumbnailUrl) {
+        <img [src]="document.thumbnailUrl" [alt]="document.title" class="thumbnail-image">
+        } @else {
+        <div class="thumbnail-placeholder">
+            <i class="pi pi-file document-icon"></i>
+            <span class="file-extension">{{ getFileExtension(document.originalFileName) }}</span>
+        </div>
+        }
+
+        <!-- Document Type Badge -->
+        <div class="document-type-badge">
+            <p-tag [value]="document.documentType" [severity]="documentTypeSeverity()" class="type-tag">
+            </p-tag>
+        </div>
+
+        <!-- Verification Status Indicator -->
+        <div class="verification-indicator">
+            @if (document.verificationStatus === VerificationStatus.VERIFIED) {
+            <i class="pi pi-verified verification-icon verified" pTooltip="Verified"></i>
+            } @else if (document.verificationStatus === VerificationStatus.PENDING) {
+            <i class="pi pi-clock verification-icon pending" pTooltip="Verification Pending"></i>
+            } @else if (document.verificationStatus === VerificationStatus.FAILED) {
+            <i class="pi pi-times-circle verification-icon failed" pTooltip="Verification Failed"></i>
+            }
+        </div>
+    </div>
+
+    <!-- Document Content -->
+    <div class="document-content">
+
+        <!-- Document Header -->
+        <div class="document-header">
+            <h3 class="document-title" [pTooltip]="document.title">{{ document.title }}</h3>
+
+            <!-- Quick Actions Menu -->
+            <div class="quick-actions-menu" [class.active]="showMenu()">
+                <p-button icon="pi pi-ellipsis-v" [text]="true" size="small" (onClick)="toggleMenu($event)"
+                    class="menu-trigger">
+                </p-button>
+
+                @if (showMenu()) {
+                <div class="actions-dropdown">
+                    <button class="action-item" (click)="onQuickAction('view', $event)">
+                        <i class="pi pi-eye"></i>
+                        <span>View Details</span>
+                    </button>
+                    <button class="action-item" (click)="onQuickAction('download', $event)">
+                        <i class="pi pi-download"></i>
+                        <span>Download</span>
+                    </button>
+                    <button class="action-item" (click)="onQuickAction('share', $event)">
+                        <i class="pi pi-share-alt"></i>
+                        <span>Share</span>
+                    </button>
+                    <div class="action-divider"></div>
+                    <button class="action-item danger" (click)="onQuickAction('delete', $event)">
+                        <i class="pi pi-trash"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Document Description -->
+        @if (document.description) {
+        <p class="document-description" [pTooltip]="document.description">
+            {{ document.description }}
+        </p>
+        }
+
+        <!-- Document Metadata -->
+        <div class="document-metadata">
+            <div class="metadata-item">
+                <i class="pi pi-file metadata-icon"></i>
+                <span class="metadata-text">{{ document.originalFileName }}</span>
+            </div>
+
+            <div class="metadata-item">
+                <i class="pi pi-calendar metadata-icon"></i>
+                <span class="metadata-text">{{ uploadedDate() | date:'mediumDate' }}</span>
+            </div>
+
+            <div class="metadata-item">
+                <i class="pi pi-database metadata-icon"></i>
+                <span class="metadata-text">{{ formattedFileSize() }}</span>
+            </div>
+
+            @if (document.metadata.expiryDate) {
+            <div class="metadata-item" [class.expiring]="isExpiringSoon()">
+                <i class="pi pi-clock metadata-icon"></i>
+                <span class="metadata-text">
+                    Expires {{ document.metadata.expiryDate | date:'mediumDate' }}
+                </span>
+            </div>
+            }
+        </div>
+
+        <!-- Document Tags -->
+        @if (document.tags && document.tags.length > 0) {
+        <div class="document-tags">
+            @for (tag of document.tags.slice(0, 3); track tag) {
+            <p-tag [value]="tag" severity="secondary" class="document-tag"></p-tag>
+            }
+            @if (document.tags.length > 3) {
+            <span class="more-tags">+{{ document.tags.length - 3 }} more</span>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Document Footer -->
+    <div class="document-footer">
+
+        <!-- Status Badges -->
+        <div class="status-badges">
+            <p-tag [value]="document.status" [severity]="statusSeverity()" class="status-tag">
+            </p-tag>
+
+            <p-tag [value]="document.verificationStatus" [severity]="verificationSeverity()" class="verification-tag">
+            </p-tag>
+        </div>
+
+        <!-- Card Actions -->
+        <div class="card-actions">
+            <p-button icon="pi pi-eye" [text]="true" size="small" (onClick)="onQuickAction('view', $event)"
+                pTooltip="View Details" class="action-btn">
+            </p-button>
+
+            <p-button icon="pi pi-download" [text]="true" size="small" (onClick)="onQuickAction('download', $event)"
+                pTooltip="Download" class="action-btn">
+            </p-button>
+
+            <p-button icon="pi pi-share-alt" [text]="true" size="small" (onClick)="onQuickAction('share', $event)"
+                pTooltip="Share" class="action-btn">
+            </p-button>
+        </div>
+    </div>
+
+    <!-- Hover Overlay -->
+    <div class="hover-overlay">
+        <div class="overlay-content">
+            <p-button label="View Details" icon="pi pi-eye" (onClick)="onQuickAction('view', $event)"
+                class="overlay-btn">
+            </p-button>
+        </div>
+    </div>
+</div>
