@@ -8,12 +8,25 @@ export interface LazyLoadConfig {
     rootMargin?: string;
     threshold?: number;
     debounceTime?: number;
+    maxConcurrentLoads?: number;
+    retryAttempts?: number;
+    retryDelay?: number;
 }
 
 export interface LazyLoadItem {
     id: string;
     type: 'thumbnail' | 'metadata' | 'content';
     priority?: number;
+    retryCount?: number;
+}
+
+export interface LazyLoadStats {
+    totalRequests: number;
+    successfulLoads: number;
+    failedLoads: number;
+    cacheHits: number;
+    averageLoadTime: number;
+    queueSize: number;
 }
 
 @Injectable({
@@ -26,12 +39,28 @@ export class LazyLoadingService {
     private intersectionObserver?: IntersectionObserver;
     private loadQueue = new BehaviorSubject<LazyLoadItem[]>([]);
     private loadingItems = new Set<string>();
+    private concurrentLoads = 0;
+    private loadStats = new BehaviorSubject<LazyLoadStats>({
+        totalRequests: 0,
+        successfulLoads: 0,
+        failedLoads: 0,
+        cacheHits: 0,
+        averageLoadTime: 0,
+        queueSize: 0
+    });
 
     private readonly defaultConfig: LazyLoadConfig = {
-        rootMargin: '50px',
+        rootMargin: '100px', // Increased for better preloading
         threshold: 0.1,
-        debounceTime: 100
+        debounceTime: 50, // Reduced for better responsiveness
+        maxConcurrentLoads: 6, // Limit concurrent requests
+        retryAttempts: 3,
+        retryDelay: 1000
     };
+
+    // Performance tracking
+    private loadTimes: number[] = [];
+    private readonly maxLoadTimeHistory = 100;
 
     constructor() {
         this.initializeIntersectionObserver();
@@ -58,17 +87,36 @@ export class LazyLoadingService {
     }
 
     /**
-     * Load thumbnail for document
+     * Load thumbnail for document with performance tracking
      */
     loadThumbnail(documentId: string): Observable<string> {
+        const startTime = performance.now();
         const cacheKey = `thumbnail:${documentId}`;
+
+        // Check if already cached
+        if (this.cacheService.has(cacheKey)) {
+            this.updateStats('cacheHit');
+            return this.cacheService.get(
+                cacheKey,
+                () => this.documentService.generateThumbnail(documentId),
+                { ttl: 60 * 60 * 1000 } // 1 hour for thumbnails
+            );
+        }
+
+        this.updateStats('request');
 
         return this.cacheService.get(
             cacheKey,
             () => this.documentService.generateThumbnail(documentId),
-            { ttl: 30 * 60 * 1000 } // 30 minutes
+            { ttl: 60 * 60 * 1000 }
         ).pipe(
+            tap(() => {
+                const loadTime = performance.now() - startTime;
+                this.trackLoadTime(loadTime);
+                this.updateStats('success');
+            }),
             catchError(error => {
+                this.updateStats('failure');
                 console.warn(`Failed to load thumbnail for document ${documentId}:`, error);
                 return of('/assets/images/document-placeholder.svg');
             })
@@ -76,10 +124,33 @@ export class LazyLoadingService {
     }
 
     /**
-     * Load document metadata
+     * Load document metadata with performance tracking
      */
     loadMetadata(documentId: string): Observable<any> {
+        const startTime = performance.now();
         const cacheKey = `metadata:${documentId}`;
+
+        // Check if already cached
+        if (this.cacheService.has(cacheKey)) {
+            this.updateStats('cacheHit');
+            return this.cacheService.get(
+                cacheKey,
+                () => this.documentService.getDocument(documentId).pipe(
+                    map(doc => ({
+                        title: doc.title,
+                        description: doc.description,
+                        fileSize: doc.fileSize,
+                        uploadedAt: doc.uploadedAt,
+                        tags: doc.tags,
+                        status: doc.status,
+                        verificationStatus: doc.verificationStatus
+                    }))
+                ),
+                { ttl: 15 * 60 * 1000 } // 15 minutes for metadata
+            );
+        }
+
+        this.updateStats('request');
 
         return this.cacheService.get(
             cacheKey,
@@ -89,12 +160,20 @@ export class LazyLoadingService {
                     description: doc.description,
                     fileSize: doc.fileSize,
                     uploadedAt: doc.uploadedAt,
-                    tags: doc.tags
+                    tags: doc.tags,
+                    status: doc.status,
+                    verificationStatus: doc.verificationStatus
                 }))
             ),
-            { ttl: 10 * 60 * 1000 } // 10 minutes
+            { ttl: 15 * 60 * 1000 }
         ).pipe(
+            tap(() => {
+                const loadTime = performance.now() - startTime;
+                this.trackLoadTime(loadTime);
+                this.updateStats('success');
+            }),
             catchError(error => {
+                this.updateStats('failure');
                 console.warn(`Failed to load metadata for document ${documentId}:`, error);
                 return of(null);
             })
@@ -102,20 +181,54 @@ export class LazyLoadingService {
     }
 
     /**
-     * Preload items based on priority
+     * Preload items based on priority with intelligent batching
      */
     preload(items: LazyLoadItem[]): void {
         const sortedItems = items.sort((a, b) => (b.priority || 0) - (a.priority || 0));
         const currentQueue = this.loadQueue.value;
 
-        // Add new items to queue, avoiding duplicates
-        const newItems = sortedItems.filter(item =>
-            !currentQueue.some(existing => existing.id === item.id && existing.type === item.type)
-        );
+        // Filter out items that are already cached or loading
+        const newItems = sortedItems.filter(item => {
+            const key = `${item.type}:${item.id}`;
+            return !this.cacheService.has(key) &&
+                !this.loadingItems.has(key) &&
+                !currentQueue.some(existing => existing.id === item.id && existing.type === item.type);
+        });
 
         if (newItems.length > 0) {
-            this.loadQueue.next([...currentQueue, ...newItems]);
+            // Limit queue size to prevent memory issues
+            const maxQueueSize = 50;
+            const updatedQueue = [...currentQueue, ...newItems].slice(0, maxQueueSize);
+            this.loadQueue.next(updatedQueue);
+            this.updateQueueSize(updatedQueue.length);
         }
+    }
+
+    /**
+     * Preload items in viewport with predictive loading
+     */
+    preloadViewport(visibleItems: any[], allItems: any[], viewportIndex: number): void {
+        const preloadRange = 10; // Items to preload ahead
+        const startIndex = Math.max(0, viewportIndex - 5);
+        const endIndex = Math.min(allItems.length, viewportIndex + preloadRange);
+
+        const itemsToPreload: LazyLoadItem[] = [];
+
+        for (let i = startIndex; i < endIndex; i++) {
+            const item = allItems[i];
+            if (item) {
+                // Higher priority for items closer to viewport
+                const distance = Math.abs(i - viewportIndex);
+                const priority = Math.max(1, 10 - distance);
+
+                itemsToPreload.push(
+                    { id: item.id, type: 'thumbnail', priority },
+                    { id: item.id, type: 'metadata', priority: priority - 1 }
+                );
+            }
+        }
+
+        this.preload(itemsToPreload);
     }
 
     /**
