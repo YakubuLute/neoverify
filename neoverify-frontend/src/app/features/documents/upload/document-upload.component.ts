@@ -77,34 +77,34 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   >
                     @if (uploadMode() === 'single') {
                       @if (!selectedFile()) {
-                        <div class="space-y-4">
-                          <div class="mx-auto w-16 h-16 bg-surface-100 dark:bg-surface-800 rounded-full flex items-center justify-center">
-                            <i class="pi pi-cloud-upload text-2xl text-surface-500"></i>
+                        <div class="drop-zone-content">
+                          <div class="drop-zone-icon">
+                            <i class="pi pi-cloud-upload"></i>
                           </div>
-                          <div>
-                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-2">
+                          <div class="drop-zone-text">
+                            <p class="drop-zone-title">
                               Drop your file here or click to browse
                             </p>
-                            <p class="text-sm text-surface-500">
+                            <p class="drop-zone-subtitle">
                               Supported formats: PDF, DOCX, PNG, JPG, JPEG (Max: {{ maxFileSize / 1024 / 1024 }}MB)
                             </p>
                           </div>
                         </div>
                       } @else {
-                        <div class="space-y-4">
-                          <div class="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                            <i class="pi pi-check text-2xl text-green-600 dark:text-green-400"></i>
+                        <div class="file-selected-content">
+                          <div class="file-selected-icon">
+                            <i class="pi pi-check"></i>
                           </div>
-                          <div>
-                            <p class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-1">
+                          <div class="file-selected-info">
+                            <p class="file-selected-name">
                               {{ selectedFile()?.name }}
                             </p>
-                            <p class="text-sm text-surface-500">
+                            <p class="file-selected-size">
                               {{ formatFileSize(selectedFile()?.size || 0) }}
                             </p>
                             <button 
                               type="button" 
-                              class="mt-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              class="file-remove-btn"
                               (click)="removeFile($event)"
                             >
                               Remove file
@@ -164,10 +164,10 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   />
 
                   @if (fileError()) {
-                    <div class="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
-                      <div class="flex items-start">
-                        <i class="pi pi-exclamation-triangle text-red-600 dark:text-red-400 mr-2 mt-0.5"></i>
-                        <span class="text-sm text-red-700 dark:text-red-300">{{ fileError() }}</span>
+                    <div class="error-message">
+                      <div class="error-content">
+                        <i class="pi pi-exclamation-triangle error-icon"></i>
+                        <span class="error-text">{{ fileError() }}</span>
                       </div>
                     </div>
                   }
@@ -230,14 +230,14 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   </div>
                 }
               </div>
-            </p-card>
+            </div>
 
             <!-- Upload Progress -->
             @if (uploadMode() === 'single' && uploadProgress()) {
-              <p-card class="shadow-lg">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-surface-900 dark:text-surface-0">
+              <div class="progress-card">
+                <div class="progress-card-content">
+                  <div class="progress-card-header">
+                    <h3 class="progress-card-title">
                       Upload Progress
                     </h3>
                     @if (uploadProgress()?.status === UploadStatus.UPLOADING || uploadProgress()?.status === UploadStatus.PROCESSING) {
@@ -253,10 +253,10 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     }
                   </div>
 
-                  <div class="space-y-3">
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-surface-600 dark:text-surface-400">{{ uploadProgress()?.fileName }}</span>
-                      <span class="font-medium">{{ uploadProgress()?.progress }}%</span>
+                  <div class="progress-details">
+                    <div class="progress-info">
+                      <span class="progress-filename">{{ uploadProgress()?.fileName }}</span>
+                      <span class="progress-percentage">{{ uploadProgress()?.progress }}%</span>
                     </div>
                     
                     <p-progressBar 
@@ -297,12 +297,12 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     }
                   </div>
                 </div>
-              </p-card>
+              </div>
             }
 
             <!-- Bulk Upload Progress -->
             @if (uploadMode() === 'bulk' && bulkUploadProgress().size > 0) {
-              <p-card class="shadow-lg">
+              <div class="progress-card">
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
                     <h3 class="text-lg font-medium text-surface-900 dark:text-surface-0">
@@ -405,18 +405,18 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
           </div>
 
           <!-- Metadata Form -->
-          <div class="space-y-6">
-            <p-card class="shadow-lg">
-              <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <div class="metadata-section">
+            <div class="metadata-card">
+              <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="metadata-form">
 
-                <h3 class="text-lg font-medium text-surface-900 dark:text-surface-0 mb-4">
+                <h3 class="metadata-card-title">
                   Document Information
                 </h3>
 
                 <!-- Template Selection -->
                 @if (availableTemplates().length > 0) {
-                  <div class="field">
-                    <label for="templateId" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                  <div class="form-field">
+                    <label for="templateId" class="form-field-label">
                       Document Template (Optional)
                     </label>
                     <div class="flex gap-2">
@@ -440,15 +440,15 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                         ></p-button>
                       }
                     </div>
-                    <small class="text-surface-500 mt-1 block">
+                    <small class="form-field-help">
                       Templates help standardize document information and pre-fill common fields
                     </small>
                   </div>
 
                   <!-- Template Preview -->
                   @if (selectedTemplate() && showTemplatePreview()) {
-                    <div class="field">
-                      <div class="p-3 bg-surface-50 dark:bg-surface-800 rounded border">
+                    <div class="form-field">
+                      <div class="template-preview-card">
                         <div class="flex items-center justify-between mb-2">
                           <h4 class="text-sm font-medium text-surface-900 dark:text-surface-0">
                             {{ selectedTemplate()?.name }}
@@ -486,8 +486,8 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                 }
 
                 <!-- Document Type -->
-                <div class="field">
-                  <label for="documentType" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                <div class="form-field">
+                  <label for="documentType" class="form-field-label">
                     Document Type *
                   </label>
                   <p-select
@@ -506,8 +506,8 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                 </div>
 
                 <!-- Document Title -->
-                <div class="field">
-                  <label for="title" class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+                <div class="form-field">
+                  <label for="title" class="form-field-label">
                     Document Title *
                   </label>
                   <input
@@ -704,13 +704,12 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-4 pt-4">
+                <div class="form-actions">
                   <p-button
                     type="button"
                     label="Cancel"
                     icon="pi pi-times"
-                    [outlined]="true"
-                    class="flex-1"
+                    styleClass="p-button-outlined"
                     (onClick)="cancel()"
                     [disabled]="isUploading()"
                   ></p-button>
@@ -719,9 +718,9 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     type="submit"
                     label="Upload Document"
                     icon="pi pi-upload"
+                    styleClass="p-button-primary"
                     [loading]="isUploading()"
                     [disabled]="!canSubmit()"
-                    class="flex-1"
                   ></p-button>
                 </div>
               </form>
@@ -732,40 +731,274 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
+    .document-upload-container {
+      @apply min-h-screen bg-gray-900 text-white;
     }
-    
+
+    // Header Section
+    .document-upload-header {
+      @apply bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-6;
+
+      .header-content {
+        @apply max-w-7xl mx-auto flex items-center justify-between;
+
+        .title-section {
+          .page-title {
+            @apply text-3xl font-semibold text-white mb-2;
+          }
+
+          .page-subtitle {
+            @apply text-gray-300 font-normal;
+          }
+        }
+
+        .header-actions {
+          @apply flex items-center space-x-4;
+
+          .mode-toggle {
+            @apply flex items-center space-x-2 px-4 py-2 bg-gray-700/50 rounded-lg;
+
+            .toggle-label {
+              @apply text-sm text-gray-300;
+            }
+          }
+
+          ::ng-deep .p-button.p-button-text {
+            @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
+          }
+        }
+      }
+    }
+
+    // Upload Content
+    .upload-content {
+      @apply max-w-7xl mx-auto p-6;
+
+      .upload-grid {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+
+        .upload-section {
+          @apply space-y-6;
+
+          .upload-card {
+            @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
+
+            .upload-card-content {
+              @apply space-y-6;
+
+              .upload-field {
+                .upload-field-label {
+                  @apply block text-sm font-medium text-gray-300 mb-4;
+                }
+
+                .drag-drop-zone {
+                  @apply border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer;
+                  @apply transition-all duration-200 hover:border-cyan-500 hover:bg-cyan-500/10;
+
+                  &.drag-over {
+                    @apply border-cyan-500 bg-cyan-500/20 transform scale-105;
+                    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+                  }
+
+                  .drop-zone-content {
+                    @apply space-y-4;
+
+                    .drop-zone-icon {
+                      @apply mx-auto w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center;
+
+                      i {
+                        @apply text-2xl text-gray-400;
+                      }
+                    }
+
+                    .drop-zone-text {
+                      .drop-zone-title {
+                        @apply text-lg font-medium text-white mb-2;
+                      }
+
+                      .drop-zone-subtitle {
+                        @apply text-sm text-gray-400;
+                      }
+                    }
+                  }
+
+                  .file-selected-content {
+                    @apply space-y-4;
+
+                    .file-selected-icon {
+                      @apply mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center;
+
+                      i {
+                        @apply text-2xl text-green-400;
+                      }
+                    }
+
+                    .file-selected-info {
+                      .file-selected-name {
+                        @apply text-lg font-medium text-white mb-1;
+                      }
+
+                      .file-selected-size {
+                        @apply text-sm text-gray-400;
+                      }
+
+                      .file-remove-btn {
+                        @apply mt-2 text-sm text-red-400 hover:text-red-300 transition-colors;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .metadata-section {
+          @apply space-y-6;
+
+          .metadata-card {
+            @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
+
+            .metadata-card-title {
+              @apply text-lg font-medium text-white mb-6;
+            }
+
+            .metadata-form {
+              @apply space-y-6;
+
+              .form-field {
+                @apply space-y-2;
+
+                .form-field-label {
+                  @apply block text-sm font-medium text-gray-300;
+                }
+
+                .form-field-help {
+                  @apply text-xs text-gray-400 mt-1 block;
+                }
+
+                .template-preview-card {
+                  @apply p-3 bg-gray-700/30 rounded border border-gray-600;
+                }
+              }
+            }
+
+            .progress-card {
+              @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
+
+              .progress-card-content {
+                @apply space-y-4;
+
+                .progress-card-header {
+                  @apply flex items-center justify-between;
+
+                  .progress-card-title {
+                    @apply text-lg font-medium text-white;
+                  }
+                }
+
+                .progress-details {
+                  @apply space-y-3;
+
+                  .progress-info {
+                    @apply flex items-center justify-between text-sm;
+
+                    .progress-filename {
+                      @apply text-gray-400;
+                    }
+
+                    .progress-percentage {
+                      @apply font-medium text-white;
+                    }
+                  }
+
+                  .error-message {
+                    @apply mt-2 p-3 bg-red-500/20 rounded border border-red-500/30;
+
+                    .error-content {
+                      @apply flex items-start;
+
+                      .error-icon {
+                        @apply text-red-400 mr-2 mt-0.5;
+                      }
+
+                      .error-text {
+                        @apply text-sm text-red-300;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Form Fields
     .field {
-      margin-bottom: 1.5rem;
+      @apply mb-6;
     }
 
-    .drag-drop-zone {
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-    }
+    // Dark theme glassmorphism effects
+    .document-upload-container {
+      ::ng-deep .p-card {
+        @apply bg-gray-800/50 backdrop-blur-sm border-gray-700;
+      }
 
-    .drag-drop-zone:hover {
-      border-color: var(--primary-500);
-      background-color: var(--primary-50);
-    }
+      ::ng-deep .p-button:not(.p-button-text) {
+        @apply bg-gray-700/50 border-gray-600 hover:bg-gray-600/50;
 
-    .drag-drop-zone.drag-over {
-      transform: scale(1.02);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
+        &.p-button-primary {
+          @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
+        }
+      }
 
-    .dark .drag-drop-zone:hover {
-      background-color: var(--primary-900);
-      opacity: 0.2;
-    }
+      ::ng-deep .p-inputtext,
+      ::ng-deep .p-select,
+      ::ng-deep .p-multiselect,
+      ::ng-deep .p-datepicker input {
+        @apply bg-gray-700/50 border-gray-600 text-white;
 
-    .suggestion-chip {
-      transition: all 0.2s ease-in-out;
-    }
+        &:enabled:focus {
+          @apply border-cyan-500 ring-2 ring-cyan-500/20;
+        }
+      }
 
-    .suggestion-chip:hover {
-      transform: translateY(-1px);
+      ::ng-deep .p-progressbar {
+        @apply bg-gray-700/50;
+
+        .p-progressbar-value {
+          @apply bg-cyan-500;
+        }
+      }
+
+      ::ng-deep .p-toggleswitch {
+        .p-toggleswitch-slider {
+          @apply bg-gray-600;
+        }
+
+        &.p-toggleswitch-checked .p-toggleswitch-slider {
+          @apply bg-cyan-500;
+        }
+      }
+
+      // Form Actions
+      .form-actions {
+        @apply flex gap-4 pt-6 border-t border-gray-700;
+
+        ::ng-deep .p-button {
+          @apply flex-1;
+
+          &.p-button-outlined {
+            @apply border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500;
+          }
+
+          &.p-button-primary {
+            @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
+          }
+        }
+      }
     }
   `]
 })
