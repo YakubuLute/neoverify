@@ -152,8 +152,7 @@
                 <div class="document-card-wrapper" [style.height.px]="virtualScrollConfig().itemHeight"
                     *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
                     <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
-                        [canSelect]="canBulkEdit()" [thumbnailUrl]="getThumbnailUrl(document)"
-                        [isLoading]="isDocumentLoading(document)" (documentClick)="onDocumentClick(document)"
+                        [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
                         (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
                     </app-document-card>
                 </div>
@@ -167,8 +166,7 @@
         @for (document of filteredDocuments(); track document.id) {
         <div *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
             <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
-                [canSelect]="canBulkEdit()" [thumbnailUrl]="getThumbnailUrl(document)"
-                [isLoading]="isDocumentLoading(document)" (documentClick)="onDocumentClick(document)"
+                [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
                 (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
             </app-document-card>
         </div>
