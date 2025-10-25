@@ -11,11 +11,9 @@
 
         <!-- Search Actions -->
         <div class="search-actions">
-            @if (hasActiveFilters()) {
-            <p-button icon="pi pi-filter-slash" [text]="true" (onClick)="onClearFilters()" pTooltip="Clear all filters"
-                class="clear-filters-btn">
+            <p-button *ngIf="hasActiveFilters()" icon="pi pi-filter-slash" [text]="true" (onClick)="onClearFilters()"
+                pTooltip="Clear all filters" class="clear-filters-btn">
             </p-button>
-            }
 
             <p-button icon="pi pi-search" [text]="true" pTooltip="Advanced search" class="advanced-search-btn">
             </p-button>
@@ -23,18 +21,16 @@
     </div>
 
     <!-- Advanced Filters Panel -->
-    @if (showAdvancedFilters) {
-    <div class="advanced-filters-panel">
+    <div class="advanced-filters-panel" *ngIf="showAdvancedFilters">
         <div class="filters-header">
             <h3 class="filters-title">
                 <i class="pi pi-filter"></i>
                 Advanced Filters
             </h3>
 
-            @if (hasActiveFilters()) {
-            <p-button label="Clear All" [text]="true" size="small" (onClick)="onClearFilters()" class="clear-all-btn">
+            <p-button *ngIf="hasActiveFilters()" label="Clear All" [text]="true" size="small"
+                (onClick)="onClearFilters()" class="clear-all-btn">
             </p-button>
-            }
         </div>
 
         <div class="filters-content">
@@ -46,21 +42,8 @@
                     Document Type
                 </label>
                 <p-multiSelect [options]="documentTypeOptions" optionLabel="label" optionValue="value"
-                    placeholder="Select document types" [value]="getCurrentDocumentTypes()"
+                    placeholder="Select document types" [ngModel]="getCurrentDocumentTypes()"
                     (onChange)="onDocumentTypeChange($event.value)" [showClear]="true" class="filter-multiselect">
-                    <ng-template pTemplate="selectedItems" let-value>
-                        @if (value && value.length > 0) {
-                        <div class="selected-items">
-                            @if (value.length <= 2) { @for (item of value; track item) { <p-tag
-                                [value]="documentTypeOptions.find(opt => opt.value === item)?.label" severity="info">
-                                </p-tag>
-                                }
-                                } @else {
-                                <p-tag [value]="value.length + ' types selected'" severity="info"></p-tag>
-                                }
-                        </div>
-                        }
-                    </ng-template>
                 </p-multiSelect>
             </div>
 
@@ -71,21 +54,8 @@
                     Document Status
                 </label>
                 <p-multiSelect [options]="statusOptions" optionLabel="label" optionValue="value"
-                    placeholder="Select status" [value]="getCurrentStatuses()" (onChange)="onStatusChange($event.value)"
-                    [showClear]="true" class="filter-multiselect">
-                    <ng-template pTemplate="selectedItems" let-value>
-                        @if (value && value.length > 0) {
-                        <div class="selected-items">
-                            @if (value.length <= 2) { @for (item of value; track item) { <p-tag
-                                [value]="statusOptions.find(opt => opt.value === item)?.label" severity="secondary">
-                                </p-tag>
-                                }
-                                } @else {
-                                <p-tag [value]="value.length + ' statuses selected'" severity="secondary"></p-tag>
-                                }
-                        </div>
-                        }
-                    </ng-template>
+                    placeholder="Select status" [ngModel]="getCurrentStatuses()"
+                    (onChange)="onStatusChange($event.value)" [showClear]="true" class="filter-multiselect">
                 </p-multiSelect>
             </div>
 
@@ -96,21 +66,8 @@
                     Verification Status
                 </label>
                 <p-multiSelect [options]="verificationStatusOptions" optionLabel="label" optionValue="value"
-                    placeholder="Select verification status" [value]="getCurrentVerificationStatuses()"
+                    placeholder="Select verification status" [ngModel]="getCurrentVerificationStatuses()"
                     (onChange)="onVerificationStatusChange($event.value)" [showClear]="true" class="filter-multiselect">
-                    <ng-template pTemplate="selectedItems" let-value>
-                        @if (value && value.length > 0) {
-                        <div class="selected-items">
-                            @if (value.length <= 2) { @for (item of value; track item) { <p-tag
-                                [value]="verificationStatusOptions.find(opt => opt.value === item)?.label"
-                                severity="success"></p-tag>
-                                }
-                                } @else {
-                                <p-tag [value]="value.length + ' statuses selected'" severity="success"></p-tag>
-                                }
-                        </div>
-                        }
-                    </ng-template>
                 </p-multiSelect>
             </div>
 
@@ -120,7 +77,7 @@
                     <i class="pi pi-calendar"></i>
                     Upload Date Range
                 </label>
-                <p-datePicker selectionMode="range" placeholder="Select date range" [value]="getCurrentDateRange()"
+                <p-datePicker selectionMode="range" placeholder="Select date range" [ngModel]="getCurrentDateRange()"
                     (onSelect)="onDateRangeChange($event)" [showClear]="true" dateFormat="mm/dd/yy"
                     class="filter-datepicker">
                 </p-datePicker>
@@ -133,7 +90,7 @@
                     Issuer Organization
                 </label>
                 <p-multiSelect [options]="[]" optionLabel="name" optionValue="id" placeholder="Select issuers"
-                    [value]="getCurrentIssuers()" (onChange)="onIssuerChange($event.value)" [showClear]="true"
+                    [ngModel]="getCurrentIssuers()" (onChange)="onIssuerChange($event.value)" [showClear]="true"
                     class="filter-multiselect">
                 </p-multiSelect>
             </div>
@@ -145,7 +102,7 @@
                     Tags
                 </label>
                 <p-multiSelect [options]="[]" optionLabel="name" optionValue="value" placeholder="Select tags"
-                    [value]="getCurrentTags()" (onChange)="onTagsChange($event.value)" [showClear]="true"
+                    [ngModel]="getCurrentTags()" (onChange)="onTagsChange($event.value)" [showClear]="true"
                     [filter]="true" filterPlaceholder="Search tags" class="filter-multiselect">
                 </p-multiSelect>
             </div>
@@ -153,46 +110,32 @@
         </div>
 
         <!-- Filter Summary -->
-        @if (hasActiveFilters()) {
-        <div class="filter-summary">
+        <div class="filter-summary" *ngIf="hasActiveFilters()">
             <div class="summary-header">
                 <span class="summary-title">Active Filters:</span>
             </div>
 
             <div class="summary-tags">
-                @if (searchControl.value) {
-                <p-tag [value]="'Search: ' + searchControl.value" severity="info" [removable]="true"
-                    (onRemove)="searchControl.setValue('')">
+                <p-tag *ngIf="searchControl.value" [value]="'Search: ' + searchControl.value" severity="info">
                 </p-tag>
-                }
 
-                @if (getCurrentDocumentTypes().length > 0) {
-                <p-tag [value]="'Types: ' + getCurrentDocumentTypes().length" severity="info" [removable]="true"
-                    (onRemove)="onDocumentTypeChange([])">
+                <p-tag *ngIf="getCurrentDocumentTypes().length > 0"
+                    [value]="'Types: ' + getCurrentDocumentTypes().length" severity="info">
                 </p-tag>
-                }
 
-                @if (getCurrentStatuses().length > 0) {
-                <p-tag [value]="'Status: ' + getCurrentStatuses().length" severity="secondary" [removable]="true"
-                    (onRemove)="onStatusChange([])">
+                <p-tag *ngIf="getCurrentStatuses().length > 0" [value]="'Status: ' + getCurrentStatuses().length"
+                    severity="secondary">
                 </p-tag>
-                }
 
-                @if (getCurrentVerificationStatuses().length > 0) {
-                <p-tag [value]="'Verification: ' + getCurrentVerificationStatuses().length" severity="success"
-                    [removable]="true" (onRemove)="onVerificationStatusChange([])">
+                <p-tag *ngIf="getCurrentVerificationStatuses().length > 0"
+                    [value]="'Verification: ' + getCurrentVerificationStatuses().length" severity="success">
                 </p-tag>
-                }
 
-                @if (getCurrentDateRange()) {
-                <p-tag value="Date Range" severity="warning" [removable]="true" (onRemove)="onDateRangeChange(null)">
+                <p-tag *ngIf="getCurrentDateRange()" value="Date Range" severity="warn">
                 </p-tag>
-                }
             </div>
         </div>
-        }
     </div>
-    }
 
     <!-- Quick Filters -->
     <div class="quick-filters">

@@ -37,7 +37,6 @@
             (filtersChange)="onFilterChange($event)" (clearFilters)="clearFilters()">
         </app-document-search>
     </div>
-    }
 </div>
 
 <!-- Bulk Actions Bar -->
@@ -238,7 +237,6 @@
     }
 </div>
 }
-</div>
 
 <!-- Bulk Operations -->
 <app-bulk-operations [selectedCount]="selectedDocuments().length" [canBulkEdit]="canBulkEdit()" [canExport]="true"

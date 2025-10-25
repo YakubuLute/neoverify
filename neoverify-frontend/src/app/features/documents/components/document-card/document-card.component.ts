@@ -67,12 +67,12 @@ export class DocumentCardComponent {
         return extension || 'FILE';
     }
 
-    private getStatusSeverity(status: DocumentStatus): string {
+    private getStatusSeverity(status: DocumentStatus): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (status) {
             case DocumentStatus.ACTIVE:
                 return 'success';
             case DocumentStatus.PENDING:
-                return 'warning';
+                return 'warn';
             case DocumentStatus.REVOKED:
                 return 'danger';
             case DocumentStatus.EXPIRED:
@@ -82,12 +82,12 @@ export class DocumentCardComponent {
         }
     }
 
-    private getVerificationSeverity(status: VerificationStatus): string {
+    private getVerificationSeverity(status: VerificationStatus): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (status) {
             case VerificationStatus.VERIFIED:
                 return 'success';
             case VerificationStatus.PENDING:
-                return 'warning';
+                return 'warn';
             case VerificationStatus.FAILED:
                 return 'danger';
             case VerificationStatus.EXPIRED:
@@ -97,14 +97,14 @@ export class DocumentCardComponent {
         }
     }
 
-    private getDocumentTypeSeverity(type: DocumentType): string {
+    private getDocumentTypeSeverity(type: DocumentType): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (type) {
             case DocumentType.DEGREE:
                 return 'success';
             case DocumentType.CERTIFICATE:
                 return 'info';
             case DocumentType.LICENSE:
-                return 'warning';
+                return 'warn';
             case DocumentType.TRANSCRIPT:
                 return 'secondary';
             default:
@@ -119,71 +119,4 @@ export class DocumentCardComponent {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-}
-this.selectionChange.emit(selected);
-    }
-
-onQuickAction(action: string, event: Event): void {
-    event.stopPropagation();
-    this.quickAction.emit({ action, document: this.document });
-    this.showMenu.set(false);
-}
-
-toggleMenu(event: Event): void {
-    event.stopPropagation();
-    this.showMenu.set(!this.showMenu());
-}
-
-    private getStatusSeverity(status: DocumentStatus): string {
-    switch (status) {
-        case DocumentStatus.ACTIVE:
-            return 'success';
-        case DocumentStatus.PENDING:
-            return 'warning';
-        case DocumentStatus.REVOKED:
-            return 'danger';
-        case DocumentStatus.EXPIRED:
-            return 'secondary';
-        default:
-            return 'contrast';
-    }
-}
-
-    private getVerificationSeverity(status: VerificationStatus): string {
-    switch (status) {
-        case VerificationStatus.VERIFIED:
-            return 'success';
-        case VerificationStatus.PENDING:
-            return 'warning';
-        case VerificationStatus.FAILED:
-            return 'danger';
-        case VerificationStatus.EXPIRED:
-            return 'secondary';
-        default:
-            return 'contrast';
-    }
-}
-
-    private getDocumentTypeSeverity(type: DocumentType): string {
-    switch (type) {
-        case DocumentType.DEGREE:
-            return 'success';
-        case DocumentType.CERTIFICATE:
-            return 'info';
-        case DocumentType.LICENSE:
-            return 'warning';
-        case DocumentType.TRANSCRIPT:
-            return 'secondary';
-        default:
-            return 'contrast';
-    }
-}
-
-    private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
 }

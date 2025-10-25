@@ -70,7 +70,7 @@
                 <div class="format-options">
                     @for (format of exportFormats; track format.value) {
                     <div class="format-option" [class.selected]="exportOptions().format === format.value"
-                        (click)="updateExportFormat(format.value as any)">
+                        (click)="updateExportFormat(format.value)">
                         <div class="format-header">
                             <span class="format-name">{{ format.label }}</span>
                             <i class="pi pi-check check-icon"
@@ -87,7 +87,7 @@
                 <label class="option-label">Include Additional Data</label>
                 <div class="checkbox-options">
                     <div class="checkbox-option">
-                        <p-checkbox [binary]="true" [checked]="exportOptions().includeMetadata"
+                        <p-checkbox [binary]="true" [ngModel]="exportOptions().includeMetadata"
                             (onChange)="updateExportOption('includeMetadata', $event.checked)"
                             inputId="includeMetadata">
                         </p-checkbox>
@@ -97,7 +97,7 @@
                     </div>
 
                     <div class="checkbox-option">
-                        <p-checkbox [binary]="true" [checked]="exportOptions().includeAuditTrail"
+                        <p-checkbox [binary]="true" [ngModel]="exportOptions().includeAuditTrail"
                             (onChange)="updateExportOption('includeAuditTrail', $event.checked)"
                             inputId="includeAuditTrail">
                         </p-checkbox>

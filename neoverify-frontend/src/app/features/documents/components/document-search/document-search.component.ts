@@ -107,11 +107,11 @@ export class DocumentSearchComponent implements OnInit, OnDestroy {
         this.updateFilters(updatedFilters);
     }
 
-    onDateRangeChange(dateRange: Date[] | null): void {
+    onDateRangeChange(dateRange: Date | Date[] | null): void {
         const currentFilters = this.filters();
         const updatedFilters = {
             ...currentFilters,
-            dateRange: dateRange && dateRange.length === 2
+            dateRange: dateRange && Array.isArray(dateRange) && dateRange.length === 2
                 ? { start: dateRange[0], end: dateRange[1] }
                 : undefined
         };

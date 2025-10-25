@@ -2,7 +2,7 @@
 .document-card {
     @apply relative bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700;
     @apply hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10;
-    @apply transition-all duration-300 cursor-pointer group overflow-hidden;
+    @apply transition-all duration-300 cursor-pointer overflow-hidden;
     @apply flex flex-col h-full;
 
     &.selected {
@@ -13,9 +13,32 @@
         @apply border-orange-500/50 shadow-lg shadow-orange-500/10;
     }
 
+    // Hover effects
+    &:hover {
+        .selection-checkbox {
+            @apply opacity-100;
+        }
+
+        .document-title {
+            @apply text-cyan-400;
+        }
+
+        .menu-trigger {
+            @apply opacity-100;
+        }
+
+        .card-actions {
+            @apply opacity-100;
+        }
+
+        .hover-overlay {
+            @apply opacity-100;
+        }
+    }
+
     // Selection Checkbox
     .selection-checkbox {
-        @apply absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity;
+        @apply absolute top-3 left-3 z-10 opacity-0 transition-opacity;
 
         ::ng-deep .p-checkbox {
             .p-checkbox-box {
@@ -96,7 +119,7 @@
 
             .document-title {
                 @apply text-lg font-semibold text-white line-clamp-2 flex-1 mr-2;
-                @apply group-hover:text-cyan-400 transition-colors;
+                @apply transition-colors;
             }
 
             // Quick Actions Menu
@@ -104,7 +127,7 @@
                 @apply relative;
 
                 .menu-trigger {
-                    @apply opacity-0 group-hover:opacity-100 transition-opacity;
+                    @apply opacity-0 transition-opacity;
 
                     ::ng-deep .p-button {
                         @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
@@ -203,7 +226,7 @@
         }
 
         .card-actions {
-            @apply flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity;
+            @apply flex items-center space-x-1 opacity-0 transition-opacity;
 
             .action-btn {
                 ::ng-deep .p-button {
@@ -216,7 +239,7 @@
     // Hover Overlay
     .hover-overlay {
         @apply absolute inset-0 bg-gray-900/80 backdrop-blur-sm;
-        @apply flex items-center justify-center opacity-0 group-hover:opacity-100;
+        @apply flex items-center justify-center opacity-0;
         @apply transition-opacity duration-300 pointer-events-none;
 
         .overlay-content {

@@ -5,7 +5,7 @@
     <!-- Selection Checkbox -->
     @if (canSelect) {
     <div class="selection-checkbox">
-        <p-checkbox [binary]="true" [checked]="selected" (onChange)="onSelectionChange($event.checked)">
+        <p-checkbox [binary]="true" [ngModel]="selected" (onChange)="onSelectionChange($event.checked)">
         </p-checkbox>
     </div>
     }
