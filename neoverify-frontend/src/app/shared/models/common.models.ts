@@ -14,6 +14,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
+  totalCount?: number;
 }
 
 export interface QueryParams {

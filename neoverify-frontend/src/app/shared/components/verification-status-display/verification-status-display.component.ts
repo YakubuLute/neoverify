@@ -475,15 +475,18 @@ import {
     }
 
     .forensics-flags .flag-item.bg-red-50 {
-      @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800;
+      @apply dark:bg-red-900/20 border border-red-200 dark:border-red-800;
+      background-color: #fef2f2; /* bg-red-50 */
     }
 
     .forensics-flags .flag-item.bg-yellow-50 {
-      @apply bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800;
+      @apply dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800;
+      background-color: #fffbeb; /* bg-yellow-50 */
     }
 
     .forensics-flags .flag-item.bg-blue-50 {
-      @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800;
+      @apply dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800;
+      background-color: #eff6ff; /* bg-blue-50 */
     }
 
     :host ::ng-deep .p-card-content {

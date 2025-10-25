@@ -616,7 +616,7 @@ export class AuditTrailComponent implements OnInit {
     ).subscribe({
       next: (response) => {
         this.auditEntries.set(response.items);
-        this.totalRecords.set(response.totalCount);
+        this.totalRecords.set(response?.totalCount!);
       },
       error: (error) => {
         console.error('Failed to load audit entries:', error);
@@ -816,7 +816,7 @@ export class AuditTrailComponent implements OnInit {
     const actions = Object.entries(stats.actionCounts);
     if (!actions.length) return 'N/A';
 
-    const mostCommon = actions.reduce((a, b) => a[1] > b[1] ? a : b);
+    const mostCommon = actions.reduce((a, b) => (a[1] as any )> (b[1] as any )? a : b);
     return this.getActionLabel(mostCommon[0] as AuditAction);
   }
 }

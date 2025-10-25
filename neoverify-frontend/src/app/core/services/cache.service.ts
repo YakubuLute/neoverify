@@ -360,8 +360,8 @@ export class CacheService {
         }
 
         // Calculate hit rate
-        const totalRequests = (current.hits + updates.hits || current.hits) + (current.misses + updates.misses || current.misses);
-        updates.hitRate = totalRequests > 0 ? ((current.hits + updates.hits || current.hits) / totalRequests) * 100 : 0;
+        const totalRequests = (current.hits + updates.hits! || current.hits) + (current.misses + updates.misses! || current.misses);
+        updates.hitRate = totalRequests > 0 ? ((current.hits + updates.hits! || current.hits) / totalRequests) * 100 : 0;
 
         this.cacheStats.next({
             ...current,

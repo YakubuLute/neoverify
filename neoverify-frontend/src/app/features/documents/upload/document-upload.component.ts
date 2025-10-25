@@ -14,56 +14,62 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
-                {{ uploadMode() === 'single' ? 'Upload Document' : 'Bulk Upload Documents' }}
-              </h1>
-              <p class="text-surface-600 dark:text-surface-400">
-                {{ uploadMode() === 'single' 
-                  ? 'Upload and register your document on the blockchain for verification'
-                  : 'Upload multiple documents at once (up to 100 files)'
-                }}
-              </p>
-            </div>
-            
+    <div class="document-upload-container">
+      <!-- Header Section -->
+      <div class="document-upload-header">
+        <div class="header-content">
+          <div class="title-section">
+            <h1 class="page-title">
+              {{ uploadMode() === 'single' ? 'Upload Document' : 'Bulk Upload Documents' }}
+            </h1>
+            <p class="page-subtitle">
+              {{ uploadMode() === 'single' 
+                ? 'Upload and register your document on the blockchain for verification'
+                : 'Upload multiple documents at once (up to 100 files)'
+              }}
+            </p>
+          </div>
+          
+          <div class="header-actions">
             <!-- Upload Mode Toggle -->
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-surface-600 dark:text-surface-400">Single</span>
+            <div class="mode-toggle">
+              <span class="toggle-label">Single</span>
               <p-toggleSwitch
                 [(ngModel)]="isBulkModeValue"
                 (onChange)="toggleUploadMode()"
                 [disabled]="isUploading()"
               ></p-toggleSwitch>
-              <span class="text-sm text-surface-600 dark:text-surface-400">Bulk</span>
+              <span class="toggle-label">Bulk</span>
             </div>
+            
+            <p-button 
+              icon="pi pi-arrow-left" 
+              label="Back to Documents"
+              (onClick)="cancel()" 
+              styleClass="p-button-text"
+              pTooltip="Return to documents list">
+            </p-button>
           </div>
         </div>
+      </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Upload Content -->
+      <div class="upload-content">
+        <div class="upload-grid">
           <!-- Upload Section -->
-          <div class="space-y-6">
+          <div class="upload-section">
             <!-- Drag and Drop Upload Area -->
-            <p-card class="shadow-lg">
-              <div class="space-y-6">
-                <div class="field">
-                  <label class="block text-sm font-medium text-surface-900 dark:text-surface-0 mb-4">
+            <div class="upload-card">
+              <div class="upload-card-content">
+                <div class="upload-field">
+                  <label class="upload-field-label">
                     Document File *
                   </label>
                   
                   <!-- Drag and Drop Zone -->
                   <div 
-                    class="drag-drop-zone border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200"
+                    class="drag-drop-zone"
                     [class.drag-over]="isDragOver()"
-                    [class.border-primary-500]="isDragOver()"
-                    [class.border-surface-300]="!isDragOver()"
-                    [class.dark:border-surface-600]="!isDragOver()"
-                    [class.bg-primary-50]="isDragOver()"
-                    [class.dark:bg-primary-900/20]="isDragOver()"
                     (dragover)="onDragOver($event)"
                     (dragleave)="onDragLeave($event)"
                     (drop)="onDrop($event)"

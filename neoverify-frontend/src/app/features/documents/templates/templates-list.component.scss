@@ -557,18 +557,8 @@
     }
 }
 
-// Utility Classes
-.text-green-400 {
-    @apply text-green-400;
-}
-
-.text-red-400 {
-    @apply text-red-400;
-}
-
-.text-gray-400 {
-    @apply text-gray-400;
-}
+// Utility Classes - Remove circular dependencies
+// These utilities are already available from Tailwind CSS
 
 // Responsive Design
 @media (max-width: 768px) {
