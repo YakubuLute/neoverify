@@ -400,7 +400,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                     </div>
                   }
                 </div>
-              </p-card>
+              </div>
             }
           </div>
 
@@ -724,7 +724,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
                   ></p-button>
                 </div>
               </form>
-            </p-card>
+            </div>
           </div>
         </div>
       </div>
