@@ -99,6 +99,47 @@ export class FormPersistenceService {
         }
     }
 
+    // Legacy methods for backward compatibility with signup component
+    /**
+     * @deprecated Use hasFormState() instead
+     */
+    hasSavedData(): boolean {
+        return this.hasFormState('signup');
+    }
+
+    /**
+     * @deprecated Use restoreFormState() instead
+     */
+    getFormData(): FormState | null {
+        try {
+            const allStates = this.getAllStatesFromStorage();
+            return allStates['signup'] || this.formStates.get('signup') || null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * @deprecated Use saveFormState() instead
+     */
+    saveFormData(formData: FormState): void {
+        this.formStates.set('signup', formData);
+        try {
+            const allStates = this.getAllStatesFromStorage();
+            allStates['signup'] = formData;
+            localStorage.setItem(this.storageKey, JSON.stringify(allStates));
+        } catch (error) {
+            console.warn('Failed to save form data to localStorage:', error);
+        }
+    }
+
+    /**
+     * @deprecated Use clearFormState() instead
+     */
+    clearFormData(): void {
+        this.clearFormState('signup');
+    }
+
     private getAllStatesFromStorage(): { [key: string]: FormState } {
         const stored = localStorage.getItem(this.storageKey);
         return stored ? JSON.parse(stored) : {};

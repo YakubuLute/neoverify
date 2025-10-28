@@ -38,11 +38,12 @@ export class ProfileService {
             message: 'Profile updated successfully',
             user: {
                 id: '1',
+                name: `${profileData.firstName} ${profileData.lastName}`,
                 firstName: profileData.firstName,
                 lastName: profileData.lastName,
                 email: profileData.email,
                 phone: profileData.phone,
-                role: 'user',
+                role: 'org_admin' as any,
                 organizationId: '1',
                 organizationName: 'Test Organization',
                 mfaEnabled: false,
