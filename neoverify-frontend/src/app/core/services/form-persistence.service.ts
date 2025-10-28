@@ -2,7 +2,19 @@ import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 export interface FormState {
-    [key: string]: any;
+    [key: string]: unknown;
+}
+
+// Legacy interface for signup compatibility
+export interface SignupFormState extends FormState {
+    accountType?: string;
+    currentStep?: number;
+    individualForm?: {
+        fullName?: string;
+        email?: string;
+        phone?: string;
+        acceptTerms?: boolean;
+    };
 }
 
 @Injectable({
@@ -110,10 +122,10 @@ export class FormPersistenceService {
     /**
      * @deprecated Use restoreFormState() instead
      */
-    getFormData(): FormState | null {
+    getFormData(): SignupFormState | null {
         try {
             const allStates = this.getAllStatesFromStorage();
-            return allStates['signup'] || this.formStates.get('signup') || null;
+            return (allStates['signup'] || this.formStates.get('signup') || null) as SignupFormState;
         } catch (error) {
             return null;
         }

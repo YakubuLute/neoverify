@@ -1,11 +1,11 @@
-import { Component, inject, signal, OnInit, computed, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { FormPersistenceService } from '../../core/services/form-persistence.service';
 import { SHARED_IMPORTS } from '../../shared';
-import { User } from '../../shared/models/auth.models';
+
 import { FormUtils, FormValidators } from '../../shared/utils/form.utils';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -769,8 +769,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     this.updatingProfile.set(true);
-    const formValue = this.profileForm.value;
 
+    const formValue = this.profileForm.value;
     this.profileService.updateProfile({
       firstName: formValue.firstName!,
       lastName: formValue.lastName!,
@@ -840,7 +840,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     console.log('Delete account');
   }
 
-  private passwordMatchValidator(form: any) {
+  private passwordMatchValidator(form: any): any {
     const newPassword = form.get('newPassword');
     const confirmPassword = form.get('confirmPassword');
 

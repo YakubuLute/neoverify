@@ -92,7 +92,7 @@ export class ProfileService {
         }
 
         // Mock validation - replace with actual endpoint
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
         const isValid = phoneRegex.test(phone.replace(/\s/g, ''));
 
         return of({

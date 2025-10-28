@@ -951,12 +951,12 @@ export class SignupComponent implements OnInit, OnDestroy {
     }, 5000);
 
     // Restore account type and step
-    this.selectedAccountType.set(savedData.accountType);
-    this.currentStep.set(savedData.currentStep);
+    this.selectedAccountType.set(savedData['accountType'] as any);
+    this.currentStep.set(savedData['currentStep'] as number);
 
     // Restore individual form data
     if (savedData['individualForm'] && this.selectedAccountType() === 'individual') {
-      const individualData = savedData['individualForm'];
+      const individualData = savedData['individualForm'] as any;
       this.individualForm.patchValue({
         fullName: individualData.fullName || '',
         email: individualData.email || '',

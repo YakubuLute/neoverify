@@ -87,7 +87,7 @@ export class FormValidators {
         return null;
       }
 
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
       const valid = phoneRegex.test(control.value.replace(/\s/g, ''));
 
       return valid ? null : { phoneNumber: { value: control.value } };
@@ -161,7 +161,7 @@ export class FormUtils {
    * Mark all fields as touched to show validation errors
    */
   static markFormGroupTouched(formGroup: AbstractControl): void {
-    const controls = (formGroup as any).controls;
+    const controls = (formGroup as { controls?: { [key: string]: AbstractControl } }).controls;
     if (controls) {
       Object.keys(controls).forEach(field => {
         const control = formGroup.get(field);
