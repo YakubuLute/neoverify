@@ -1,10 +1,12 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn, AsyncValidatorFn } from '@angular/forms';
+import { Observable, of, timer } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
 
 /**
  * Custom form validators
  */
 export class FormValidators {
-  
+
   /**
    * Email validator with better regex
    */
@@ -13,10 +15,10 @@ export class FormValidators {
       if (!control.value) {
         return null;
       }
-      
+
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       const valid = emailRegex.test(control.value);
-      
+
       return valid ? null : { email: { value: control.value } };
     };
   }
@@ -91,13 +93,70 @@ export class FormValidators {
       return valid ? null : { phoneNumber: { value: control.value } };
     };
   }
+
+  /**
+   * Name validator (letters, spaces, hyphens, apostrophes only)
+   */
+  static name(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null;
+      }
+
+      const nameRegex = /^[a-zA-Z\s\-']+$/;
+      const valid = nameRegex.test(control.value.trim());
+
+      return valid ? null : { name: { value: control.value } };
+    };
+  }
+
+  /**
+   * Async email availability validator
+   */
+  static emailAvailability(
+    checkAvailability: (email: string, currentEmail: string) => Observable<{ available: boolean; message?: string }>,
+    currentEmail: string,
+    debounceTime = 500
+  ): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value === currentEmail) {
+        return of(null);
+      }
+
+      return timer(debounceTime).pipe(
+        switchMap(() => checkAvailability(control.value, currentEmail)),
+        map(result => result.available ? null : { emailTaken: { message: result.message } }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
+  /**
+   * Async phone number validator
+   */
+  static asyncPhoneNumber(
+    validatePhone: (phone: string) => Observable<{ valid: boolean; message?: string }>,
+    debounceTime = 300
+  ): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null);
+      }
+
+      return timer(debounceTime).pipe(
+        switchMap(() => validatePhone(control.value)),
+        map(result => result.valid ? null : { asyncPhoneNumber: { message: result.message } }),
+        catchError(() => of(null))
+      );
+    };
+  }
 }
 
 /**
  * Form utility functions
  */
 export class FormUtils {
-  
+
   /**
    * Mark all fields as touched to show validation errors
    */
@@ -148,7 +207,7 @@ export class FormUtils {
       if (!errors['strongPassword'].hasLower) requirements.push('a lowercase letter');
       if (!errors['strongPassword'].hasSpecial) requirements.push('a special character');
       if (!errors['strongPassword'].isLengthValid) requirements.push('at least 8 characters');
-      
+
       return `Password must contain ${requirements.join(', ')}`;
     }
 
@@ -158,6 +217,18 @@ export class FormUtils {
 
     if (errors['phoneNumber']) {
       return 'Please enter a valid phone number';
+    }
+
+    if (errors['name']) {
+      return `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`;
+    }
+
+    if (errors['emailTaken']) {
+      return errors['emailTaken'].message || 'Email is already in use';
+    }
+
+    if (errors['asyncPhoneNumber']) {
+      return errors['asyncPhoneNumber'].message || 'Invalid phone number';
     }
 
     return 'Invalid input';

@@ -1,17 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './layout/header/header.component';
+import { ToastModule } from 'primeng/toast';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   private readonly router = inject(Router);
-  
+
   showHeader = true;
 
   constructor() {

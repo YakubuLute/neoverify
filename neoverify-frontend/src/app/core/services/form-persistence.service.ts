@@ -1,121 +1,106 @@
 import { Injectable } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
-export interface SignupFormData {
-    accountType: 'individual' | 'organization';
-    currentStep: number;
-    individualForm?: {
-        fullName?: string;
-        email?: string;
-        phone?: string;
-        password?: string;
-        confirmPassword?: string;
-        acceptTerms?: boolean;
-    };
-    organizationForm?: {
-        contactFirstName?: string;
-        contactLastName?: string;
-        contactEmail?: string;
-        contactPhone?: string;
-        organizationName?: string;
-        organizationEmail?: string;
-        organizationLocation?: string;
-        password?: string;
-        confirmPassword?: string;
-        acceptTerms?: boolean;
-    };
-    timestamp: number;
+export interface FormState {
+    [key: string]: any;
 }
 
 @Injectable({
     providedIn: 'root'
 })
 export class FormPersistenceService {
-    private readonly STORAGE_KEY = 'neoverify_signup_form';
-    private readonly EXPIRY_HOURS = 24; // Form data expires after 24 hours
+    private readonly storageKey = 'neoverify_form_state';
+    private formStates = new Map<string, FormState>();
 
     /**
-     * Save form data to local storage
+     * Save form state to memory and optionally to localStorage
      */
-    saveFormData(data: Partial<SignupFormData>): void {
-        try {
-            const existingData = this.getFormData();
-            const updatedData: SignupFormData = {
-                accountType: 'individual',
-                currentStep: 1,
-                timestamp: Date.now(),
-                ...existingData,
-                ...data
-            };
+    saveFormState(formId: string, formGroup: FormGroup, persistent = false): void {
+        const formState = formGroup.value;
+        this.formStates.set(formId, formState);
 
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedData));
-        } catch (error) {
-            console.warn('Failed to save form data to localStorage:', error);
-        }
-    }
-
-    /**
-     * Retrieve form data from local storage
-     */
-    getFormData(): SignupFormData | null {
-        try {
-            const stored = localStorage.getItem(this.STORAGE_KEY);
-            if (!stored) {
-                return null;
+        if (persistent) {
+            try {
+                const allStates = this.getAllStatesFromStorage();
+                allStates[formId] = formState;
+                localStorage.setItem(this.storageKey, JSON.stringify(allStates));
+            } catch (error) {
+                console.warn('Failed to save form state to localStorage:', error);
             }
+        }
+    }
 
-            const data: SignupFormData = JSON.parse(stored);
+    /**
+     * Restore form state from memory or localStorage
+     */
+    restoreFormState(formId: string, formGroup: FormGroup): boolean {
+        // First try to get from memory
+        let formState = this.formStates.get(formId);
 
-            // Check if data has expired
-            if (this.isDataExpired(data.timestamp)) {
-                this.clearFormData();
-                return null;
+        // If not in memory, try localStorage
+        if (!formState) {
+            try {
+                const allStates = this.getAllStatesFromStorage();
+                formState = allStates[formId];
+            } catch (error) {
+                console.warn('Failed to restore form state from localStorage:', error);
+                return false;
             }
-
-            return data;
-        } catch (error) {
-            console.warn('Failed to retrieve form data from localStorage:', error);
-            this.clearFormData();
-            return null;
         }
+
+        if (formState) {
+            formGroup.patchValue(formState);
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * Clear form data from local storage
+     * Clear form state from memory and localStorage
      */
-    clearFormData(): void {
+    clearFormState(formId: string): void {
+        this.formStates.delete(formId);
+
         try {
-            localStorage.removeItem(this.STORAGE_KEY);
+            const allStates = this.getAllStatesFromStorage();
+            delete allStates[formId];
+            localStorage.setItem(this.storageKey, JSON.stringify(allStates));
         } catch (error) {
-            console.warn('Failed to clear form data from localStorage:', error);
+            console.warn('Failed to clear form state from localStorage:', error);
         }
     }
 
     /**
-     * Check if stored data has expired
+     * Check if form state exists
      */
-    private isDataExpired(timestamp: number): boolean {
-        const now = Date.now();
-        const expiryTime = this.EXPIRY_HOURS * 60 * 60 * 1000; // Convert hours to milliseconds
-        return (now - timestamp) > expiryTime;
-    }
-
-    /**
-     * Check if there is any saved form data
-     */
-    hasSavedData(): boolean {
-        const data = this.getFormData();
-        return data !== null;
-    }
-
-    /**
-     * Get the age of saved data in minutes
-     */
-    getSavedDataAge(): number | null {
-        const data = this.getFormData();
-        if (!data) {
-            return null;
+    hasFormState(formId: string): boolean {
+        if (this.formStates.has(formId)) {
+            return true;
         }
 
-        return Math.floor((Date.now() - data.timestamp) / (1000 * 60));
+        try {
+            const allStates = this.getAllStatesFromStorage();
+            return formId in allStates;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear all form states
+     */
+    clearAllFormStates(): void {
+        this.formStates.clear();
+        try {
+            localStorage.removeItem(this.storageKey);
+        } catch (error) {
+            console.warn('Failed to clear all form states from localStorage:', error);
+        }
+    }
+
+    private getAllStatesFromStorage(): { [key: string]: FormState } {
+        const stored = localStorage.getItem(this.storageKey);
+        return stored ? JSON.parse(stored) : {};
     }
 }

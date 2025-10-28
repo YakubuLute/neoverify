@@ -2,11 +2,14 @@
 <div class="min-h-screen bg-gray-50">
   <!-- Header -->
   @if (showHeader) {
-    <app-header></app-header>
+  <app-header></app-header>
   }
-  
+
   <!-- Main Content Area -->
   <main [class]="showHeader ? 'pt-16' : ''">
     <router-outlet></router-outlet>
   </main>
+
+  <!-- Toast Messages -->
+  <p-toast position="top-right"></p-toast>
 </div>
