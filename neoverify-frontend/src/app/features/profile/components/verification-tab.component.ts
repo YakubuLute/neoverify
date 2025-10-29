@@ -990,11 +990,11 @@ export class VerificationTabComponent implements OnInit, OnDestroy {
         shareOnCompletion: formValue.autoShare?.shareOnCompletion || false,
         shareOnFailure: formValue.autoShare?.shareOnFailure || false,
         includeDetails: formValue.autoShare?.includeDetails || false,
-        recipients: formValue.autoShare?.recipients?.map((r: { id: string; email: string; name: string; type: RecipientType }) => ({
+        recipients: (formValue.autoShare?.recipients as any[])?.map((r: any) => ({
           id: r.id || '',
           email: r.email,
           name: r.name,
-          type: r.type,
+          type: r.type as RecipientType,
           permissions: {
             canView: true,
             canDownload: false,
