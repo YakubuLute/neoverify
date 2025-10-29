@@ -65,6 +65,16 @@ async function startServer(): Promise<void> {
             logger.info(`API documentation will be available at: http://localhost:${config.port}/api-docs`);
         });
 
+        // Initialize WebSocket service
+        try {
+            const { initializeWebSocketService } = require('./services/websocket.service');
+            initializeWebSocketService(server);
+            logger.info('WebSocket service initialized successfully');
+        } catch (error) {
+            logger.warn('Failed to initialize WebSocket service:', error instanceof Error ? error.message : error);
+            logger.warn('Continuing without WebSocket - real-time features may be limited');
+        }
+
         // Setup graceful shutdown
         gracefulShutdown(server);
 

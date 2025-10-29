@@ -3,7 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
-import { config, redisClient } from './config';
+import swaggerUi from 'swagger-ui-express';
+import { config, redisClient, swaggerSpec } from './config';
 import logger from './utils/logger';
 import {
     globalErrorHandler,
@@ -164,6 +165,30 @@ app.get('/health', (req: Request, res: Response) => {
             version: process.env.npm_package_version || '1.0.0',
         },
     });
+});
+
+// API Documentation with Swagger UI
+const swaggerOptions = {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'NeoVerify API Documentation',
+    customfavIcon: '/favicon.ico',
+    swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        docExpansion: 'none',
+        filter: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: true,
+    },
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
+
+// Swagger JSON endpoint for external tools
+app.get('/api-docs.json', (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
 });
 
 // Import routes
