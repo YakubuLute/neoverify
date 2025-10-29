@@ -198,14 +198,14 @@
   - Create organization analytics and reporting
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [-] 7.1 Create organization management system
+- [x] 7.1 Create organization management system
   - Implement organization creation and configuration
   - Set up organization profile and settings management
   - Create organization subscription and billing integration
   - Implement organization deactivation and data handling
   - _Requirements: 4.1, 4.4_
 
-- [ ] 7.2 Implement user invitation and role management
+- [-] 7.2 Implement user invitation and role management
   - Create user invitation system with email notifications
   - Set up role-based access control (RBAC) system
   - Implement user role assignment and permission checking
