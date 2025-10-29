@@ -3,10 +3,32 @@ import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import User from '../models/User';
+import User, { UserPreferences } from '../models/User';
 import { asyncHandler, formatValidationErrors, AppError } from '../middleware/errorHandler';
 import logger from '../utils/logger';
 import { config } from '../config';
+
+// Notification preferences interface
+export interface NotificationPreferences {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    pushNotifications: boolean;
+    verificationAlerts: boolean;
+    weeklyReports: boolean;
+    documentStatusUpdates: boolean;
+    securityAlerts: boolean;
+    marketingEmails: boolean;
+}
+
+// Verification preferences interface
+export interface VerificationPreferences {
+    autoVerifyDocuments: boolean;
+    requireMfaForSensitiveActions: boolean;
+    allowThirdPartyIntegrations: boolean;
+    dataRetentionPeriod: number; // in days
+    shareAnalyticsData: boolean;
+    enableAuditLogging: boolean;
+}
 
 // Profile update validation rules
 export const profileUpdateValidation = [

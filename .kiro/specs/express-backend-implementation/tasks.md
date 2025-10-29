@@ -170,14 +170,14 @@
   - Implement account security settings management
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [-] 6.1 Implement profile information management
+- [x] 6.1 Implement profile information management
   - Create profile retrieval endpoint with complete user data
   - Implement profile update with validation and sanitization
   - Set up profile picture upload and management
   - Create profile completion tracking and validation
   - _Requirements: 3.1, 3.2_
 
-- [ ] 6.2 Create notification and verification preferences
+- [-] 6.2 Create notification and verification preferences
   - Implement notification preferences CRUD operations
   - Set up email notification settings and templates
   - Create verification preferences configuration

@@ -75,6 +75,9 @@ if (error) {
 export interface Config {
   env: string;
   port: number;
+  server: {
+    baseUrl: string;
+  };
   database: {
     host: string;
     port: number;
@@ -134,6 +137,9 @@ export interface Config {
 const config: Config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  server: {
+    baseUrl: envVars.SERVER_BASE_URL,
+  },
   database: {
     host: envVars.DB_HOST,
     port: envVars.DB_PORT,

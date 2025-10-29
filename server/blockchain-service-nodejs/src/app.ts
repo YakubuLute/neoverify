@@ -169,6 +169,13 @@ app.get('/health', (req: Request, res: Response) => {
 // Import routes
 import apiRoutes from './routes';
 
+// Static file serving for uploads
+app.use('/uploads', express.static(config.upload.uploadPath, {
+    maxAge: '1d', // Cache for 1 day
+    etag: true,
+    lastModified: true,
+}));
+
 // API routes
 app.use('/api', apiRoutes);
 
