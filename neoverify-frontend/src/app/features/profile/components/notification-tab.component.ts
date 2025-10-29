@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { DialogService } from 'primeng/dynamicdialog';
 import { SHARED_IMPORTS } from '../../../shared';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
@@ -10,11 +11,12 @@ import {
   NotificationHistoryItem,
   DigestFrequency
 } from '../../../shared/models/notification.models';
+import { NotificationHistoryDialogComponent } from './notification-history-dialog.component';
 
 @Component({
   selector: 'app-notification-tab',
   standalone: true,
-  imports: [SHARED_IMPORTS],
+  imports: [SHARED_IMPORTS, NotificationHistoryDialogComponent],
   template: `
     <div class="notification-preferences-container">
       <!-- Header -->
@@ -384,6 +386,7 @@ import {
 export class NotificationTabComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly notificationService = inject(NotificationService);
+  private readonly dialogService = inject(DialogService);
   private readonly destroy$ = new Subject<void>();
 
   readonly loading = signal<boolean>(false);
@@ -588,8 +591,19 @@ export class NotificationTabComponent implements OnInit, OnDestroy {
   }
 
   viewFullHistory(): void {
-    // TODO: Navigate to full notification history page
-    this.notificationService.info('Full notification history coming soon');
+    const dialogRef = this.dialogService.open(NotificationHistoryDialogComponent, {
+      header: 'Notification History',
+      width: '90vw',
+      maxWidth: '800px',
+      modal: true,
+      closable: true,
+      dismissableMask: true
+    });
+
+    dialogRef.onClose.subscribe(() => {
+      // Refresh the recent history when dialog closes
+      this.loadNotificationHistory();
+    });
   }
 
   hasChanges(): boolean {
