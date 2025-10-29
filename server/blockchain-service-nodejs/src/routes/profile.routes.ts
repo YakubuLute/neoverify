@@ -23,12 +23,12 @@ import {
     deactivateAccountValidation,
     profilePictureUpload,
 } from '../controllers/profile.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
 // All profile routes require authentication
-router.use(authenticate);
+router.use(authenticateToken);
 
 // Profile information routes
 router.get('/', getProfile);

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { Op } from 'sequelize';
-import { Organization, User, Document, UserRole, SubscriptionTier } from '../models';
+import { Organization, User, Document, UserRole, SubscriptionTier, OrganizationSettings } from '../models';
 import logger from '../utils/logger';
 
 // Interfaces for request bodies
@@ -632,27 +632,21 @@ export const updateOrganizationSettings = async (req: Request, res: Response): P
 
         const settingsUpdate = req.body as UpdateOrganizationSettingsRequest;
 
-        // Merge with existing settings
-        const updatedSettings = {
+        // Create a properly typed updated settings object
+        const updatedSettings: OrganizationSettings = {
             ...organization.settings,
             ...settingsUpdate,
-        };
-
-        // If password policy is being updated, merge with existing policy
-        if (settingsUpdate.passwordPolicy) {
-            updatedSettings.passwordPolicy = {
+            // Ensure password policy is properly merged
+            passwordPolicy: settingsUpdate.passwordPolicy ? {
                 ...organization.settings.passwordPolicy,
                 ...settingsUpdate.passwordPolicy,
-            };
-        }
-
-        // If email notifications are being updated, merge with existing notifications
-        if (settingsUpdate.emailNotifications) {
-            updatedSettings.emailNotifications = {
+            } : organization.settings.passwordPolicy,
+            // Ensure email notifications are properly merged
+            emailNotifications: settingsUpdate.emailNotifications ? {
                 ...organization.settings.emailNotifications,
                 ...settingsUpdate.emailNotifications,
-            };
-        }
+            } : organization.settings.emailNotifications,
+        };
 
         await organization.update({ settings: updatedSettings });
 
@@ -903,8 +897,9 @@ export const getOrganizationAnalytics = async (req: Request, res: Response): Pro
             },
         });
     }
-};// Im
-port additional models for user invitation functionality
+};
+
+// Import additional models for user invitation functionality
 import { UserInvitation, InvitationStatus } from '../models';
 import crypto from 'crypto';
 
@@ -1420,9 +1415,9 @@ export const removeUser = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        // Remove user from organization (set organizationId to null and deactivate)
+        // Remove user from organization (set organizationId to undefined and deactivate)
         await targetUser.update({
-            organizationId: null,
+            organizationId: undefined,
             role: UserRole.USER,
             isActive: false,
         });

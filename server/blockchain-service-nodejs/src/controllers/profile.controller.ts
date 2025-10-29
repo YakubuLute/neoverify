@@ -383,18 +383,18 @@ export const getPreferences = asyncHandler(async (req: Request, res: Response) =
         pushNotifications: preferences.pushNotifications,
         verificationAlerts: preferences.verificationAlerts,
         weeklyReports: preferences.weeklyReports,
-        documentStatusUpdates: preferences.documentStatusUpdates || true,
-        securityAlerts: preferences.securityAlerts || true,
-        marketingEmails: preferences.marketingEmails || false,
+        documentStatusUpdates: true, // Default value
+        securityAlerts: true, // Default value
+        marketingEmails: false, // Default value
     };
 
     const verificationPreferences: VerificationPreferences = {
-        autoVerifyDocuments: preferences.autoVerifyDocuments || false,
-        requireMfaForSensitiveActions: preferences.requireMfaForSensitiveActions || true,
-        allowThirdPartyIntegrations: preferences.allowThirdPartyIntegrations || false,
-        dataRetentionPeriod: preferences.dataRetentionPeriod || 365,
-        shareAnalyticsData: preferences.shareAnalyticsData || false,
-        enableAuditLogging: preferences.enableAuditLogging || true,
+        autoVerifyDocuments: false, // Default value
+        requireMfaForSensitiveActions: true, // Default value
+        allowThirdPartyIntegrations: false, // Default value
+        dataRetentionPeriod: 365, // Default value
+        shareAnalyticsData: false, // Default value
+        enableAuditLogging: true, // Default value
     };
 
     const generalPreferences = {
