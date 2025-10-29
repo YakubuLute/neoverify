@@ -143,7 +143,18 @@ export class ProfileService {
             templates: {
                 defaultTemplate: null,
                 autoApplyTemplate: false,
-                templatePreferences: []
+                templatePreferences: [
+                    {
+                        documentType: 'degree',
+                        templateId: '2',
+                        autoApply: true
+                    },
+                    {
+                        documentType: 'certificate',
+                        templateId: '1',
+                        autoApply: false
+                    }
+                ]
             }
         };
 

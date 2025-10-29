@@ -419,11 +419,13 @@ import {
                 [showClear]="true"
               >
                 <ng-template pTemplate="selectedItem" let-selectedOption>
-                  <div class="flex items-center gap-2" *ngIf="selectedOption">
+                  @if (selectedOption) {
+                    <div class="flex items-center gap-2">
                     <i class="pi pi-file-edit text-indigo-600"></i>
-                    <span>{{ selectedOption.name }}</span>
-                    <p-tag [value]="selectedOption.verificationLevel" severity="info" class="text-xs"></p-tag>
-                  </div>
+                      <span>{{ selectedOption.name }}</span>
+                      <p-tag [value]="selectedOption.verificationLevel" severity="info" class="text-xs"></p-tag>
+                    </div>
+                  }
                 </ng-template>
                 <ng-template pTemplate="item" let-template>
                   <div class="flex items-center justify-between w-full p-2">
@@ -543,7 +545,7 @@ import {
                       <p class="text-sm text-blue-700 mt-1">{{ selectedTemplatePreview()?.description }}</p>
                       <div class="flex items-center gap-4 mt-2 text-sm text-blue-600">
                         <span><strong>Level:</strong> {{ selectedTemplatePreview()?.verificationLevel }}</span>
-                        <span><strong>Types:</strong> {{ selectedTemplatePreview()?.documentTypes.join(', ') }}</span>
+                        <span><strong>Types:</strong> {{ selectedTemplatePreview()?.documentTypes?.join(', ') }}</span>
                       </div>
                     </div>
                   </div>
@@ -766,7 +768,7 @@ export class VerificationTabComponent implements OnInit, OnDestroy {
       digestFrequency: [DigestFrequency.WEEKLY]
     }),
     templates: this.fb.group({
-      defaultTemplate: [null],
+      defaultTemplate: [null as string | null],
       autoApplyTemplate: [false],
       templatePreferences: this.fb.array([])
     })
@@ -978,14 +980,14 @@ export class VerificationTabComponent implements OnInit, OnDestroy {
     this.saving.set(true);
     const formValue = this.verificationForm.value;
 
-    const updateRequest: VerificationPreferencesUpdateRequest = {
+    const _updateRequest: VerificationPreferencesUpdateRequest = {
       defaultVerificationLevel: formValue.defaultVerificationLevel as VerificationLevel,
       autoShare: {
         enabled: formValue.autoShare?.enabled || false,
         shareOnCompletion: formValue.autoShare?.shareOnCompletion || false,
         shareOnFailure: formValue.autoShare?.shareOnFailure || false,
         includeDetails: formValue.autoShare?.includeDetails || false,
-        recipients: formValue.autoShare?.recipients?.map((r: any) => ({
+        recipients: formValue.autoShare?.recipients?.map((r: { id: string; email: string; name: string; type: RecipientType }) => ({
           id: r.id || '',
           email: r.email,
           name: r.name,
@@ -997,9 +999,9 @@ export class VerificationTabComponent implements OnInit, OnDestroy {
           }
         })) || []
       },
-      retention: formValue.retention as any,
-      notifications: formValue.notifications as any,
-      templates: formValue.templates as any
+      retention: formValue.retention as Partial<RetentionSettings>,
+      notifications: formValue.notifications as Partial<VerificationNotificationSettings>,
+      templates: formValue.templates as Partial<TemplateSettings>
     };
 
     // Mock API call - replace with actual service
