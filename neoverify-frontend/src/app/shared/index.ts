@@ -3,6 +3,7 @@ export * from './shared.module';
 export * from './models/auth.models';
 export * from './models/document.models';
 export * from './models/common.models';
+export * from './models/notification.models';
 export * from './utils/form.utils';
 export * from './utils/date.utils';
 export * from './components/loading-spinner/loading-spinner.component';

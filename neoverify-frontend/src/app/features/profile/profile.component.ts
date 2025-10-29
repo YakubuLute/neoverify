@@ -14,6 +14,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MfaSetupDialogComponent } from './components/mfa-setup-dialog.component';
 import { SessionManagementComponent } from './components/session-management.component';
 import { EnhancedPasswordChangeComponent } from './components/enhanced-password-change.component';
+import { NotificationTabComponent } from './components/notification-tab.component';
 
 interface ProfileTab {
   id: string;
@@ -30,7 +31,8 @@ interface ProfileTab {
     DynamicDialogModule,
     MfaSetupDialogComponent,
     SessionManagementComponent,
-    EnhancedPasswordChangeComponent
+    EnhancedPasswordChangeComponent,
+    NotificationTabComponent
   ],
   template: `
     <div class="container mx-auto px-4 py-8">
@@ -434,6 +436,11 @@ interface ProfileTab {
                             </p-card>
                           </div>
                         </div>
+                      </div>
+                    }
+                    @case ('notifications') {
+                      <div class="notifications-tab">
+                        <app-notification-tab></app-notification-tab>
                       </div>
                     }
                     @default {
