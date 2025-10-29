@@ -53,3 +53,20 @@ export {
     validateFileSize,
     validateFileType,
 } from './validation';
+
+// API versioning middleware
+export {
+    apiVersioning,
+    versionDeprecation,
+    backwardCompatibility,
+    versionedHandler,
+    type VersionedRequest,
+} from './versioning';
+
+// API monitoring middleware
+export {
+    apiMonitoring,
+    getApiMetrics,
+    getRealTimeStats,
+    getMonitoringHealth,
+} from './monitoring';
