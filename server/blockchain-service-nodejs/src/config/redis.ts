@@ -12,11 +12,12 @@ class RedisClient {
       port: config.redis.port,
       password: config.redis.password,
       db: config.redis.db,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: config.env === 'development' ? 1 : 3,
       lazyConnect: true,
       keepAlive: 30000,
-      connectTimeout: 10000,
+      connectTimeout: 5000,
       commandTimeout: 5000,
+      enableReadyCheck: false,
     };
 
     this.client = new Redis(redisConfig);

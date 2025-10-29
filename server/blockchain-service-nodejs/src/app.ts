@@ -166,7 +166,9 @@ app.use('/api', (req: Request, res: Response, next: NextFunction) => {
 });
 
 // 404 handler for undefined routes
-app.use('*', notFoundHandler);
+app.use((req: Request, res: Response, next: NextFunction) => {
+    notFoundHandler(req, res);
+});
 
 // Global error handling middleware (must be last)
 app.use(globalErrorHandler);

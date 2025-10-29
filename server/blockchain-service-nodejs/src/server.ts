@@ -7,31 +7,53 @@ async function startServer(): Promise<void> {
     try {
         logger.info(`Server configuration loaded for environment: ${config.env}`);
 
-        // Try to connect to database
-        try {
-            await database.connect();
-            logger.info(`Database connected successfully`);
-        } catch (error) {
-            logger.warn('Database connection failed:', error);
-            if (config.env === 'production') {
-                logger.error('Database is required in production');
+        // Try to connect to database with timeout in development
+        if (config.env === 'development') {
+            try {
+                // Set a timeout for database connection in development
+                const connectPromise = database.connect();
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Database connection timeout')), 5000)
+                );
+
+                await Promise.race([connectPromise, timeoutPromise]);
+                logger.info(`Database connected successfully`);
+            } catch (error) {
+                logger.warn('Database connection failed in development mode:', error instanceof Error ? error.message : error);
+                logger.warn('Continuing without database - some features may be limited');
+            }
+        } else {
+            try {
+                await database.connect();
+                logger.info(`Database connected successfully`);
+            } catch (error) {
+                logger.error('Database connection failed in production:', error);
                 process.exit(1);
-            } else {
-                logger.warn('Continuing without database in development mode');
             }
         }
 
-        // Try to connect to Redis
-        try {
-            await redisClient.connect();
-            logger.info(`Redis connected successfully`);
-        } catch (error) {
-            logger.warn('Redis connection failed:', error);
-            if (config.env === 'production') {
-                logger.error('Redis is required in production');
+        // Try to connect to Redis with timeout in development
+        if (config.env === 'development') {
+            try {
+                // Set a timeout for Redis connection in development
+                const connectPromise = redisClient.connect();
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Redis connection timeout')), 3000)
+                );
+
+                await Promise.race([connectPromise, timeoutPromise]);
+                logger.info(`Redis connected successfully`);
+            } catch (error) {
+                logger.warn('Redis connection failed in development mode:', error instanceof Error ? error.message : error);
+                logger.warn('Continuing without Redis - some features may be limited');
+            }
+        } else {
+            try {
+                await redisClient.connect();
+                logger.info(`Redis connected successfully`);
+            } catch (error) {
+                logger.error('Redis connection failed in production:', error);
                 process.exit(1);
-            } else {
-                logger.warn('Continuing without Redis in development mode');
             }
         }
 
