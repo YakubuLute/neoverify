@@ -8,6 +8,7 @@ export {
     JwtUtils,
     type JwtPayload,
     type TokenPair,
+    type AuthenticatedRequest,
 } from './auth';
 
 // Error handling middleware

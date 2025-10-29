@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { verificationService, VerificationRequest } from '../services/verification.service';
-import Document from '../models/Document';
+import Document, { VerificationStatus } from '../models/Document';
 import Verification, { VerificationType, VerificationPriority } from '../models/Verification';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 
 /**
  * Start a new verification process
@@ -397,7 +397,7 @@ export const cancelVerification = async (
         // Update verification status
         await verificationService.updateVerificationStatus({
             verificationId,
-            status: verification.status === 'cancelled' ? verification.status : 'cancelled',
+            status: VerificationStatus.CANCELLED,
         });
 
         logger.info('Verification cancelled successfully', {

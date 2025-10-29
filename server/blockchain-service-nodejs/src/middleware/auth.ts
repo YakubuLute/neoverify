@@ -20,6 +20,18 @@ declare global {
     }
 }
 
+// Type for authenticated requests where user is guaranteed to exist
+export interface AuthenticatedRequest extends Request {
+    user: {
+        id: string;
+        email: string;
+        organizationId?: string;
+        role: string;
+        permissions: string[];
+    };
+    token?: string;
+}
+
 export interface JwtPayload {
     id: string;
     email: string;
