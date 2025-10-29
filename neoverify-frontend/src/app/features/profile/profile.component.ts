@@ -15,6 +15,7 @@ import { MfaSetupDialogComponent } from './components/mfa-setup-dialog.component
 import { SessionManagementComponent } from './components/session-management.component';
 import { EnhancedPasswordChangeComponent } from './components/enhanced-password-change.component';
 import { NotificationTabComponent } from './components/notification-tab.component';
+import { VerificationTabComponent } from './components/verification-tab.component';
 
 interface ProfileTab {
   id: string;
@@ -30,7 +31,8 @@ interface ProfileTab {
     SHARED_IMPORTS,
     DynamicDialogModule,
     EnhancedPasswordChangeComponent,
-    NotificationTabComponent
+    NotificationTabComponent,
+    VerificationTabComponent
   ],
   template: `
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
@@ -443,6 +445,11 @@ interface ProfileTab {
                     @case ('notifications') {
                       <div class="notifications-tab">
                         <app-notification-tab></app-notification-tab>
+                      </div>
+                    }
+                    @case ('verification') {
+                      <div class="verification-tab">
+                        <app-verification-tab></app-verification-tab>
                       </div>
                     }
                     @default {
