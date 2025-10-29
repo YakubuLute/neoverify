@@ -22,7 +22,7 @@ router.post(
     authenticateToken,
     secureUploadSingle,
     validateDocumentUpload,
-    DocumentController.uploadDocument
+    DocumentController.uploadDocument as any
 );
 
 /**

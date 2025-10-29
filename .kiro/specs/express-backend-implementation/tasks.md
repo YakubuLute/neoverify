@@ -128,7 +128,7 @@
   - Implement password strength validation
   - _Requirements: 3.4_
 
-- [-] 5. Implement document management API
+- [x] 5. Implement document management API
   - Create file upload endpoint with validation
   - Implement document listing with pagination and filtering
   - Set up document retrieval and download functionality

@@ -2,7 +2,8 @@ import request from 'supertest';
 import path from 'path';
 import fs from 'fs/promises';
 import app from '../../app';
-import { Document, User } from '../../models';
+import Document, { DocumentType } from '../../models/Document';
+import User from '../../models/User';
 import { JwtUtils } from '../../middleware/auth';
 
 describe('Document Controller', () => {
@@ -66,7 +67,7 @@ describe('Document Controller', () => {
             expect(response.body.data.document.tags).toEqual(['test', 'document']);
 
             // Store for cleanup
-            testDocument = await Document.findByPk(response.body.data.document.id);
+            testDocument = await Document.findByPk(response.body.data.document.id) as Document;
 
             // Cleanup test file
             await fs.unlink(testFilePath);
@@ -206,7 +207,7 @@ describe('Document Controller', () => {
                 mimeType: 'text/plain',
                 size: 100,
                 hash: 'bulk-test-hash',
-                documentType: 'text',
+                documentType: DocumentType.TEXT,
                 metadata: { fileSize: 100, mimeType: 'text/plain', checksum: 'bulk-test-hash' },
                 sharingSettings: { isPublic: false, allowDownload: true },
             });
