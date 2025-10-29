@@ -2,6 +2,9 @@ import User from './User';
 import Document from './Document';
 import Organization from './Organization';
 import Verification from './Verification';
+import UserSession from './UserSession';
+import LoginHistory from './LoginHistory';
+import UserInvitation from './UserInvitation';
 
 // Define associations between models
 
@@ -19,6 +22,16 @@ User.hasMany(Document, {
 User.hasMany(Verification, {
     foreignKey: 'userId',
     as: 'verifications',
+});
+
+User.hasMany(UserSession, {
+    foreignKey: 'userId',
+    as: 'sessions',
+});
+
+User.hasMany(LoginHistory, {
+    foreignKey: 'userId',
+    as: 'loginHistory',
 });
 
 // Organization associations
@@ -69,12 +82,60 @@ Verification.belongsTo(Organization, {
     as: 'organization',
 });
 
+// UserSession associations
+UserSession.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user',
+});
+
+UserSession.hasMany(LoginHistory, {
+    foreignKey: 'sessionId',
+    as: 'loginHistory',
+});
+
+// LoginHistory associations
+LoginHistory.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user',
+});
+
+LoginHistory.belongsTo(UserSession, {
+    foreignKey: 'sessionId',
+    as: 'session',
+});
+
+// UserInvitation associations
+UserInvitation.belongsTo(Organization, {
+    foreignKey: 'organizationId',
+    as: 'organization',
+});
+
+UserInvitation.belongsTo(User, {
+    foreignKey: 'invitedBy',
+    as: 'inviter',
+});
+
+// Organization has many invitations
+Organization.hasMany(UserInvitation, {
+    foreignKey: 'organizationId',
+    as: 'invitations',
+});
+
+// User has many sent invitations
+User.hasMany(UserInvitation, {
+    foreignKey: 'invitedBy',
+    as: 'sentInvitations',
+});
+
 // Export all models
 export {
     User,
     Document,
     Organization,
     Verification,
+    UserSession,
+    LoginHistory,
+    UserInvitation,
 };
 
 // Export model interfaces and enums for use in other parts of the application
@@ -117,10 +178,30 @@ export {
     VerificationCreationAttributes,
 } from './Verification';
 
+export {
+    UserSessionAttributes,
+    UserSessionCreationAttributes,
+} from './UserSession';
+
+export {
+    LoginStatus,
+    LoginHistoryAttributes,
+    LoginHistoryCreationAttributes,
+} from './LoginHistory';
+
+export {
+    InvitationStatus,
+    UserInvitationAttributes,
+    UserInvitationCreationAttributes,
+} from './UserInvitation';
+
 // Default export for convenience
 export default {
     User,
     Document,
     Organization,
     Verification,
+    UserSession,
+    LoginHistory,
+    UserInvitation,
 };

@@ -136,7 +136,7 @@ const storage = multer.diskStorage({
             await ensureUploadDirectories();
             cb(null, TEMP_DIR);
         } catch (error) {
-            cb(error, '');
+            cb(error as Error, '');
         }
     },
     filename: (req: Request, file: Express.Multer.File, cb) => {
@@ -344,10 +344,10 @@ export const secureUploadMultiple = (req: any, res: any, next: any) => {
         if (req.files && Array.isArray(req.files)) {
             try {
                 const securityResults = await Promise.all(
-                    req.files.map(file => performSecurityScan(file.path))
+                    req.files.map((file: Express.Multer.File) => performSecurityScan(file.path))
                 );
 
-                const failedFiles = req.files.filter((_, index) => !securityResults[index]);
+                const failedFiles = req.files.filter((_: Express.Multer.File, index: number) => !securityResults[index]);
 
                 if (failedFiles.length > 0) {
                     // Clean up all uploaded files

@@ -3,18 +3,26 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
-import { config, redisClient } from './config';
+import swaggerUi from 'swagger-ui-express';
+import { config, redisClient, swaggerSpec } from './config';
 import logger from './utils/logger';
 import {
     globalErrorHandler,
     requestId,
     requestLogger,
     notFoundHandler,
-    setupProcessHandlers
+    setupProcessHandlers,
+    ensureUploadDirectories
 } from './middleware';
 
 // Setup process handlers for unhandled rejections and exceptions
 setupProcessHandlers();
+
+// Initialize upload directories
+ensureUploadDirectories().catch(error => {
+    logger.error('Failed to initialize upload directories', { error });
+    process.exit(1);
+});
 
 // Create Express application
 const app: Application = express();
@@ -159,8 +167,39 @@ app.get('/health', (req: Request, res: Response) => {
     });
 });
 
+// API Documentation with Swagger UI
+const swaggerOptions = {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'NeoVerify API Documentation',
+    customfavIcon: '/favicon.ico',
+    swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        docExpansion: 'none',
+        filter: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: true,
+    },
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
+
+// Swagger JSON endpoint for external tools
+app.get('/api-docs.json', (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
 // Import routes
 import apiRoutes from './routes';
+
+// Static file serving for uploads
+app.use('/uploads', express.static(config.upload.uploadPath, {
+    maxAge: '1d', // Cache for 1 day
+    etag: true,
+    lastModified: true,
+}));
 
 // API routes
 app.use('/api', apiRoutes);
