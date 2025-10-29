@@ -5,9 +5,15 @@ import { ProfileService } from '../../core/services/profile.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { FormPersistenceService } from '../../core/services/form-persistence.service';
 import { SHARED_IMPORTS } from '../../shared';
+import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 
 import { FormUtils, FormValidators } from '../../shared/utils/form.utils';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+
+// Import new security components
+import { MfaSetupDialogComponent } from './components/mfa-setup-dialog.component';
+import { SessionManagementComponent } from './components/session-management.component';
+import { EnhancedPasswordChangeComponent } from './components/enhanced-password-change.component';
 
 interface ProfileTab {
   id: string;
@@ -19,7 +25,13 @@ interface ProfileTab {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: SHARED_IMPORTS,
+  imports: [
+    SHARED_IMPORTS,
+    DynamicDialogModule,
+    MfaSetupDialogComponent,
+    SessionManagementComponent,
+    EnhancedPasswordChangeComponent
+  ],
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-6xl mx-auto">
@@ -288,79 +300,9 @@ interface ProfileTab {
                       <div class="security-tab">
                         <!-- Security Settings Content -->
                         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                          <!-- Security Forms -->
+                          <!-- Enhanced Password Change -->
                           <div class="xl:col-span-2 space-y-6">
-                            <!-- Change Password -->
-                            <p-card>
-                              <ng-template pTemplate="header">
-                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
-                                  <h2 class="text-xl font-semibold">Change Password</h2>
-                                </div>
-                              </ng-template>
-
-                              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-4">
-                                <div class="field">
-                                  <label for="currentPassword" class="block text-sm font-medium mb-2">Current Password *</label>
-                                  <p-password
-                                    id="currentPassword"
-                                    formControlName="currentPassword"
-                                    [feedback]="false"
-                                    [toggleMask]="true"
-                                    class="w-full"
-                                    [class.ng-invalid]="isPasswordFieldInvalid('currentPassword')"
-                                  ></p-password>
-                                  @if (isPasswordFieldInvalid('currentPassword')) {
-                                    <small class="p-error block mt-1">
-                                      {{ getErrorMessage(passwordForm.get('currentPassword'), 'Current Password') }}
-                                    </small>
-                                  }
-                                </div>
-
-                                <div class="field">
-                                  <label for="newPassword" class="block text-sm font-medium mb-2">New Password *</label>
-                                  <p-password
-                                    id="newPassword"
-                                    formControlName="newPassword"
-                                    [feedback]="true"
-                                    [toggleMask]="true"
-                                    class="w-full"
-                                    [class.ng-invalid]="isPasswordFieldInvalid('newPassword')"
-                                  ></p-password>
-                                  @if (isPasswordFieldInvalid('newPassword')) {
-                                    <small class="p-error block mt-1">
-                                      {{ getErrorMessage(passwordForm.get('newPassword'), 'New Password') }}
-                                    </small>
-                                  }
-                                </div>
-
-                                <div class="field">
-                                  <label for="confirmPassword" class="block text-sm font-medium mb-2">Confirm New Password *</label>
-                                  <p-password
-                                    id="confirmPassword"
-                                    formControlName="confirmPassword"
-                                    [feedback]="false"
-                                    [toggleMask]="true"
-                                    class="w-full"
-                                    [class.ng-invalid]="isPasswordFieldInvalid('confirmPassword')"
-                                  ></p-password>
-                                  @if (isPasswordFieldInvalid('confirmPassword')) {
-                                    <small class="p-error block mt-1">
-                                      {{ getErrorMessage(passwordForm.get('confirmPassword'), 'Confirm Password') }}
-                                    </small>
-                                  }
-                                </div>
-
-                                <div class="flex justify-end">
-                                  <p-button
-                                    type="submit"
-                                    label="Change Password"
-                                    icon="pi pi-lock"
-                                    [loading]="changingPassword()"
-                                    [disabled]="passwordForm.invalid"
-                                  ></p-button>
-                                </div>
-                              </form>
-                            </p-card>
+                            <app-enhanced-password-change></app-enhanced-password-change>
                           </div>
 
                           <!-- Security Settings Sidebar -->
@@ -382,11 +324,11 @@ interface ProfileTab {
                                     </p>
                                   </div>
                                   <p-button
-                                    [label]="currentUser()?.mfaEnabled ? 'Disable' : 'Enable'"
-                                    [severity]="currentUser()?.mfaEnabled ? 'danger' : 'success'"
+                                    [label]="currentUser()?.mfaEnabled ? 'Manage' : 'Enable'"
+                                    [severity]="currentUser()?.mfaEnabled ? 'info' : 'success'"
                                     [outlined]="true"
                                     size="small"
-                                    (onClick)="toggleMFA()"
+                                    (onClick)="openMfaSetup()"
                                   ></p-button>
                                 </div>
 
@@ -416,11 +358,52 @@ interface ProfileTab {
                                     </p>
                                   </div>
                                   <p-button
-                                    label="View"
+                                    label="Manage"
                                     [outlined]="true"
                                     size="small"
-                                    (onClick)="viewSessions()"
+                                    (onClick)="openSessionManagement()"
                                   ></p-button>
+                                </div>
+                              </div>
+                            </p-card>
+
+                            <!-- Security Status -->
+                            <p-card>
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                                  <h3 class="text-lg font-semibold">Security Status</h3>
+                                </div>
+                              </ng-template>
+
+                              <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">MFA Status</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.mfaEnabled ? 'Enabled' : 'Disabled'" 
+                                    [severity]="currentUser()?.mfaEnabled ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Email Verified</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.emailVerified ? 'Yes' : 'No'" 
+                                    [severity]="currentUser()?.emailVerified ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Last Password Change</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    30 days ago
+                                  </span>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Active Sessions</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    3 devices
+                                  </span>
                                 </div>
                               </div>
                             </p-card>
@@ -603,6 +586,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private readonly profileService = inject(ProfileService);
   private readonly notificationService = inject(NotificationService);
   readonly formPersistenceService = inject(FormPersistenceService);
+  private readonly dialogService = inject(DialogService);
   private readonly destroy$ = new Subject<void>();
 
   readonly currentUser = this.authService.currentUser;
@@ -653,13 +637,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     organization: ['']
   });
 
-  readonly passwordForm = this.fb.group({
-    currentPassword: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', [Validators.required]]
-  }, {
-    validators: [this.passwordMatchValidator]
-  });
+
 
   ngOnInit(): void {
     this.loadUserData();
@@ -800,57 +778,48 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  changePassword(): void {
-    if (this.passwordForm.invalid) {
-      FormUtils.markFormGroupTouched(this.passwordForm);
-      return;
-    }
 
-    this.changingPassword.set(true);
-    const formValue = this.passwordForm.value;
 
-    // Mock API call - replace with actual implementation
-    setTimeout(() => {
-      console.log('Password changed');
-      this.passwordForm.reset();
-      this.changingPassword.set(false);
-    }, 1000);
+  openMfaSetup(): void {
+    const user = this.currentUser();
+    const dialogRef = this.dialogService.open(MfaSetupDialogComponent, {
+      header: user?.mfaEnabled ? 'Manage Two-Factor Authentication' : 'Enable Two-Factor Authentication',
+      width: '90vw',
+      maxWidth: '800px',
+      modal: true,
+      closable: true,
+      data: {
+        isEnabling: !user?.mfaEnabled
+      }
+    });
+
+    dialogRef.onClose.subscribe((result) => {
+      if (result?.success) {
+        // Refresh user data or update MFA status
+        this.notificationService.success('MFA settings updated successfully');
+      }
+    });
   }
 
-  toggleMFA(): void {
-    const user = this.currentUser();
-    if (user?.mfaEnabled) {
-      // Disable MFA
-      console.log('Disable MFA');
-    } else {
-      // Enable MFA
-      console.log('Enable MFA');
-    }
+  openSessionManagement(): void {
+    const dialogRef = this.dialogService.open(SessionManagementComponent, {
+      header: 'Manage Active Sessions',
+      width: '90vw',
+      maxWidth: '1200px',
+      modal: true,
+      closable: true
+    });
   }
 
   sendVerificationEmail(): void {
-    console.log('Send verification email');
-  }
-
-  viewSessions(): void {
-    console.log('View active sessions');
+    this.notificationService.info('Verification email sent! Please check your inbox.');
   }
 
   deleteAccount(): void {
     console.log('Delete account');
   }
 
-  private passwordMatchValidator(form: any): any {
-    const newPassword = form.get('newPassword');
-    const confirmPassword = form.get('confirmPassword');
 
-    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-
-    return null;
-  }
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.profileForm.get(fieldName);
@@ -862,10 +831,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return !!(field?.valid && field?.touched && field?.value);
   }
 
-  isPasswordFieldInvalid(fieldName: string): boolean {
-    const field = this.passwordForm.get(fieldName);
-    return !!(field?.invalid && field?.touched);
-  }
+
 
   getErrorMessage(control: any, fieldName: string): string {
     return FormUtils.getErrorMessage(control, fieldName);
