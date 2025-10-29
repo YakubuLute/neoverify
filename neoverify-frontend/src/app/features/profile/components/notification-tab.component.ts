@@ -16,7 +16,7 @@ import { NotificationHistoryDialogComponent } from './notification-history-dialo
 @Component({
   selector: 'app-notification-tab',
   standalone: true,
-  imports: [SHARED_IMPORTS, NotificationHistoryDialogComponent],
+  imports: [SHARED_IMPORTS],
   template: `
     <div class="notification-preferences-container">
       <!-- Header -->
