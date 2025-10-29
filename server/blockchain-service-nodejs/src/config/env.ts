@@ -31,6 +31,9 @@ const envSchema = Joi.object({
   JWT_REFRESH_SECRET: Joi.string().min(32).required(),
   JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
 
+  // Server configuration
+  SERVER_BASE_URL: Joi.string().uri().default('http://localhost:3000'),
+
   // CORS configuration
   CORS_ORIGINS: Joi.string().default('http://localhost:4200'),
 

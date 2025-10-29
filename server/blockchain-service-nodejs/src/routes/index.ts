@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import documentRoutes from './document.routes';
+import profileRoutes from './profile.routes';
 
 const router = Router();
 
 // Mount route modules
 router.use('/auth', authRoutes);
 router.use('/documents', documentRoutes);
+router.use('/profile', profileRoutes);
 
 // Health check for API
 router.get('/health', (req, res) => {
