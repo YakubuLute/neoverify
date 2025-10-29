@@ -191,14 +191,14 @@
   - Create account deactivation and data export functionality
   - _Requirements: 3.4, 3.5_
 
-- [ ] 7. Implement organization management API
+- [-] 7. Implement organization management API
   - Create organization CRUD operations
   - Set up user invitation and role management system
   - Implement organization settings and configuration
   - Create organization analytics and reporting
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 7.1 Create organization management system
+- [-] 7.1 Create organization management system
   - Implement organization creation and configuration
   - Set up organization profile and settings management
   - Create organization subscription and billing integration
