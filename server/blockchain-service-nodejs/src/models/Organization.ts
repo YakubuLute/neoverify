@@ -4,6 +4,7 @@ import {
     Optional,
     Association,
     HasManyGetAssociationsMixin,
+    Op,
 } from 'sequelize';
 import database from '../config/database';
 
@@ -427,6 +428,41 @@ Organization.init(
             },
             {
                 fields: ['created_at'],
+            },
+            // Composite indexes for common query patterns
+            {
+                fields: ['is_active', 'subscription_tier'],
+                name: 'idx_organization_active_tier',
+            },
+            {
+                fields: ['subscription_tier', 'created_at'],
+                name: 'idx_organization_tier_created',
+            },
+            // Index for trial expiration queries
+            {
+                fields: ['trial_ends_at'],
+                name: 'idx_organization_trial_ends',
+                where: {
+                    trial_ends_at: {
+                        [Op.ne]: null,
+                    },
+                },
+            },
+            // JSONB indexes for settings and usage stats queries
+            {
+                fields: ['settings'],
+                using: 'gin',
+                name: 'idx_organization_settings_gin',
+            },
+            {
+                fields: ['usage_stats'],
+                using: 'gin',
+                name: 'idx_organization_usage_stats_gin',
+            },
+            // Index for billing status queries
+            {
+                fields: ['((billing_info->>\'subscriptionStatus\'))'],
+                name: 'idx_organization_billing_status',
             },
         ],
     }

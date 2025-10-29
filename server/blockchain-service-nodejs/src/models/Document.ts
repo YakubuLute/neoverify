@@ -6,6 +6,7 @@ import {
     BelongsToGetAssociationMixin,
     BelongsToSetAssociationMixin,
     HasManyGetAssociationsMixin,
+    Op,
 } from 'sequelize';
 import database from '../config/database';
 
@@ -273,10 +274,11 @@ class Document extends Model<DocumentAttributes, DocumentCreationAttributes> imp
 
     public static async findByShareToken(token: string): Promise<Document | null> {
         return this.findOne({
-            where: database.getSequelize().where(
-                database.getSequelize().json('sharing_settings.shareToken'),
-                token
-            ),
+            where: {
+                sharingSettings: {
+                    shareToken: token,
+                },
+            },
         });
     }
 

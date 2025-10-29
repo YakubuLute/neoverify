@@ -473,6 +473,44 @@ Verification.init(
             {
                 fields: ['expires_at'],
             },
+            // Composite indexes for common query patterns
+            {
+                fields: ['status', 'priority', 'created_at'],
+                name: 'idx_verification_status_priority_created',
+            },
+            {
+                fields: ['document_id', 'status'],
+                name: 'idx_verification_document_status',
+            },
+            {
+                fields: ['user_id', 'status', 'created_at'],
+                name: 'idx_verification_user_status_created',
+            },
+            {
+                fields: ['organization_id', 'type', 'status'],
+                name: 'idx_verification_org_type_status',
+            },
+            // Index for expired verification cleanup queries
+            {
+                fields: ['expires_at', 'status'],
+                name: 'idx_verification_expires_status',
+                where: {
+                    expires_at: {
+                        [Op.ne]: null,
+                    },
+                },
+            },
+            // JSONB indexes for results queries
+            {
+                fields: ['results'],
+                using: 'gin',
+                name: 'idx_verification_results_gin',
+            },
+            {
+                fields: ['metadata'],
+                using: 'gin',
+                name: 'idx_verification_metadata_gin',
+            },
         ],
         hooks: {
             beforeUpdate: (verification: Verification) => {
