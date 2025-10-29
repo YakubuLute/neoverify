@@ -432,7 +432,7 @@ import {
             }
 
             <!-- Organization Policies -->
-            @if (currentContext()?.policies.length) {
+            @if (currentContext()?.policies && currentContext()?.policies?.length) {
               <p-card>
                 <ng-template pTemplate="header">
                   <div class="p-4 border-b border-surface-200 dark:border-surface-700">
@@ -473,7 +473,7 @@ import {
             }
 
             <!-- Restrictions Notice -->
-            @if (currentContext()?.restrictions && currentContext()?.restrictions.length) {
+            @if (currentContext()?.restrictions && currentContext()?.restrictions?.length) {
               <p-card>
                 <ng-template pTemplate="header">
                   <div class="p-4 border-b border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
@@ -1130,16 +1130,16 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
 
     const exportData = {
       organization: {
-        id: context.membership.organizationId,
-        name: context.membership.organizationName,
-        domain: context.membership.organizationDomain
+        id: context.membership?.organizationId,
+        name: context.membership?.organizationName,
+        domain: context.membership?.organizationDomain
       },
       membership: context.membership,
       policies: context.policies,
       restrictions: context.restrictions,
       preferences: this.preferencesForm.value,
       exportedAt: new Date().toISOString(),
-      exportedBy: context.membership.id
+      exportedBy: context.membership?.id
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });

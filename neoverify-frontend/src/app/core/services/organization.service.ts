@@ -360,329 +360,211 @@ export class OrganizationService {
         };
         return permissionNames[permission] || permission;
     }
-}  /**
 
-   * Validate setting change against organization policies
-   */
-validateSettingChange(settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const context = this.currentOrganizationContext();
-    if (!context) {
+    /**
+     * Validate setting change against organization policies
+     */
+    validateSettingChange(settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        const context = this.currentOrganizationContext();
+        if (!context) {
+            return { isValid: true };
+        }
+
+        // Check if setting is restricted
+        const restriction = context.restrictions.find(r => r.setting === settingPath);
+        if (restriction && !restriction.canOverride) {
+            return {
+                isValid: false,
+                reason: restriction.reason,
+                policyId: restriction.policyId
+            };
+        }
+
+        // Check specific policy validations
+        for (const policy of context.policies) {
+            if (!policy.isEnforced) continue;
+
+            const validation = this.validateAgainstPolicy(policy, settingPath, newValue);
+            if (!validation.isValid) {
+                return validation;
+            }
+        }
+
         return { isValid: true };
     }
 
-    // Check if setting is restricted
-    const restriction = context.restrictions.find(r => r.setting === settingPath);
-    if (restriction && !restriction.canOverride) {
-        return {
-            isValid: false,
-            reason: restriction.reason,
-            policyId: restriction.policyId
-        };
-    }
-
-    // Check specific policy validations
-    for (const policy of context.policies) {
-        if (!policy.isEnforced) continue;
-
-        const validation = this.validateAgainstPolicy(policy, settingPath, newValue);
-        if (!validation.isValid) {
-            return validation;
+    /**
+     * Get all policy violations for current settings
+     */
+    getPolicyViolations(currentSettings: any): Array<{ setting: string; violation: string; policyId: string; policyName: string }> {
+        const context = this.currentOrganizationContext();
+        if (!context) {
+            return [];
         }
-    }
 
-    return { isValid: true };
-}
+        const violations: Array<{ setting: string; violation: string; policyId: string; policyName: string }> = [];
 
-  /**
-   * Validate a setting change against a specific policy
-   */
-  private validateAgainstPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    switch (policy.type) {
-        case PolicyType.SECURITY:
-            return this.validateSecurityPolicy(policy, settingPath, newValue);
-        case PolicyType.VERIFICATION:
-            return this.validateVerificationPolicy(policy, settingPath, newValue);
-        case PolicyType.NOTIFICATION:
-            return this.validateNotificationPolicy(policy, settingPath, newValue);
-        case PolicyType.DATA_RETENTION:
-            return this.validateDataRetentionPolicy(policy, settingPath, newValue);
-        case PolicyType.API_ACCESS:
-            return this.validateApiAccessPolicy(policy, settingPath, newValue);
-        default:
-            return { isValid: true };
-    }
-}
+        for (const policy of context.policies) {
+            if (!policy.isEnforced) continue;
 
-  /**
-   * Validate against security policies
-   */
-  private validateSecurityPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const settings = policy.settings;
-
-    if (settingPath === 'mfaEnabled' && settings.requireMfa && !newValue) {
-        return {
-            isValid: false,
-            reason: 'Organization policy requires MFA to be enabled',
-            policyId: policy.id
-        };
-    }
-
-    if (settingPath.startsWith('password') && settings.passwordPolicy) {
-        const passwordPolicy = settings.passwordPolicy;
-
-        if (settingPath === 'password.minLength' && newValue < passwordPolicy.minLength) {
-            return {
-                isValid: false,
-                reason: `Minimum password length must be at least ${passwordPolicy.minLength} characters`,
-                policyId: policy.id
-            };
+            const policyViolations = this.checkPolicyViolations(policy, currentSettings);
+            violations.push(...policyViolations);
         }
+
+        return violations;
     }
 
-    if (settingPath === 'sessionTimeout' && settings.sessionTimeout && newValue > settings.sessionTimeout) {
-        return {
-            isValid: false,
-            reason: `Session timeout cannot exceed ${settings.sessionTimeout} minutes`,
-            policyId: policy.id
-        };
-    }
-
-    return { isValid: true };
-}
-
-  /**
-   * Validate against verification policies
-   */
-  private validateVerificationPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const settings = policy.settings;
-
-    if (settingPath === 'verification.defaultVerificationLevel' && settings.requiredVerificationLevel) {
-        const levelOrder = { 'basic': 1, 'standard': 2, 'comprehensive': 3 };
-        const requiredLevel = levelOrder[settings.requiredVerificationLevel as keyof typeof levelOrder];
-        const selectedLevel = levelOrder[newValue as keyof typeof levelOrder];
-
-        if (selectedLevel < requiredLevel) {
-            return {
-                isValid: false,
-                reason: `Verification level must be at least ${settings.requiredVerificationLevel}`,
-                policyId: policy.id
-            };
+    /**
+     * Get effective setting value considering organization policies
+     */
+    getEffectiveSettingValue(settingPath: string, userValue: any): any {
+        const context = this.currentOrganizationContext();
+        if (!context) {
+            return userValue;
         }
-    }
 
-    if (settingPath === 'verification.autoShare' && settings.allowAutoSharing === false && newValue === true) {
-        return {
-            isValid: false,
-            reason: 'Organization policy prohibits automatic document sharing',
-            policyId: policy.id
-        };
-    }
+        // Check if setting is overridden by policy
+        for (const policy of context.policies) {
+            if (!policy.isEnforced) continue;
 
-    return { isValid: true };
-}
-
-  /**
-   * Validate against notification policies
-   */
-  private validateNotificationPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const settings = policy.settings;
-
-    if (settings.allowedNotificationChannels && settingPath.includes('notification')) {
-        const channel = settingPath.includes('email') ? 'email' : 'inApp';
-        if (!settings.allowedNotificationChannels.includes(channel) && newValue === true) {
-            return {
-                isValid: false,
-                reason: `${channel} notifications are not allowed by organization policy`,
-                policyId: policy.id
-            };
+            const effectiveValue = this.getPolicyEffectiveValue(policy, settingPath, userValue);
+            if (effectiveValue !== undefined) {
+                return effectiveValue;
+            }
         }
-    }
 
-    if (settings.mandatoryNotifications && settingPath.includes('notification')) {
-        const notificationType = settingPath.split('.').pop();
-        if (settings.mandatoryNotifications.includes(notificationType) && newValue === false) {
-            return {
-                isValid: false,
-                reason: `${notificationType} notifications are mandatory and cannot be disabled`,
-                policyId: policy.id
-            };
-        }
-    }
-
-    return { isValid: true };
-}
-
-  /**
-   * Validate against data retention policies
-   */
-  private validateDataRetentionPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const settings = policy.settings;
-
-    if (settingPath === 'verification.retentionDays' && settings.documentRetentionDays) {
-        if (newValue > settings.documentRetentionDays) {
-            return {
-                isValid: false,
-                reason: `Document retention cannot exceed ${settings.documentRetentionDays} days`,
-                policyId: policy.id
-            };
-        }
-    }
-
-    if (settingPath === 'privacy.autoDelete' && settings.autoDeleteEnabled === true && newValue === false) {
-        return {
-            isValid: false,
-            reason: 'Organization policy requires automatic data deletion to be enabled',
-            policyId: policy.id
-        };
-    }
-
-    return { isValid: true };
-}
-
-  /**
-   * Validate against API access policies
-   */
-  private validateApiAccessPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason ?: string; policyId ?: string } {
-    const settings = policy.settings;
-
-    if (settingPath === 'apiKey.scopes' && settings.allowedApiScopes) {
-        const requestedScopes = Array.isArray(newValue) ? newValue : [newValue];
-        const unauthorizedScopes = requestedScopes.filter((scope: string) => !settings.allowedApiScopes.includes(scope));
-
-        if (unauthorizedScopes.length > 0) {
-            return {
-                isValid: false,
-                reason: `API scopes ${unauthorizedScopes.join(', ')} are not allowed by organization policy`,
-                policyId: policy.id
-            };
-        }
-    }
-
-    if (settingPath === 'apiKey.rateLimit' && settings.rateLimitOverride && newValue > settings.rateLimitOverride) {
-        return {
-            isValid: false,
-            reason: `API rate limit cannot exceed ${settings.rateLimitOverride} requests per minute`,
-            policyId: policy.id
-        };
-    }
-
-    return { isValid: true };
-}
-
-/**
- * Get effective setting value considering organization policies
- */
-getEffectiveSettingValue(settingPath: string, userValue: any): any {
-    const context = this.currentOrganizationContext();
-    if (!context) {
         return userValue;
     }
 
-    // Check if setting is overridden by policy
-    for (const policy of context.policies) {
-        if (!policy.isEnforced) continue;
-
-        const effectiveValue = this.getPolicyEffectiveValue(policy, settingPath, userValue);
-        if (effectiveValue !== undefined) {
-            return effectiveValue;
+    /**
+     * Validate a setting change against a specific policy
+     */
+    private validateAgainstPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        switch (policy.type) {
+            case PolicyType.SECURITY:
+                return this.validateSecurityPolicy(policy, settingPath, newValue);
+            case PolicyType.VERIFICATION:
+                return this.validateVerificationPolicy(policy, settingPath, newValue);
+            case PolicyType.NOTIFICATION:
+                return this.validateNotificationPolicy(policy, settingPath, newValue);
+            case PolicyType.DATA_RETENTION:
+                return this.validateDataRetentionPolicy(policy, settingPath, newValue);
+            case PolicyType.API_ACCESS:
+                return this.validateApiAccessPolicy(policy, settingPath, newValue);
+            default:
+                return { isValid: true };
         }
     }
 
-    return userValue;
-}
+    /**
+     * Validate against security policies
+     */
+    private validateSecurityPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        const settings = policy.settings;
 
-  /**
-   * Get effective value from a specific policy
-   */
-  private getPolicyEffectiveValue(policy: any, settingPath: string, userValue: any): any {
-    const settings = policy.settings;
+        if (settingPath === 'mfaEnabled' && settings.requireMfa && !newValue) {
+            return {
+                isValid: false,
+                reason: 'Organization policy requires MFA to be enabled',
+                policyId: policy.id
+            };
+        }
 
-    switch (policy.type) {
-        case PolicyType.SECURITY:
-            if (settingPath === 'mfaEnabled' && settings.requireMfa) {
-                return true; // Force MFA to be enabled
-            }
-            if (settingPath === 'sessionTimeout' && settings.sessionTimeout) {
-                return Math.min(userValue || settings.sessionTimeout, settings.sessionTimeout);
-            }
-            break;
+        return { isValid: true };
+    }
 
-        case PolicyType.VERIFICATION:
-            if (settingPath === 'verification.autoShare' && settings.allowAutoSharing === false) {
-                return false; // Force auto-sharing to be disabled
-            }
-            if (settingPath === 'verification.defaultVerificationLevel' && settings.requiredVerificationLevel) {
-                const levelOrder = { 'basic': 1, 'standard': 2, 'comprehensive': 3 };
-                const requiredLevel = levelOrder[settings.requiredVerificationLevel as keyof typeof levelOrder];
-                const userLevel = levelOrder[userValue as keyof typeof levelOrder];
+    /**
+     * Validate against verification policies
+     */
+    private validateVerificationPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        const settings = policy.settings;
 
-                if (userLevel < requiredLevel) {
-                    return settings.requiredVerificationLevel;
+        if (settingPath === 'verification.autoShare' && settings.allowAutoSharing === false && newValue === true) {
+            return {
+                isValid: false,
+                reason: 'Organization policy prohibits automatic document sharing',
+                policyId: policy.id
+            };
+        }
+
+        return { isValid: true };
+    }
+
+    /**
+     * Validate against notification policies
+     */
+    private validateNotificationPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        return { isValid: true };
+    }
+
+    /**
+     * Validate against data retention policies
+     */
+    private validateDataRetentionPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        return { isValid: true };
+    }
+
+    /**
+     * Validate against API access policies
+     */
+    private validateApiAccessPolicy(policy: any, settingPath: string, newValue: any): { isValid: boolean; reason?: string; policyId?: string } {
+        return { isValid: true };
+    }
+
+    /**
+     * Get effective value from a specific policy
+     */
+    private getPolicyEffectiveValue(policy: any, settingPath: string, userValue: any): any {
+        const settings = policy.settings;
+
+        switch (policy.type) {
+            case PolicyType.SECURITY:
+                if (settingPath === 'mfaEnabled' && settings.requireMfa) {
+                    return true; // Force MFA to be enabled
                 }
+                break;
+
+            case PolicyType.VERIFICATION:
+                if (settingPath === 'verification.autoShare' && settings.allowAutoSharing === false) {
+                    return false; // Force auto-sharing to be disabled
+                }
+                break;
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Check violations for a specific policy
+     */
+    private checkPolicyViolations(policy: any, settings: any): Array<{ setting: string; violation: string; policyId: string; policyName: string }> {
+        const violations: Array<{ setting: string; violation: string; policyId: string; policyName: string }> = [];
+
+        // This would contain comprehensive policy checking logic
+        // For now, we'll implement basic checks
+
+        if (policy.type === PolicyType.SECURITY) {
+            if (policy.settings.requireMfa && !settings.mfaEnabled) {
+                violations.push({
+                    setting: 'mfaEnabled',
+                    violation: 'MFA is required but not enabled',
+                    policyId: policy.id,
+                    policyName: policy.name
+                });
             }
-            break;
+        }
 
-        case PolicyType.DATA_RETENTION:
-            if (settingPath === 'verification.retentionDays' && settings.documentRetentionDays) {
-                return Math.min(userValue || settings.documentRetentionDays, settings.documentRetentionDays);
+        if (policy.type === PolicyType.VERIFICATION) {
+            if (policy.settings.allowAutoSharing === false && settings.verification?.autoShare === true) {
+                violations.push({
+                    setting: 'verification.autoShare',
+                    violation: 'Auto-sharing is prohibited but enabled',
+                    policyId: policy.id,
+                    policyName: policy.name
+                });
             }
-            break;
-    }
+        }
 
-    return undefined;
-}
-
-/**
- * Get all policy violations for current settings
- */
-getPolicyViolations(currentSettings: any): Array < { setting: string; violation: string; policyId: string; policyName: string } > {
-    const context = this.currentOrganizationContext();
-    if(!context) {
-        return [];
-    }
-
-    const violations: Array<{ setting: string; violation: string; policyId: string; policyName: string }> =[];
-
-for (const policy of context.policies) {
-    if (!policy.isEnforced) continue;
-
-    const policyViolations = this.checkPolicyViolations(policy, currentSettings);
-    violations.push(...policyViolations);
-}
-
-return violations;
-  }
-
-  /**
-   * Check violations for a specific policy
-   */
-  private checkPolicyViolations(policy: any, settings: any): Array < { setting: string; violation: string; policyId: string; policyName: string } > {
-    const violations: Array<{ setting: string; violation: string; policyId: string; policyName: string }> =[];
-
-// This would contain comprehensive policy checking logic
-// For now, we'll implement basic checks
-
-if (policy.type === PolicyType.SECURITY) {
-    if (policy.settings.requireMfa && !settings.mfaEnabled) {
-        violations.push({
-            setting: 'mfaEnabled',
-            violation: 'MFA is required but not enabled',
-            policyId: policy.id,
-            policyName: policy.name
-        });
+        return violations;
     }
 }
-
-if (policy.type === PolicyType.VERIFICATION) {
-    if (policy.settings.allowAutoSharing === false && settings.verification?.autoShare === true) {
-        violations.push({
-            setting: 'verification.autoShare',
-            violation: 'Auto-sharing is prohibited but enabled',
-            policyId: policy.id,
-            policyName: policy.name
-        });
-    }
-}
-
-return violations;
-  }
