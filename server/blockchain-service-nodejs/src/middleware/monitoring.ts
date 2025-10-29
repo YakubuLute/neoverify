@@ -29,7 +29,7 @@ export const apiMonitoring = (req: RequestMetrics, res: Response, next: NextFunc
 
     // Override res.end to capture response metrics
     const originalEnd = res.end;
-    res.end = function (chunk?: any, encoding?: any) {
+    res.end = function (chunk?: any, encoding?: any, cb?: () => void) {
         const responseTime = Date.now() - (req.startTime || Date.now());
 
         // Record metrics asynchronously
@@ -38,7 +38,7 @@ export const apiMonitoring = (req: RequestMetrics, res: Response, next: NextFunc
         });
 
         // Call original end method
-        originalEnd.call(this, chunk, encoding);
+        return originalEnd.call(this, chunk, encoding, cb);
     };
 
     next();
@@ -266,7 +266,7 @@ export async function getMonitoringHealth() {
         logger.error('Failed to check monitoring health', { error });
         return {
             status: 'error',
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         };
     }
 }

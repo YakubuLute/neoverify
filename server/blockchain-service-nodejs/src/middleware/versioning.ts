@@ -82,7 +82,11 @@ export const apiVersioning = (req: VersionedRequest, res: Response, next: NextFu
  * Adds deprecation warnings for older API versions
  */
 export const versionDeprecation = (req: VersionedRequest, res: Response, next: NextFunction) => {
-    const deprecatedVersions = {
+    const deprecatedVersions: Record<string, {
+        deprecatedAt: string;
+        sunsetAt: string;
+        message: string;
+    }> = {
         // 'v1': {
         //     deprecatedAt: '2024-01-01',
         //     sunsetAt: '2024-06-01',
@@ -91,7 +95,7 @@ export const versionDeprecation = (req: VersionedRequest, res: Response, next: N
     };
 
     const version = req.apiVersion;
-    const deprecationInfo = deprecatedVersions[version as keyof typeof deprecatedVersions];
+    const deprecationInfo = deprecatedVersions[version];
 
     if (deprecationInfo) {
         // Add deprecation headers
