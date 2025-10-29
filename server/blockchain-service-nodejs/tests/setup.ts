@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 import { config } from '../src/config';
 
 // Set test environment

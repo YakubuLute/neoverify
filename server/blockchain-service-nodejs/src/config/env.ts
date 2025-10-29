@@ -22,7 +22,7 @@ const envSchema = Joi.object({
   // Redis configuration
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().port().default(6379),
-  REDIS_PASSWORD: Joi.string().optional(),
+  REDIS_PASSWORD: Joi.string().allow('').optional(),
   REDIS_DB: Joi.number().default(0),
 
   // JWT configuration
@@ -43,18 +43,18 @@ const envSchema = Joi.object({
   UPLOAD_PATH: Joi.string().default('./uploads'),
 
   // External services
-  AI_FORENSICS_API_URL: Joi.string().uri().optional(),
-  AI_FORENSICS_API_KEY: Joi.string().optional(),
-  BLOCKCHAIN_SERVICE_URL: Joi.string().uri().optional(),
-  IPFS_API_URL: Joi.string().uri().optional(),
+  AI_FORENSICS_API_URL: Joi.string().uri().allow('').optional(),
+  AI_FORENSICS_API_KEY: Joi.string().allow('').optional(),
+  BLOCKCHAIN_SERVICE_URL: Joi.string().uri().allow('').optional(),
+  IPFS_API_URL: Joi.string().uri().allow('').optional(),
 
   // Email configuration
   EMAIL_SERVICE: Joi.string().default('smtp'),
-  EMAIL_HOST: Joi.string().optional(),
+  EMAIL_HOST: Joi.string().allow('').optional(),
   EMAIL_PORT: Joi.number().port().optional(),
-  EMAIL_USER: Joi.string().optional(),
-  EMAIL_PASSWORD: Joi.string().optional(),
-  EMAIL_FROM: Joi.string().email().optional(),
+  EMAIL_USER: Joi.string().allow('').optional(),
+  EMAIL_PASSWORD: Joi.string().allow('').optional(),
+  EMAIL_FROM: Joi.string().email().allow('').optional(),
 
   // Logging
   LOG_LEVEL: Joi.string()
@@ -142,7 +142,7 @@ const config: Config = {
   redis: {
     host: envVars.REDIS_HOST,
     port: envVars.REDIS_PORT,
-    password: envVars.REDIS_PASSWORD,
+    password: envVars.REDIS_PASSWORD || undefined,
     db: envVars.REDIS_DB,
   },
   jwt: {
@@ -166,18 +166,22 @@ const config: Config = {
   },
   externalServices: {
     ...(envVars.AI_FORENSICS_API_URL &&
-      envVars.AI_FORENSICS_API_KEY && {
-        aiForensics: {
-          apiUrl: envVars.AI_FORENSICS_API_URL,
-          apiKey: envVars.AI_FORENSICS_API_KEY,
-        },
-      }),
-    ...(envVars.BLOCKCHAIN_SERVICE_URL && {
+      envVars.AI_FORENSICS_API_KEY &&
+      envVars.AI_FORENSICS_API_URL.trim() !== '' &&
+      envVars.AI_FORENSICS_API_KEY.trim() !== '' && {
+      aiForensics: {
+        apiUrl: envVars.AI_FORENSICS_API_URL,
+        apiKey: envVars.AI_FORENSICS_API_KEY,
+      },
+    }),
+    ...(envVars.BLOCKCHAIN_SERVICE_URL &&
+      envVars.BLOCKCHAIN_SERVICE_URL.trim() !== '' && {
       blockchain: {
         serviceUrl: envVars.BLOCKCHAIN_SERVICE_URL,
       },
     }),
-    ...(envVars.IPFS_API_URL && {
+    ...(envVars.IPFS_API_URL &&
+      envVars.IPFS_API_URL.trim() !== '' && {
       ipfs: {
         apiUrl: envVars.IPFS_API_URL,
       },
@@ -185,11 +189,11 @@ const config: Config = {
   },
   email: {
     service: envVars.EMAIL_SERVICE,
-    host: envVars.EMAIL_HOST,
+    host: envVars.EMAIL_HOST || undefined,
     port: envVars.EMAIL_PORT,
-    user: envVars.EMAIL_USER,
-    password: envVars.EMAIL_PASSWORD,
-    from: envVars.EMAIL_FROM,
+    user: envVars.EMAIL_USER || undefined,
+    password: envVars.EMAIL_PASSWORD || undefined,
+    from: envVars.EMAIL_FROM || undefined,
   },
   logging: {
     level: envVars.LOG_LEVEL,
