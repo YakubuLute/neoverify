@@ -10,11 +10,18 @@ import {
     requestId,
     requestLogger,
     notFoundHandler,
-    setupProcessHandlers
+    setupProcessHandlers,
+    ensureUploadDirectories
 } from './middleware';
 
 // Setup process handlers for unhandled rejections and exceptions
 setupProcessHandlers();
+
+// Initialize upload directories
+ensureUploadDirectories().catch(error => {
+    logger.error('Failed to initialize upload directories', { error });
+    process.exit(1);
+});
 
 // Create Express application
 const app: Application = express();

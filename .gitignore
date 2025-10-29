@@ -3,8 +3,9 @@
 Thumbs.db
 
 
-.kiro
+.kiro*
 .kiro/*
+.vscode
 
 
 # Root-level node

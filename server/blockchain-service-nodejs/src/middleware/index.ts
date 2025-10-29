@@ -28,3 +28,28 @@ export {
     RateLimitError,
     ExternalServiceError,
 } from './errorHandler';
+
+// File upload middleware
+export {
+    uploadSingle,
+    uploadMultiple,
+    secureUploadSingle,
+    secureUploadMultiple,
+    ensureUploadDirectories,
+    cleanupTempFiles,
+    uploadConfig,
+} from './upload';
+
+// Validation middleware
+export {
+    validateDocumentUpload,
+    validateDocumentUpdate,
+    validateDocumentListing,
+    validateDocumentId,
+    validateBulkOperations,
+    validateDocumentSharing,
+    validateDocumentSearch,
+    validateDocumentVerification,
+    validateFileSize,
+    validateFileType,
+} from './validation';
