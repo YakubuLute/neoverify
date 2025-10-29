@@ -21,10 +21,10 @@ export class PolicyEnforcementDirective implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.checkPolicyEnforcement();
 
-        // Re-check when organization context changes
-        this.organizationService.currentOrganizationContext.subscribe(() => {
-            this.checkPolicyEnforcement();
-        });
+        // // Re-check when organization context changes
+        // this.organizationService.currentOrganizationContext.subscribe(() => {
+        //     this.checkPolicyEnforcement();
+        // });
     }
 
     ngOnDestroy(): void {

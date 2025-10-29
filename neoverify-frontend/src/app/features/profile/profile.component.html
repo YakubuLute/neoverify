@@ -1,0 +1,447 @@
+  <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+      <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <div class="mx-auto h-20 w-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <i class="pi pi-user text-white text-3xl"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            Profile Settings
+          </h1>
+          <p class="text-gray-600 text-lg">
+            Manage your account information, security settings, and preferences
+          </p>
+        </div>
+
+        <!-- Tabbed Interface -->
+        <div class="profile-tabs-container">
+          <!-- Tab Navigation -->
+          <div class="tab-navigation">
+            @for (tab of profileTabs(); track tab.id; let i = $index) {
+              <button
+                type="button"
+                class="tab-button"
+                [class.active]="activeTabIndex() === i"
+                [disabled]="tab.disabled"
+                (click)="onTabChange(i)"
+              >
+                <i [class]="tab.icon" class="tab-icon"></i>
+                <span class="tab-label">{{ tab.label }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content-container">
+            <div class="tab-content">
+              @switch (profileTabs()[activeTabIndex()]?.id) {
+                    @case ('basic') {
+                      <div class="basic-info-tab">
+                        <!-- Basic Information Content -->
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                          <!-- Profile Form -->
+                          <div class="xl:col-span-2">
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                                  <h2 class="text-xl font-semibold">Basic Information</h2>
+                                </div>
+                              </ng-template>
+
+                              <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div class="field">
+                                    <label for="firstName" class="block text-sm font-medium mb-2">
+                                      First Name *
+                                      @if (profileForm.get('firstName')?.pending) {
+                                        <i class="pi pi-spin pi-spinner text-xs ml-1"></i>
+                                      }
+                                    </label>
+                                    <input
+                                      id="firstName"
+                                      type="text"
+                                      pInputText
+                                      formControlName="firstName"
+                                      class="w-full"
+                                      [class.ng-invalid]="isFieldInvalid('firstName')"
+                                      [class.ng-valid]="isFieldValid('firstName')"
+                                      placeholder="Enter your first name"
+                                    />
+                                    @if (isFieldInvalid('firstName')) {
+                                      <small class="p-error block mt-1">
+                                        {{ getErrorMessage(profileForm.get('firstName'), 'First Name') }}
+                                      </small>
+                                    }
+                                    @if (isFieldValid('firstName')) {
+                                      <small class="text-green-600 block mt-1">
+                                        <i class="pi pi-check text-xs mr-1"></i>Valid
+                                      </small>
+                                    }
+                                  </div>
+
+                                  <div class="field">
+                                    <label for="lastName" class="block text-sm font-medium mb-2">
+                                      Last Name *
+                                      @if (profileForm.get('lastName')?.pending) {
+                                        <i class="pi pi-spin pi-spinner text-xs ml-1"></i>
+                                      }
+                                    </label>
+                                    <input
+                                      id="lastName"
+                                      type="text"
+                                      pInputText
+                                      formControlName="lastName"
+                                      class="w-full"
+                                      [class.ng-invalid]="isFieldInvalid('lastName')"
+                                      [class.ng-valid]="isFieldValid('lastName')"
+                                      placeholder="Enter your last name"
+                                    />
+                                    @if (isFieldInvalid('lastName')) {
+                                      <small class="p-error block mt-1">
+                                        {{ getErrorMessage(profileForm.get('lastName'), 'Last Name') }}
+                                      </small>
+                                    }
+                                    @if (isFieldValid('lastName')) {
+                                      <small class="text-green-600 block mt-1">
+                                        <i class="pi pi-check text-xs mr-1"></i>Valid
+                                      </small>
+                                    }
+                                  </div>
+                                </div>
+
+                                <div class="field">
+                                  <label for="email" class="block text-sm font-medium mb-2">
+                                    Email Address *
+                                    @if (profileForm.get('email')?.pending) {
+                                      <i class="pi pi-spin pi-spinner text-xs ml-1"></i>
+                                    }
+                                  </label>
+                                  <input
+                                    id="email"
+                                    type="email"
+                                    pInputText
+                                    formControlName="email"
+                                    class="w-full"
+                                    [class.ng-invalid]="isFieldInvalid('email')"
+                                    [class.ng-valid]="isFieldValid('email')"
+                                    placeholder="Enter your email address"
+                                  />
+                                  @if (isFieldInvalid('email')) {
+                                    <small class="p-error block mt-1">
+                                      {{ getErrorMessage(profileForm.get('email'), 'Email') }}
+                                    </small>
+                                  }
+                                  @if (isFieldValid('email')) {
+                                    <small class="text-green-600 block mt-1">
+                                      <i class="pi pi-check text-xs mr-1"></i>Valid
+                                    </small>
+                                  }
+                                </div>
+
+                                <div class="field">
+                                  <label for="phone" class="block text-sm font-medium mb-2">
+                                    Phone Number
+                                    @if (profileForm.get('phone')?.pending) {
+                                      <i class="pi pi-spin pi-spinner text-xs ml-1"></i>
+                                    }
+                                  </label>
+                                  <input
+                                    id="phone"
+                                    type="tel"
+                                    pInputText
+                                    formControlName="phone"
+                                    class="w-full"
+                                    [class.ng-invalid]="isFieldInvalid('phone')"
+                                    [class.ng-valid]="isFieldValid('phone')"
+                                    placeholder="Enter your phone number (optional)"
+                                  />
+                                  @if (isFieldInvalid('phone')) {
+                                    <small class="p-error block mt-1">
+                                      {{ getErrorMessage(profileForm.get('phone'), 'Phone') }}
+                                    </small>
+                                  }
+                                  @if (isFieldValid('phone') && profileForm.get('phone')?.value) {
+                                    <small class="text-green-600 block mt-1">
+                                      <i class="pi pi-check text-xs mr-1"></i>Valid
+                                    </small>
+                                  }
+                                </div>
+
+                                <div class="field">
+                                  <label for="organization" class="block text-sm font-medium mb-2">Organization</label>
+                                  <input
+                                    id="organization"
+                                    type="text"
+                                    pInputText
+                                    formControlName="organization"
+                                    class="w-full"
+                                    [readonly]="true"
+                                  />
+                                  <small class="text-surface-500 mt-1 block">
+                                    Contact your administrator to change organization
+                                  </small>
+                                </div>
+
+                                <div class="flex justify-between items-center">
+                                  @if (formPersistenceService.hasFormState(formId)) {
+                                    <p-button
+                                      label="Reset Form"
+                                      icon="pi pi-refresh"
+                                      severity="secondary"
+                                      [outlined]="true"
+                                      size="small"
+                                      (onClick)="resetForm()"
+                                    ></p-button>
+                                  } @else {
+                                    <div></div>
+                                  }
+                                  
+                                  <p-button
+                                    type="submit"
+                                    label="Update Profile"
+                                    icon="pi pi-save"
+                                    [loading]="updatingProfile()"
+                                    [disabled]="profileForm.invalid || profileForm.pending"
+                                  ></p-button>
+                                </div>
+                              </form>
+                            </p-card>
+                          </div>
+
+                          <!-- Account Overview Sidebar -->
+                          <div class="space-y-6">
+                            <!-- Account Status -->
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                                  <h3 class="text-lg font-semibold">Account Status</h3>
+                                </div>
+                              </ng-template>
+
+                              <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Account Status</span>
+                                  <p-tag value="Active" severity="success"></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Role</span>
+                                  <p-tag [value]="currentUser()?.role" severity="info"></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">MFA Enabled</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.mfaEnabled ? 'Yes' : 'No'" 
+                                    [severity]="currentUser()?.mfaEnabled ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Email Verified</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.emailVerified ? 'Yes' : 'No'" 
+                                    [severity]="currentUser()?.emailVerified ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div>
+                                  <span class="text-sm font-medium block mb-1">Member Since</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    {{ formatDate(currentUser()?.createdAt) }}
+                                  </span>
+                                </div>
+
+                                <div>
+                                  <span class="text-sm font-medium block mb-1">Last Login</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    {{ formatDate(currentUser()?.lastLoginAt) }}
+                                  </span>
+                                </div>
+                              </div>
+                            </p-card>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    @case ('security') {
+                      <div class="security-tab">
+                        <!-- Security Settings Content -->
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                          <!-- Enhanced Password Change -->
+                          <div class="xl:col-span-2 space-y-6">
+                            <app-enhanced-password-change></app-enhanced-password-change>
+                          </div>
+
+                          <!-- Security Settings Sidebar -->
+                          <div class="space-y-6">
+                            <!-- Security Settings -->
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                                  <h3 class="text-lg font-semibold">Security Settings</h3>
+                                </div>
+                              </ng-template>
+
+                              <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                  <div>
+                                    <p class="font-medium">Two-Factor Authentication</p>
+                                    <p class="text-sm text-surface-600 dark:text-surface-400">
+                                      Add an extra layer of security
+                                    </p>
+                                  </div>
+                                  <p-button
+                                    [label]="currentUser()?.mfaEnabled ? 'Manage' : 'Enable'"
+                                    [severity]="currentUser()?.mfaEnabled ? 'info' : 'success'"
+                                    [outlined]="true"
+                                    size="small"
+                                    (onClick)="openMfaSetup()"
+                                  ></p-button>
+                                </div>
+
+                                @if (!currentUser()?.emailVerified) {
+                                  <div class="flex items-center justify-between">
+                                    <div>
+                                      <p class="font-medium">Email Verification</p>
+                                      <p class="text-sm text-surface-600 dark:text-surface-400">
+                                        Verify your email address
+                                      </p>
+                                    </div>
+                                    <p-button
+                                      label="Verify"
+                                      severity="warn"
+                                      [outlined]="true"
+                                      size="small"
+                                      (onClick)="sendVerificationEmail()"
+                                    ></p-button>
+                                  </div>
+                                }
+
+                                <div class="flex items-center justify-between">
+                                  <div>
+                                    <p class="font-medium">Active Sessions</p>
+                                    <p class="text-sm text-surface-600 dark:text-surface-400">
+                                      Manage your active sessions
+                                    </p>
+                                  </div>
+                                  <p-button
+                                    label="Manage"
+                                    [outlined]="true"
+                                    size="small"
+                                    (onClick)="openSessionManagement()"
+                                  ></p-button>
+                                </div>
+                              </div>
+                            </p-card>
+
+                            <!-- Security Status -->
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                                  <h3 class="text-lg font-semibold">Security Status</h3>
+                                </div>
+                              </ng-template>
+
+                              <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">MFA Status</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.mfaEnabled ? 'Enabled' : 'Disabled'" 
+                                    [severity]="currentUser()?.mfaEnabled ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Email Verified</span>
+                                  <p-tag 
+                                    [value]="currentUser()?.emailVerified ? 'Yes' : 'No'" 
+                                    [severity]="currentUser()?.emailVerified ? 'success' : 'warn'"
+                                  ></p-tag>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Last Password Change</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    30 days ago
+                                  </span>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm font-medium">Active Sessions</span>
+                                  <span class="text-sm text-surface-600 dark:text-surface-400">
+                                    3 devices
+                                  </span>
+                                </div>
+                              </div>
+                            </p-card>
+
+                            <!-- Danger Zone -->
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                              <ng-template pTemplate="header">
+                                <div class="p-4 border-b border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                                  <h3 class="text-lg font-semibold text-red-700 dark:text-red-300">Danger Zone</h3>
+                                </div>
+                              </ng-template>
+
+                              <div class="space-y-4">
+                                <div>
+                                  <p class="font-medium text-red-700 dark:text-red-300 mb-2">Delete Account</p>
+                                  <p class="text-sm text-surface-600 dark:text-surface-400 mb-4">
+                                    Permanently delete your account and all associated data. This action cannot be undone.
+                                  </p>
+                                  <p-button
+                                    label="Delete Account"
+                                    severity="danger"
+                                    [outlined]="true"
+                                    size="small"
+                                    (onClick)="deleteAccount()"
+                                  ></p-button>
+                                </div>
+                              </div>
+                            </p-card>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    @case ('notifications') {
+                      <div class="notifications-tab">
+                        <app-notification-tab></app-notification-tab>
+                      </div>
+                    }
+                    @case ('verification') {
+                      <div class="verification-tab">
+                        <app-verification-tab></app-verification-tab>
+                      </div>
+                    }
+                    @case ('organization') {
+                      <div class="organization-tab">
+                        <app-organization-tab></app-organization-tab>
+                      </div>
+                    }
+                    @default {
+                      <div class="coming-soon-tab">
+                        <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
+                          <ng-template pTemplate="header">
+                            <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                              <h2 class="text-xl font-semibold">{{ profileTabs()[activeTabIndex()]?.label }}</h2>
+                              <p class="text-sm text-surface-600 dark:text-surface-400 mt-1">
+                                Coming soon - This feature will be available in the next update
+                              </p>
+                            </div>
+                          </ng-template>
+                          <div class="p-6 text-center text-surface-600 dark:text-surface-400">
+                            <i [class]="profileTabs()[activeTabIndex()]?.icon" class="text-4xl mb-4"></i>
+                            <p>This feature will be available in the next update. 123</p>
+                          </div>
+                        </p-card>
+                      </div>
+                    }
+                  }
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
