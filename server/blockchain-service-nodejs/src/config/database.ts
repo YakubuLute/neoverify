@@ -16,9 +16,9 @@ class Database {
       dialectOptions: {
         ssl: config.database.ssl
           ? {
-              require: true,
-              rejectUnauthorized: false,
-            }
+            require: true,
+            rejectUnauthorized: false,
+          }
           : false,
       },
       pool: {
@@ -65,6 +65,8 @@ class Database {
     options: { force?: boolean; alter?: boolean } = {}
   ): Promise<void> {
     try {
+      // Import models to ensure they are registered
+      await import('../models');
       await this.sequelize.sync(options);
       logger.info('Database synchronized successfully');
     } catch (error) {
