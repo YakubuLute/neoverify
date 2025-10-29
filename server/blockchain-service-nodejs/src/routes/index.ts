@@ -4,6 +4,7 @@ import documentRoutes from './document.routes';
 import profileRoutes from './profile.routes';
 import organizationRoutes from './organization.routes';
 import invitationRoutes from './invitation.routes';
+import verificationRoutes from './verification.routes';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/documents', documentRoutes);
 router.use('/profile', profileRoutes);
 router.use('/organizations', organizationRoutes);
 router.use('/invitations', invitationRoutes);
+router.use('/verification', verificationRoutes);
 
 // Health check for API
 router.get('/health', (req, res) => {
