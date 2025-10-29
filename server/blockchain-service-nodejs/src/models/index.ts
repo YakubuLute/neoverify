@@ -4,6 +4,7 @@ import Organization from './Organization';
 import Verification from './Verification';
 import UserSession from './UserSession';
 import LoginHistory from './LoginHistory';
+import UserInvitation from './UserInvitation';
 
 // Define associations between models
 
@@ -103,6 +104,29 @@ LoginHistory.belongsTo(UserSession, {
     as: 'session',
 });
 
+// UserInvitation associations
+UserInvitation.belongsTo(Organization, {
+    foreignKey: 'organizationId',
+    as: 'organization',
+});
+
+UserInvitation.belongsTo(User, {
+    foreignKey: 'invitedBy',
+    as: 'inviter',
+});
+
+// Organization has many invitations
+Organization.hasMany(UserInvitation, {
+    foreignKey: 'organizationId',
+    as: 'invitations',
+});
+
+// User has many sent invitations
+User.hasMany(UserInvitation, {
+    foreignKey: 'invitedBy',
+    as: 'sentInvitations',
+});
+
 // Export all models
 export {
     User,
@@ -111,6 +135,7 @@ export {
     Verification,
     UserSession,
     LoginHistory,
+    UserInvitation,
 };
 
 // Export model interfaces and enums for use in other parts of the application
@@ -164,6 +189,12 @@ export {
     LoginHistoryCreationAttributes,
 } from './LoginHistory';
 
+export {
+    InvitationStatus,
+    UserInvitationAttributes,
+    UserInvitationCreationAttributes,
+} from './UserInvitation';
+
 // Default export for convenience
 export default {
     User,
@@ -172,4 +203,5 @@ export default {
     Verification,
     UserSession,
     LoginHistory,
+    UserInvitation,
 };
