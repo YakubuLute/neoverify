@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { config, redisClient } from '../config';
 import logger from '../utils/logger';
 
@@ -44,30 +44,26 @@ export class JwtUtils {
      * Generate access token
      */
     static generateAccessToken(payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'>): string {
-        return jwt.sign(
-            { ...payload, type: 'access' },
-            config.jwt.secret,
-            {
-                expiresIn: config.jwt.expiresIn,
-                issuer: 'neoverify-api',
-                audience: 'neoverify-client',
-            }
-        );
+        const tokenPayload = { ...payload, type: 'access' as const };
+        const options: SignOptions = {
+            expiresIn: config.jwt.expiresIn as string,
+            issuer: 'neoverify-api',
+            audience: 'neoverify-client',
+        };
+        return jwt.sign(tokenPayload, config.jwt.secret, options);
     }
 
     /**
      * Generate refresh token
      */
     static generateRefreshToken(payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'>): string {
-        return jwt.sign(
-            { ...payload, type: 'refresh' },
-            config.jwt.refreshSecret,
-            {
-                expiresIn: config.jwt.refreshExpiresIn,
-                issuer: 'neoverify-api',
-                audience: 'neoverify-client',
-            }
-        );
+        const tokenPayload = { ...payload, type: 'refresh' as const };
+        const options: SignOptions = {
+            expiresIn: config.jwt.refreshExpiresIn,
+            issuer: 'neoverify-api',
+            audience: 'neoverify-client',
+        };
+        return jwt.sign(tokenPayload, config.jwt.refreshSecret, options);
     }
 
     /**

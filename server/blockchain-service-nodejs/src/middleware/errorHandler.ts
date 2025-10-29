@@ -165,7 +165,7 @@ const handleDatabaseError = (error: DatabaseError): AppError => {
             return new ValidationError('Invalid reference to related resource');
 
         case 'SequelizeValidationError':
-            const validationError = error as SequelizeValidationError;
+            const validationError = error as unknown as SequelizeValidationError;
             const details = validationError.errors.reduce((acc, err) => {
                 acc[err.path || 'general'] = err.message;
                 return acc;
