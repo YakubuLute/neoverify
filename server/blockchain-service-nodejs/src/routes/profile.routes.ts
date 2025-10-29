@@ -9,10 +9,18 @@ import {
     updateVerificationPreferences,
     updateGeneralPreferences,
     resetPreferences,
+    getSecuritySettings,
+    getActiveSessions,
+    terminateSession,
+    terminateAllOtherSessions,
+    getLoginHistory,
+    deactivateAccount,
+    exportUserData,
     profileUpdateValidation,
     notificationPreferencesValidation,
     verificationPreferencesValidation,
     preferencesValidation,
+    deactivateAccountValidation,
     profilePictureUpload,
 } from '../controllers/profile.controller';
 import { authenticate } from '../middleware/auth';
@@ -36,5 +44,14 @@ router.put('/preferences/notifications', notificationPreferencesValidation, upda
 router.put('/preferences/verification', verificationPreferencesValidation, updateVerificationPreferences);
 router.put('/preferences/general', preferencesValidation, updateGeneralPreferences);
 router.post('/preferences/reset', resetPreferences);
+
+// Security management routes
+router.get('/security', getSecuritySettings);
+router.get('/security/sessions', getActiveSessions);
+router.delete('/security/sessions/:sessionId', terminateSession);
+router.post('/security/sessions/terminate-all', terminateAllOtherSessions);
+router.get('/security/login-history', getLoginHistory);
+router.post('/security/deactivate', deactivateAccountValidation, deactivateAccount);
+router.get('/security/export-data', exportUserData);
 
 export default router;

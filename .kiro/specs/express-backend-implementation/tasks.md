@@ -163,7 +163,7 @@
   - Create bulk operations for multiple documents
   - _Requirements: 2.4, 2.5_
 
-- [-] 6. Create user profile management API
+- [x] 6. Create user profile management API
   - Implement profile information CRUD operations
   - Set up notification preferences management
   - Create verification preferences configuration
@@ -184,7 +184,7 @@
   - Implement preference validation and default settings
   - _Requirements: 3.3_
 
-- [-] 6.3 Set up account security management
+- [x] 6.3 Set up account security management
   - Create security settings overview endpoint
   - Implement active session management and termination
   - Set up login history and security event logging

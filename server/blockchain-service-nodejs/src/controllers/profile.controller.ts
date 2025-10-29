@@ -133,6 +133,13 @@ export const preferencesValidation = [
         .withMessage('Theme must be light, dark, or auto'),
 ];
 
+// Account deactivation validation rules
+export const deactivateAccountValidation = [
+    body('confirmPassword')
+        .notEmpty()
+        .withMessage('Password confirmation is required'),
+];
+
 // Profile picture upload configuration
 const profilePictureStorage = multer.diskStorage({
     destination: async (req, file, cb) => {
@@ -643,6 +650,384 @@ function getDefaultPreferences(): UserPreferences & NotificationPreferences & Ve
         enableAuditLogging: true,
     };
 }
+
+/**
+ * Get security settings overview
+ */
+export const getSecuritySettings = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Get active sessions count
+    const activeSessions = await UserSession.count({
+        where: {
+            userId,
+            isActive: true,
+            expiresAt: {
+                [Op.gt]: new Date(),
+            },
+        },
+    });
+
+    // Get recent login attempts (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const recentLoginAttempts = await LoginHistory.count({
+        where: {
+            userId,
+            createdAt: {
+                [Op.gte]: thirtyDaysAgo,
+            },
+        },
+    });
+
+    // Get failed login attempts (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const failedLoginAttempts = await LoginHistory.count({
+        where: {
+            userId,
+            status: {
+                [Op.ne]: LoginStatus.SUCCESS,
+            },
+            createdAt: {
+                [Op.gte]: sevenDaysAgo,
+            },
+        },
+    });
+
+    const securitySettings = {
+        mfaEnabled: user.mfaEnabled,
+        emailVerified: user.isEmailVerified,
+        accountLocked: user.isLocked(),
+        activeSessions,
+        recentLoginAttempts,
+        failedLoginAttempts,
+        lastLoginAt: user.lastLoginAt,
+        passwordLastChanged: user.updatedAt, // Approximate - would need separate field for exact tracking
+        loginAttempts: user.loginAttempts,
+        lockUntil: user.lockUntil,
+    };
+
+    logger.info('Security settings retrieved:', {
+        userId: user.id,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            securitySettings,
+        },
+    });
+});
+
+/**
+ * Get active sessions
+ */
+export const getActiveSessions = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const currentSessionToken = req.token;
+
+    const sessions = await UserSession.findAll({
+        where: {
+            userId,
+            isActive: true,
+            expiresAt: {
+                [Op.gt]: new Date(),
+            },
+        },
+        order: [['lastActivityAt', 'DESC']],
+        attributes: {
+            exclude: ['sessionToken', 'refreshToken'],
+        },
+    });
+
+    // Mark current session
+    const sessionsWithCurrent = sessions.map(session => ({
+        ...session.toJSON(),
+        isCurrent: session.sessionToken === currentSessionToken,
+    }));
+
+    logger.info('Active sessions retrieved:', {
+        userId,
+        sessionCount: sessions.length,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            sessions: sessionsWithCurrent,
+        },
+    });
+});
+
+/**
+ * Terminate a specific session
+ */
+export const terminateSession = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const { sessionId } = req.params;
+    const currentSessionToken = req.token;
+
+    const session = await UserSession.findOne({
+        where: {
+            id: sessionId,
+            userId,
+            isActive: true,
+        },
+    });
+
+    if (!session) {
+        throw new AppError('Session not found or already terminated', 404, 'SESSION_NOT_FOUND');
+    }
+
+    // Prevent terminating current session
+    if (session.sessionToken === currentSessionToken) {
+        throw new AppError('Cannot terminate current session', 400, 'CANNOT_TERMINATE_CURRENT_SESSION');
+    }
+
+    // Deactivate session
+    session.deactivate();
+    await session.save();
+
+    // Blacklist the session token
+    await JwtUtils.blacklistToken(session.sessionToken);
+
+    // Log the session termination
+    await LoginHistory.create({
+        userId,
+        status: LoginStatus.LOGOUT,
+        ipAddress: req.ip || '0.0.0.0',
+        userAgent: req.get('User-Agent') || 'Unknown',
+        sessionId: session.id,
+    });
+
+    logger.info('Session terminated:', {
+        userId,
+        sessionId: session.id,
+        terminatedBy: 'user',
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'Session terminated successfully',
+        },
+    });
+});
+
+/**
+ * Terminate all other sessions (except current)
+ */
+export const terminateAllOtherSessions = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const currentSessionToken = req.token;
+
+    // Find all active sessions except current
+    const sessions = await UserSession.findAll({
+        where: {
+            userId,
+            isActive: true,
+            sessionToken: {
+                [Op.ne]: currentSessionToken,
+            },
+        },
+    });
+
+    // Deactivate all sessions
+    const sessionTokens = sessions.map(session => session.sessionToken);
+    await UserSession.update(
+        { isActive: false },
+        {
+            where: {
+                userId,
+                isActive: true,
+                sessionToken: {
+                    [Op.ne]: currentSessionToken,
+                },
+            },
+        }
+    );
+
+    // Blacklist all session tokens
+    for (const token of sessionTokens) {
+        await JwtUtils.blacklistToken(token);
+    }
+
+    // Log the mass session termination
+    await LoginHistory.create({
+        userId,
+        status: LoginStatus.LOGOUT,
+        ipAddress: req.ip || '0.0.0.0',
+        userAgent: req.get('User-Agent') || 'Unknown',
+    });
+
+    logger.info('All other sessions terminated:', {
+        userId,
+        terminatedCount: sessions.length,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: `${sessions.length} sessions terminated successfully`,
+            terminatedCount: sessions.length,
+        },
+    });
+});
+
+/**
+ * Get login history
+ */
+export const getLoginHistory = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const offset = (page - 1) * limit;
+
+    const { count, rows: loginHistory } = await LoginHistory.findAndCountAll({
+        where: { userId },
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+        attributes: {
+            exclude: ['userId'],
+        },
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    logger.info('Login history retrieved:', {
+        userId,
+        page,
+        limit,
+        totalRecords: count,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            loginHistory,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalRecords: count,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1,
+            },
+        },
+    });
+});
+
+/**
+ * Deactivate account
+ */
+export const deactivateAccount = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const { confirmPassword } = req.body;
+
+    if (!confirmPassword) {
+        throw new AppError('Password confirmation is required', 400, 'PASSWORD_REQUIRED');
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Verify password
+    const isPasswordValid = await user.validatePassword(confirmPassword);
+    if (!isPasswordValid) {
+        throw new AppError('Invalid password', 400, 'INVALID_PASSWORD');
+    }
+
+    // Deactivate user account
+    user.isActive = false;
+    await user.save();
+
+    // Terminate all active sessions
+    await UserSession.update(
+        { isActive: false },
+        {
+            where: {
+                userId,
+                isActive: true,
+            },
+        }
+    );
+
+    // Invalidate all tokens
+    await JwtUtils.invalidateAllUserTokens(userId);
+
+    logger.info('Account deactivated:', {
+        userId: user.id,
+        email: user.email,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'Account deactivated successfully',
+        },
+    });
+});
+
+/**
+ * Export user data (GDPR compliance)
+ */
+export const exportUserData = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+
+    const user = await User.findByPk(userId, {
+        attributes: {
+            exclude: ['password', 'mfaSecret', 'mfaBackupCodes', 'emailVerificationToken', 'passwordResetToken'],
+        },
+    });
+
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Get user sessions
+    const sessions = await UserSession.findAll({
+        where: { userId },
+        attributes: {
+            exclude: ['sessionToken', 'refreshToken'],
+        },
+    });
+
+    // Get login history
+    const loginHistory = await LoginHistory.findAll({
+        where: { userId },
+        attributes: {
+            exclude: ['userId'],
+        },
+    });
+
+    // TODO: Add documents, verifications, and other user data when those models are available
+
+    const exportData = {
+        profile: user.toJSON(),
+        sessions: sessions.map(session => session.toJSON()),
+        loginHistory: loginHistory.map(entry => entry.toJSON()),
+        exportedAt: new Date().toISOString(),
+    };
+
+    logger.info('User data exported:', {
+        userId: user.id,
+        email: user.email,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'User data exported successfully',
+            exportData,
+        },
+    });
+});
 
 /**
  * Calculate profile completion percentage
