@@ -177,14 +177,14 @@
   - Create profile completion tracking and validation
   - _Requirements: 3.1, 3.2_
 
-- [-] 6.2 Create notification and verification preferences
+- [x] 6.2 Create notification and verification preferences
   - Implement notification preferences CRUD operations
   - Set up email notification settings and templates
   - Create verification preferences configuration
   - Implement preference validation and default settings
   - _Requirements: 3.3_
 
-- [ ] 6.3 Set up account security management
+- [-] 6.3 Set up account security management
   - Create security settings overview endpoint
   - Implement active session management and termination
   - Set up login history and security event logging

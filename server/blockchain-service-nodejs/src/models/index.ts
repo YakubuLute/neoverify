@@ -2,6 +2,8 @@ import User from './User';
 import Document from './Document';
 import Organization from './Organization';
 import Verification from './Verification';
+import UserSession from './UserSession';
+import LoginHistory from './LoginHistory';
 
 // Define associations between models
 
@@ -19,6 +21,16 @@ User.hasMany(Document, {
 User.hasMany(Verification, {
     foreignKey: 'userId',
     as: 'verifications',
+});
+
+User.hasMany(UserSession, {
+    foreignKey: 'userId',
+    as: 'sessions',
+});
+
+User.hasMany(LoginHistory, {
+    foreignKey: 'userId',
+    as: 'loginHistory',
 });
 
 // Organization associations
@@ -69,12 +81,36 @@ Verification.belongsTo(Organization, {
     as: 'organization',
 });
 
+// UserSession associations
+UserSession.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user',
+});
+
+UserSession.hasMany(LoginHistory, {
+    foreignKey: 'sessionId',
+    as: 'loginHistory',
+});
+
+// LoginHistory associations
+LoginHistory.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user',
+});
+
+LoginHistory.belongsTo(UserSession, {
+    foreignKey: 'sessionId',
+    as: 'session',
+});
+
 // Export all models
 export {
     User,
     Document,
     Organization,
     Verification,
+    UserSession,
+    LoginHistory,
 };
 
 // Export model interfaces and enums for use in other parts of the application
@@ -117,10 +153,23 @@ export {
     VerificationCreationAttributes,
 } from './Verification';
 
+export {
+    UserSessionAttributes,
+    UserSessionCreationAttributes,
+} from './UserSession';
+
+export {
+    LoginStatus,
+    LoginHistoryAttributes,
+    LoginHistoryCreationAttributes,
+} from './LoginHistory';
+
 // Default export for convenience
 export default {
     User,
     Document,
     Organization,
     Verification,
+    UserSession,
+    LoginHistory,
 };

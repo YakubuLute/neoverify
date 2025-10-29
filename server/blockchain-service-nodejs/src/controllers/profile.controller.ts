@@ -3,8 +3,12 @@ import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
+import { Op } from 'sequelize';
 import User, { UserPreferences } from '../models/User';
+import UserSession from '../models/UserSession';
+import LoginHistory, { LoginStatus } from '../models/LoginHistory';
 import { asyncHandler, formatValidationErrors, AppError } from '../middleware/errorHandler';
+import { JwtUtils } from '../middleware/auth';
 import logger from '../utils/logger';
 import { config } from '../config';
 
@@ -47,6 +51,86 @@ export const profileUpdateValidation = [
         .isEmail()
         .normalizeEmail()
         .withMessage('Please provide a valid email address'),
+];
+
+// Notification preferences validation rules
+export const notificationPreferencesValidation = [
+    body('emailNotifications')
+        .optional()
+        .isBoolean()
+        .withMessage('Email notifications must be a boolean'),
+    body('smsNotifications')
+        .optional()
+        .isBoolean()
+        .withMessage('SMS notifications must be a boolean'),
+    body('pushNotifications')
+        .optional()
+        .isBoolean()
+        .withMessage('Push notifications must be a boolean'),
+    body('verificationAlerts')
+        .optional()
+        .isBoolean()
+        .withMessage('Verification alerts must be a boolean'),
+    body('weeklyReports')
+        .optional()
+        .isBoolean()
+        .withMessage('Weekly reports must be a boolean'),
+    body('documentStatusUpdates')
+        .optional()
+        .isBoolean()
+        .withMessage('Document status updates must be a boolean'),
+    body('securityAlerts')
+        .optional()
+        .isBoolean()
+        .withMessage('Security alerts must be a boolean'),
+    body('marketingEmails')
+        .optional()
+        .isBoolean()
+        .withMessage('Marketing emails must be a boolean'),
+];
+
+// Verification preferences validation rules
+export const verificationPreferencesValidation = [
+    body('autoVerifyDocuments')
+        .optional()
+        .isBoolean()
+        .withMessage('Auto verify documents must be a boolean'),
+    body('requireMfaForSensitiveActions')
+        .optional()
+        .isBoolean()
+        .withMessage('Require MFA for sensitive actions must be a boolean'),
+    body('allowThirdPartyIntegrations')
+        .optional()
+        .isBoolean()
+        .withMessage('Allow third party integrations must be a boolean'),
+    body('dataRetentionPeriod')
+        .optional()
+        .isInt({ min: 30, max: 2555 }) // 30 days to 7 years
+        .withMessage('Data retention period must be between 30 and 2555 days'),
+    body('shareAnalyticsData')
+        .optional()
+        .isBoolean()
+        .withMessage('Share analytics data must be a boolean'),
+    body('enableAuditLogging')
+        .optional()
+        .isBoolean()
+        .withMessage('Enable audit logging must be a boolean'),
+];
+
+// General preferences validation rules
+export const preferencesValidation = [
+    body('language')
+        .optional()
+        .isIn(['en', 'es', 'fr', 'de', 'it', 'pt', 'zh', 'ja', 'ko'])
+        .withMessage('Language must be a supported language code'),
+    body('timezone')
+        .optional()
+        .isString()
+        .withMessage('Timezone must be a valid timezone string'),
+    body('theme')
+        .optional()
+        .isIn(['light', 'dark', 'auto'])
+        .withMessage('Theme must be light, dark, or auto'),
 ];
 
 // Profile picture upload configuration
@@ -270,6 +354,295 @@ export const deleteProfilePicture = asyncHandler(async (req: Request, res: Respo
         },
     });
 });
+
+/**
+ * Get user preferences (notification, verification, and general)
+ */
+export const getPreferences = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Extract preferences from user model
+    const preferences = user.preferences || getDefaultPreferences();
+
+    // Separate different types of preferences
+    const notificationPreferences: NotificationPreferences = {
+        emailNotifications: preferences.emailNotifications,
+        smsNotifications: preferences.smsNotifications,
+        pushNotifications: preferences.pushNotifications,
+        verificationAlerts: preferences.verificationAlerts,
+        weeklyReports: preferences.weeklyReports,
+        documentStatusUpdates: preferences.documentStatusUpdates || true,
+        securityAlerts: preferences.securityAlerts || true,
+        marketingEmails: preferences.marketingEmails || false,
+    };
+
+    const verificationPreferences: VerificationPreferences = {
+        autoVerifyDocuments: preferences.autoVerifyDocuments || false,
+        requireMfaForSensitiveActions: preferences.requireMfaForSensitiveActions || true,
+        allowThirdPartyIntegrations: preferences.allowThirdPartyIntegrations || false,
+        dataRetentionPeriod: preferences.dataRetentionPeriod || 365,
+        shareAnalyticsData: preferences.shareAnalyticsData || false,
+        enableAuditLogging: preferences.enableAuditLogging || true,
+    };
+
+    const generalPreferences = {
+        language: preferences.language,
+        timezone: preferences.timezone,
+        theme: preferences.theme,
+    };
+
+    logger.info('Preferences retrieved:', {
+        userId: user.id,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            notificationPreferences,
+            verificationPreferences,
+            generalPreferences,
+        },
+    });
+});
+
+/**
+ * Update notification preferences
+ */
+export const updateNotificationPreferences = asyncHandler(async (req: Request, res: Response) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
+    }
+
+    const userId = req.user!.id;
+    const notificationUpdates = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Update notification preferences
+    const currentPreferences = user.preferences || getDefaultPreferences();
+    const updatedPreferences = {
+        ...currentPreferences,
+        ...notificationUpdates,
+    };
+
+    user.preferences = updatedPreferences;
+    await user.save();
+
+    logger.info('Notification preferences updated:', {
+        userId: user.id,
+        updatedFields: Object.keys(notificationUpdates),
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'Notification preferences updated successfully',
+            notificationPreferences: {
+                emailNotifications: updatedPreferences.emailNotifications,
+                smsNotifications: updatedPreferences.smsNotifications,
+                pushNotifications: updatedPreferences.pushNotifications,
+                verificationAlerts: updatedPreferences.verificationAlerts,
+                weeklyReports: updatedPreferences.weeklyReports,
+                documentStatusUpdates: updatedPreferences.documentStatusUpdates,
+                securityAlerts: updatedPreferences.securityAlerts,
+                marketingEmails: updatedPreferences.marketingEmails,
+            },
+        },
+    });
+});
+
+/**
+ * Update verification preferences
+ */
+export const updateVerificationPreferences = asyncHandler(async (req: Request, res: Response) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
+    }
+
+    const userId = req.user!.id;
+    const verificationUpdates = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Update verification preferences
+    const currentPreferences = user.preferences || getDefaultPreferences();
+    const updatedPreferences = {
+        ...currentPreferences,
+        ...verificationUpdates,
+    };
+
+    user.preferences = updatedPreferences;
+    await user.save();
+
+    logger.info('Verification preferences updated:', {
+        userId: user.id,
+        updatedFields: Object.keys(verificationUpdates),
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'Verification preferences updated successfully',
+            verificationPreferences: {
+                autoVerifyDocuments: updatedPreferences.autoVerifyDocuments,
+                requireMfaForSensitiveActions: updatedPreferences.requireMfaForSensitiveActions,
+                allowThirdPartyIntegrations: updatedPreferences.allowThirdPartyIntegrations,
+                dataRetentionPeriod: updatedPreferences.dataRetentionPeriod,
+                shareAnalyticsData: updatedPreferences.shareAnalyticsData,
+                enableAuditLogging: updatedPreferences.enableAuditLogging,
+            },
+        },
+    });
+});
+
+/**
+ * Update general preferences (language, timezone, theme)
+ */
+export const updateGeneralPreferences = asyncHandler(async (req: Request, res: Response) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
+    }
+
+    const userId = req.user!.id;
+    const generalUpdates = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Update general preferences
+    const currentPreferences = user.preferences || getDefaultPreferences();
+    const updatedPreferences = {
+        ...currentPreferences,
+        ...generalUpdates,
+    };
+
+    user.preferences = updatedPreferences;
+    await user.save();
+
+    logger.info('General preferences updated:', {
+        userId: user.id,
+        updatedFields: Object.keys(generalUpdates),
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'General preferences updated successfully',
+            generalPreferences: {
+                language: updatedPreferences.language,
+                timezone: updatedPreferences.timezone,
+                theme: updatedPreferences.theme,
+            },
+        },
+    });
+});
+
+/**
+ * Reset preferences to default values
+ */
+export const resetPreferences = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Reset to default preferences
+    user.preferences = getDefaultPreferences();
+    await user.save();
+
+    logger.info('Preferences reset to defaults:', {
+        userId: user.id,
+    });
+
+    res.json({
+        success: true,
+        data: {
+            message: 'Preferences reset to default values successfully',
+            preferences: user.preferences,
+        },
+    });
+});
+
+/**
+ * Get default preferences
+ */
+function getDefaultPreferences(): UserPreferences & NotificationPreferences & VerificationPreferences {
+    return {
+        // General preferences
+        emailNotifications: true,
+        smsNotifications: false,
+        pushNotifications: true,
+        verificationAlerts: true,
+        weeklyReports: false,
+        language: 'en',
+        timezone: 'UTC',
+        theme: 'light',
+
+        // Extended notification preferences
+        documentStatusUpdates: true,
+        securityAlerts: true,
+        marketingEmails: false,
+
+        // Verification preferences
+        autoVerifyDocuments: false,
+        requireMfaForSensitiveActions: true,
+        allowThirdPartyIntegrations: false,
+        dataRetentionPeriod: 365,
+        shareAnalyticsData: false,
+        enableAuditLogging: true,
+    };
+}
 
 /**
  * Calculate profile completion percentage
