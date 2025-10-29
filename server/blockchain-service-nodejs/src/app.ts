@@ -159,11 +159,11 @@ app.get('/health', (req: Request, res: Response) => {
     });
 });
 
-// API routes will be added here
-app.use('/api', (req: Request, res: Response, next: NextFunction) => {
-    // Placeholder for API routes
-    next();
-});
+// Import routes
+import apiRoutes from './routes';
+
+// API routes
+app.use('/api', apiRoutes);
 
 // 404 handler for undefined routes
 app.use((req: Request, res: Response, next: NextFunction) => {
