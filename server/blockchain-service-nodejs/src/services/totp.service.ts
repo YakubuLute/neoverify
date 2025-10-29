@@ -157,9 +157,12 @@ export class TotpService {
      */
     isValidSecret(secret: string): boolean {
         try {
-            // Check if it's a valid base32 string
-            const decoded = Buffer.from(secret, 'base32');
-            return decoded.length >= 16; // At least 128 bits
+            // Check if it's a valid base32 string by using speakeasy's built-in validation
+            speakeasy.totp({
+                secret,
+                encoding: 'base32',
+            });
+            return secret.length >= 16; // At least 16 characters for base32
         } catch (error) {
             return false;
         }

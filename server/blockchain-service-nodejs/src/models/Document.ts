@@ -273,9 +273,10 @@ class Document extends Model<DocumentAttributes, DocumentCreationAttributes> imp
 
     public static async findByShareToken(token: string): Promise<Document | null> {
         return this.findOne({
-            where: {
-                'sharing_settings.shareToken': token,
-            },
+            where: database.getSequelize().where(
+                database.getSequelize().json('sharing_settings.shareToken'),
+                token
+            ),
         });
     }
 

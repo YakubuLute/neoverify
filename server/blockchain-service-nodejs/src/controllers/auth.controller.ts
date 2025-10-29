@@ -110,7 +110,17 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { email, password, firstName, lastName, organizationId } = req.body;
@@ -219,7 +229,17 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { email, password, totpToken } = req.body;
@@ -309,7 +329,17 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { refreshToken } = req.body;
@@ -365,7 +395,17 @@ export const requestPasswordReset = asyncHandler(async (req: Request, res: Respo
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { email } = req.body;
@@ -426,7 +466,17 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { token, password } = req.body;
@@ -467,7 +517,17 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { currentPassword, newPassword } = req.body;
@@ -549,7 +609,17 @@ export const verifyMfa = asyncHandler(async (req: Request, res: Response) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { totpToken } = req.body;
@@ -603,7 +673,17 @@ export const disableMfa = asyncHandler(async (req: Request, res: Response) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return formatValidationErrors(errors, res);
+        const formattedErrors = formatValidationErrors(errors.array());
+        res.status(400).json({
+            success: false,
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: formattedErrors,
+                timestamp: new Date().toISOString(),
+            },
+        });
+        return;
     }
 
     const { totpToken, backupCode } = req.body;

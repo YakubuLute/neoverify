@@ -28,7 +28,7 @@ export class EmailService {
 
     private createTransporter(): Transporter {
         if (config.email.service === 'smtp' && config.email.host) {
-            return nodemailer.createTransporter({
+            return nodemailer.createTransport({
                 host: config.email.host,
                 port: config.email.port || 587,
                 secure: config.email.port === 465,
@@ -40,7 +40,7 @@ export class EmailService {
         }
 
         // Fallback to console logging for development
-        return nodemailer.createTransporter({
+        return nodemailer.createTransport({
             streamTransport: true,
             newline: 'unix',
             buffer: true,
