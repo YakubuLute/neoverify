@@ -256,7 +256,7 @@ class Organization extends Model<OrganizationAttributes, OrganizationCreationAtt
     }
 
     public toJSON(): Partial<OrganizationAttributes> {
-        const values = { ...this.get() };
+        const values = { ...this.get() } as any;
         // Remove sensitive fields from JSON output
         if (values.settings?.webhookSecret) {
             values.settings = {

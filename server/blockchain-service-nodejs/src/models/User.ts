@@ -158,7 +158,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     }
 
     public toJSON(): Partial<UserAttributes> {
-        const values = { ...this.get() };
+        const values = { ...this.get() } as any;
         // Remove sensitive fields from JSON output
         delete values.password;
         delete values.mfaSecret;
@@ -180,7 +180,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
             where: {
                 emailVerificationToken: token,
                 emailVerificationExpires: {
-                    [DataTypes.Op.gt]: new Date(),
+                    [Op.gt]: new Date(),
                 },
             },
         });
@@ -191,7 +191,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
             where: {
                 passwordResetToken: token,
                 passwordResetExpires: {
-                    [DataTypes.Op.gt]: new Date(),
+                    [Op.gt]: new Date(),
                 },
             },
         });

@@ -253,7 +253,7 @@ class Document extends Model<DocumentAttributes, DocumentCreationAttributes> imp
     }
 
     public toJSON(): Partial<DocumentAttributes> {
-        const values = { ...this.get() };
+        const values = { ...this.get() } as any;
         // Remove sensitive fields from JSON output
         if (values.sharingSettings?.password) {
             values.sharingSettings = {

@@ -5,6 +5,7 @@ import {
     Association,
     BelongsToGetAssociationMixin,
     BelongsToSetAssociationMixin,
+    Op,
 } from 'sequelize';
 import database from '../config/database';
 import { VerificationStatus } from './Document';
@@ -294,7 +295,7 @@ class Verification extends Model<VerificationAttributes, VerificationCreationAtt
     }
 
     public toJSON(): Partial<VerificationAttributes> {
-        const values = { ...this.get() };
+        const values = { ...this.get() } as any;
         // Remove sensitive callback data from JSON output
         if (values.callbackData) {
             values.callbackData = undefined;
@@ -332,7 +333,7 @@ class Verification extends Model<VerificationAttributes, VerificationCreationAtt
         return this.findAll({
             where: {
                 expiresAt: {
-                    [DataTypes.Op.lt]: new Date(),
+                    [Op.lt]: new Date(),
                 },
                 status: [VerificationStatus.PENDING, VerificationStatus.IN_PROGRESS],
             },
@@ -462,7 +463,7 @@ Verification.init(
                 fields: ['external_job_id'],
                 where: {
                     external_job_id: {
-                        [DataTypes.Op.ne]: null,
+                        [Op.ne]: null,
                     },
                 },
             },
