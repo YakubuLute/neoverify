@@ -792,7 +792,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialogService.open(MfaSetupDialogComponent, {
       header: user?.mfaEnabled ? 'Manage Two-Factor Authentication' : 'Enable Two-Factor Authentication',
       width: '90vw',
-      maxWidth: '800px',
       modal: true,
       closable: true,
       data: {
@@ -800,19 +799,20 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRef.onClose.subscribe((result) => {
-      if (result?.success) {
-        // Refresh user data or update MFA status
-        this.notificationService.success('MFA settings updated successfully');
-      }
-    });
+    if (dialogRef) {
+      dialogRef.onClose.subscribe((result) => {
+        if (result?.success) {
+          // Refresh user data or update MFA status
+          this.notificationService.success('MFA settings updated successfully');
+        }
+      });
+    }
   }
 
   openSessionManagement(): void {
     const dialogRef = this.dialogService.open(SessionManagementComponent, {
       header: 'Manage Active Sessions',
       width: '90vw',
-      maxWidth: '1200px',
       modal: true,
       closable: true
     });

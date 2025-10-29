@@ -568,8 +568,8 @@ export class NotificationTabComponent implements OnInit, OnDestroy {
   }
 
   enableAllEmail(): void {
-    const emailGroup = this.preferencesForm.get('email');
-    if (emailGroup) {
+    const emailGroup = this.preferencesForm.get('email') as any;
+    if (emailGroup && emailGroup.controls) {
       Object.keys(emailGroup.controls).forEach(key => {
         emailGroup.get(key)?.setValue(true);
       });
@@ -577,8 +577,8 @@ export class NotificationTabComponent implements OnInit, OnDestroy {
   }
 
   disableAllEmail(): void {
-    const emailGroup = this.preferencesForm.get('email');
-    if (emailGroup) {
+    const emailGroup = this.preferencesForm.get('email') as any;
+    if (emailGroup && emailGroup.controls) {
       Object.keys(emailGroup.controls).forEach(key => {
         emailGroup.get(key)?.setValue(false);
       });
@@ -594,16 +594,17 @@ export class NotificationTabComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialogService.open(NotificationHistoryDialogComponent, {
       header: 'Notification History',
       width: '90vw',
-      maxWidth: '800px',
       modal: true,
       closable: true,
       dismissableMask: true
     });
 
-    dialogRef.onClose.subscribe(() => {
-      // Refresh the recent history when dialog closes
-      this.loadNotificationHistory();
-    });
+    if (dialogRef) {
+      dialogRef.onClose.subscribe(() => {
+        // Refresh the recent history when dialog closes
+        this.loadNotificationHistory();
+      });
+    }
   }
 
   hasChanges(): boolean {
@@ -611,11 +612,13 @@ export class NotificationTabComponent implements OnInit, OnDestroy {
   }
 
   getEmailEnabled(key: string): boolean {
-    return this.preferencesForm.get(`email.${key}`)?.value || false;
+    const value = this.preferencesForm.get(`email.${key}`)?.value;
+    return typeof value === 'boolean' ? value : false;
   }
 
   getInAppEnabled(key: string): boolean {
-    return this.preferencesForm.get(`inApp.${key}`)?.value || false;
+    const value = this.preferencesForm.get(`inApp.${key}`)?.value;
+    return typeof value === 'boolean' ? value : false;
   }
 
   formatDate(date: Date): string {
