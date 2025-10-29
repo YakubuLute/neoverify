@@ -75,11 +75,13 @@ import {
                           @if (membership.isDefault) {
                             <p-tag value="Current" severity="success" size="small"></p-tag>
                           }
-                          <p-tag 
-                            [value]="getRoleDisplayName(membership.role)" 
-                            [severity]="getRoleSeverity(membership.role)"
-                            size="small"
-                          ></p-tag>
+                          @if (membership.role) {
+                            <p-tag 
+                              [value]="getRoleDisplayName(membership.role)" 
+                              [severity]="getRoleSeverity(membership.role)"
+                              size="small"
+                            ></p-tag>
+                          }
                         </div>
 
                         <div class="text-sm text-surface-600 dark:text-surface-400 space-y-1">
@@ -160,7 +162,7 @@ import {
                   <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                     <h3 class="text-lg font-semibold">Organization Preferences</h3>
                     <p class="text-sm text-surface-600 dark:text-surface-400 mt-1">
-                      Customize settings specific to {{ currentContext()?.membership.organizationName }}
+                      Customize settings specific to {{ currentContext()?.membership?.organizationName }}
                     </p>
                   </div>
                 </ng-template>
@@ -372,8 +374,8 @@ import {
                 <div class="space-y-4">
                   <div class="text-center">
                     <div class="organization-avatar mx-auto mb-3">
-                      @if (currentContext()?.membership.organizationLogo) {
-                        <img [src]="currentContext()?.membership.organizationLogo" [alt]="currentContext()?.membership.organizationName" />
+                      @if (currentContext()?.membership?.organizationLogo) {
+                        <img [src]="currentContext()?.membership?.organizationLogo" [alt]="currentContext()?.membership?.organizationName" />
                       } @else {
                         <div class="avatar-placeholder">
                           <i class="pi pi-building text-2xl"></i>
@@ -381,20 +383,20 @@ import {
                       }
                     </div>
                     <h4 class="font-semibold text-surface-900 dark:text-surface-0">
-                      {{ currentContext()?.membership.organizationName }}
+                      {{ currentContext()?.membership?.organizationName }}
                     </h4>
                     <p class="text-sm text-surface-600 dark:text-surface-400">
-                      {{ currentContext()?.membership.organizationDomain }}
+                      {{ currentContext()?.membership?.organizationDomain }}
                     </p>
                   </div>
 
                   <div class="space-y-3">
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Your Role</span>
-                      @if (currentContext()?.membership.role) {
+                      @if (currentContext()?.membership?.role) {
                         <p-tag 
-                          [value]="getRoleDisplayName(currentContext()!.membership.role)" 
-                          [severity]="getRoleSeverity(currentContext()!.membership.role)"
+                          [value]="getRoleDisplayName(currentContext()!.membership!.role)" 
+                          [severity]="getRoleSeverity(currentContext()!.membership!.role)"
                           size="small"
                         ></p-tag>
                       }
@@ -402,10 +404,10 @@ import {
 
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Status</span>
-                      @if (currentContext()?.membership.status) {
+                      @if (currentContext()?.membership?.status) {
                         <p-tag 
-                          [value]="getStatusDisplayName(currentContext()!.membership.status)" 
-                          [severity]="getStatusSeverity(currentContext()!.membership.status)"
+                          [value]="getStatusDisplayName(currentContext()!.membership!.status)" 
+                          [severity]="getStatusSeverity(currentContext()!.membership!.status)"
                           size="small"
                         ></p-tag>
                       }
@@ -414,14 +416,14 @@ import {
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Permissions</span>
                       <span class="text-sm text-surface-600 dark:text-surface-400">
-                        {{ currentContext()?.effectivePermissions.length }} granted
+                        {{ currentContext()?.effectivePermissions?.length || 0 }} granted
                       </span>
                     </div>
 
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Policies</span>
                       <span class="text-sm text-surface-600 dark:text-surface-400">
-                        {{ currentContext()?.policies.length }} active
+                        {{ currentContext()?.policies?.length || 0 }} active
                       </span>
                     </div>
                   </div>
@@ -439,7 +441,7 @@ import {
                 </ng-template>
 
                 <div class="space-y-3">
-                  @for (policy of currentContext()?.policies; track policy.id) {
+                  @for (policy of currentContext()?.policies || []; track policy.id) {
                     <div class="policy-item">
                       <div class="flex items-start gap-3">
                         <div class="policy-icon">
@@ -471,7 +473,7 @@ import {
             }
 
             <!-- Restrictions Notice -->
-            @if (currentContext()?.restrictions.length) {
+            @if (currentContext()?.restrictions && currentContext()?.restrictions.length) {
               <p-card>
                 <ng-template pTemplate="header">
                   <div class="p-4 border-b border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
@@ -483,7 +485,7 @@ import {
                 </ng-template>
 
                 <div class="space-y-3">
-                  @for (restriction of currentContext()?.restrictions; track restriction.setting) {
+                  @for (restriction of currentContext()?.restrictions || []; track restriction.setting) {
                     <div class="restriction-item">
                       <p class="text-sm font-medium text-surface-900 dark:text-surface-0">
                         {{ restriction.setting }}
@@ -733,6 +735,7 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
   private initialFormValue: any = null;
 
   ngOnInit(): void {
+    console.log('OrganizationTabComponent initialized');
     this.loadMemberships();
     this.setupFormChangeTracking();
   }
