@@ -12,7 +12,10 @@ import {
   DigestFrequency,
   OrganizationPolicy,
   VerificationTemplate,
-  VerificationPreferencesUpdateRequest
+  VerificationPreferencesUpdateRequest,
+  RetentionSettings,
+  VerificationNotificationSettings,
+  TemplateSettings
 } from '../../../shared/models/verification-preferences.models';
 
 @Component({

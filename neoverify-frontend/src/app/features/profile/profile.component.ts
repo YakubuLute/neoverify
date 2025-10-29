@@ -16,6 +16,7 @@ import { SessionManagementComponent } from './components/session-management.comp
 import { EnhancedPasswordChangeComponent } from './components/enhanced-password-change.component';
 import { NotificationTabComponent } from './components/notification-tab.component';
 import { VerificationTabComponent } from './components/verification-tab.component';
+import { OrganizationTabComponent } from './components/organization-tab.component';
 
 interface ProfileTab {
   id: string;
@@ -32,7 +33,8 @@ interface ProfileTab {
     DynamicDialogModule,
     EnhancedPasswordChangeComponent,
     NotificationTabComponent,
-    VerificationTabComponent
+    VerificationTabComponent,
+    OrganizationTabComponent
   ],
   template: `
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
@@ -450,6 +452,11 @@ interface ProfileTab {
                     @case ('verification') {
                       <div class="verification-tab">
                         <app-verification-tab></app-verification-tab>
+                      </div>
+                    }
+                    @case ('organization') {
+                      <div class="organization-tab">
+                        <app-organization-tab></app-organization-tab>
                       </div>
                     }
                     @default {
