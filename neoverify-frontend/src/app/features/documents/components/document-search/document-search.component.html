@@ -1,0 +1,169 @@
+<!-- Document Search Component -->
+<div class="document-search">
+
+    <!-- Search Input -->
+    <div class="search-input-container">
+        <span class="p-input-icon-left search-wrapper">
+            <i class="pi pi-search search-icon"></i>
+            <input type="text" pInputText [placeholder]="searchPlaceholder" [formControl]="searchControl"
+                class="search-input">
+        </span>
+
+        <!-- Search Actions -->
+        <div class="search-actions">
+            <p-button *ngIf="hasActiveFilters()" icon="pi pi-filter-slash" [text]="true" (onClick)="onClearFilters()"
+                pTooltip="Clear all filters" class="clear-filters-btn">
+            </p-button>
+
+            <p-button icon="pi pi-search" [text]="true" pTooltip="Advanced search" class="advanced-search-btn">
+            </p-button>
+        </div>
+    </div>
+
+    <!-- Advanced Filters Panel -->
+    <div class="advanced-filters-panel" *ngIf="showAdvancedFilters">
+        <div class="filters-header">
+            <h3 class="filters-title">
+                <i class="pi pi-filter"></i>
+                Advanced Filters
+            </h3>
+
+            <p-button *ngIf="hasActiveFilters()" label="Clear All" [text]="true" size="small"
+                (onClick)="onClearFilters()" class="clear-all-btn">
+            </p-button>
+        </div>
+
+        <div class="filters-content">
+
+            <!-- Document Type Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-file"></i>
+                    Document Type
+                </label>
+                <p-multiSelect [options]="documentTypeOptions" optionLabel="label" optionValue="value"
+                    placeholder="Select document types" [ngModel]="getCurrentDocumentTypes()"
+                    (onChange)="onDocumentTypeChange($event.value)" [showClear]="true" class="filter-multiselect">
+                </p-multiSelect>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-circle"></i>
+                    Document Status
+                </label>
+                <p-multiSelect [options]="statusOptions" optionLabel="label" optionValue="value"
+                    placeholder="Select status" [ngModel]="getCurrentStatuses()"
+                    (onChange)="onStatusChange($event.value)" [showClear]="true" class="filter-multiselect">
+                </p-multiSelect>
+            </div>
+
+            <!-- Verification Status Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-verified"></i>
+                    Verification Status
+                </label>
+                <p-multiSelect [options]="verificationStatusOptions" optionLabel="label" optionValue="value"
+                    placeholder="Select verification status" [ngModel]="getCurrentVerificationStatuses()"
+                    (onChange)="onVerificationStatusChange($event.value)" [showClear]="true" class="filter-multiselect">
+                </p-multiSelect>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-calendar"></i>
+                    Upload Date Range
+                </label>
+                <p-datePicker selectionMode="range" placeholder="Select date range" [ngModel]="getCurrentDateRange()"
+                    (onSelect)="onDateRangeChange($event)" [showClear]="true" dateFormat="mm/dd/yy"
+                    class="filter-datepicker">
+                </p-datePicker>
+            </div>
+
+            <!-- Issuer Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-building"></i>
+                    Issuer Organization
+                </label>
+                <p-multiSelect [options]="[]" optionLabel="name" optionValue="id" placeholder="Select issuers"
+                    [ngModel]="getCurrentIssuers()" (onChange)="onIssuerChange($event.value)" [showClear]="true"
+                    class="filter-multiselect">
+                </p-multiSelect>
+            </div>
+
+            <!-- Tags Filter -->
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="pi pi-tags"></i>
+                    Tags
+                </label>
+                <p-multiSelect [options]="[]" optionLabel="name" optionValue="value" placeholder="Select tags"
+                    [ngModel]="getCurrentTags()" (onChange)="onTagsChange($event.value)" [showClear]="true"
+                    [filter]="true" filterPlaceholder="Search tags" class="filter-multiselect">
+                </p-multiSelect>
+            </div>
+
+        </div>
+
+        <!-- Filter Summary -->
+        <div class="filter-summary" *ngIf="hasActiveFilters()">
+            <div class="summary-header">
+                <span class="summary-title">Active Filters:</span>
+            </div>
+
+            <div class="summary-tags">
+                <p-tag *ngIf="searchControl.value" [value]="'Search: ' + searchControl.value" severity="info">
+                </p-tag>
+
+                <p-tag *ngIf="getCurrentDocumentTypes().length > 0"
+                    [value]="'Types: ' + getCurrentDocumentTypes().length" severity="info">
+                </p-tag>
+
+                <p-tag *ngIf="getCurrentStatuses().length > 0" [value]="'Status: ' + getCurrentStatuses().length"
+                    severity="secondary">
+                </p-tag>
+
+                <p-tag *ngIf="getCurrentVerificationStatuses().length > 0"
+                    [value]="'Verification: ' + getCurrentVerificationStatuses().length" severity="success">
+                </p-tag>
+
+                <p-tag *ngIf="getCurrentDateRange()" value="Date Range" severity="warn">
+                </p-tag>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="quick-filters">
+        <div class="quick-filter-chips">
+            <p-button label="All Documents" [text]="true" size="small" [class.active]="!hasActiveFilters()"
+                (onClick)="onClearFilters()">
+            </p-button>
+
+            <p-button label="Verified Only" [text]="true" size="small"
+                [class.active]="getCurrentVerificationStatuses().includes(VerificationStatus.VERIFIED)"
+                (onClick)="onVerificationStatusChange([VerificationStatus.VERIFIED])">
+            </p-button>
+
+            <p-button label="Pending Verification" [text]="true" size="small"
+                [class.active]="getCurrentVerificationStatuses().includes(VerificationStatus.PENDING)"
+                (onClick)="onVerificationStatusChange([VerificationStatus.PENDING])">
+            </p-button>
+
+            <p-button label="Certificates" [text]="true" size="small"
+                [class.active]="getCurrentDocumentTypes().includes(DocumentType.CERTIFICATE)"
+                (onClick)="onDocumentTypeChange([DocumentType.CERTIFICATE])">
+            </p-button>
+
+            <p-button label="Degrees" [text]="true" size="small"
+                [class.active]="getCurrentDocumentTypes().includes(DocumentType.DEGREE)"
+                (onClick)="onDocumentTypeChange([DocumentType.DEGREE])">
+            </p-button>
+        </div>
+    </div>
+
+</div>

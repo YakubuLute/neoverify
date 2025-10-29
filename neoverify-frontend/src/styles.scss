@@ -6,14 +6,20 @@
 /* PrimeNG imports */
 @import 'primeicons/primeicons.css';
 
-/* Global styles */
+/* Global styles - Force light theme */
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
   
   body {
-    @apply bg-surface-50 text-surface-900 dark:bg-surface-900 dark:text-surface-0;
+    @apply bg-gray-50 text-gray-900;
+    /* Force light theme by removing dark mode classes */
+  }
+  
+  /* Override any dark mode styles */
+  * {
+    color-scheme: light;
   }
 }
 

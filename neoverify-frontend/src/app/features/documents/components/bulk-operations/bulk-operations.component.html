@@ -1,0 +1,161 @@
+<!-- Bulk Operations Component -->
+<div class="bulk-operations" [class.visible]="hasSelection()">
+
+    <!-- Bulk Actions Bar -->
+    <div class="bulk-actions-bar">
+
+        <!-- Selection Info -->
+        <div class="selection-info">
+            <div class="selection-count">
+                <i class="pi pi-check-circle selection-icon"></i>
+                <span class="count-text">{{ selectedCount }} document{{ selectedCount !== 1 ? 's' : '' }}
+                    selected</span>
+            </div>
+
+            <p-button label="Clear Selection" [text]="true" size="small" (onClick)="onClearSelection()"
+                class="clear-selection-btn">
+            </p-button>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+
+            <!-- Export Action -->
+            @if (canExport) {
+            <p-button label="Export" icon="pi pi-download" [text]="true" (onClick)="onExport()"
+                pTooltip="Export selected documents" class="action-btn export-btn">
+            </p-button>
+            }
+
+            <!-- Bulk Edit Actions -->
+            @if (canBulkEdit) {
+            <div class="bulk-edit-actions">
+
+                <!-- Quick Actions -->
+                <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction(bulkOperations[1])"
+                    pTooltip="Add tags to selected documents" class="action-btn">
+                </p-button>
+
+                <!-- More Actions Menu -->
+                <div class="more-actions-menu" [class.active]="showBulkActionsMenu()">
+                    <p-button icon="pi pi-ellipsis-v" [text]="true" (onClick)="toggleBulkActionsMenu()"
+                        pTooltip="More actions" class="menu-trigger">
+                    </p-button>
+
+                    @if (showBulkActionsMenu()) {
+                    <div class="actions-dropdown">
+                        @for (operation of bulkOperations; track operation.type) {
+                        <button class="action-item" [class]="operation.severity" (click)="onBulkAction(operation)">
+                            <i [class]="operation.icon"></i>
+                            <span>{{ operation.label }}</span>
+                        </button>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Export Dialog -->
+    <p-dialog header="Export Documents" [modal]="true" [visible]="showExportDialog()" (onHide)="onCancelExport()"
+        [style]="{ width: '500px' }" styleClass="export-dialog">
+
+        <div class="export-options">
+
+            <!-- Format Selection -->
+            <div class="option-group">
+                <label class="option-label">Export Format</label>
+                <div class="format-options">
+                    @for (format of exportFormats; track format.value) {
+                    <div class="format-option" [class.selected]="exportOptions().format === format.value"
+                        (click)="updateExportFormat(format.value)">
+                        <div class="format-header">
+                            <span class="format-name">{{ format.label }}</span>
+                            <i class="pi pi-check check-icon"
+                                [class.visible]="exportOptions().format === format.value"></i>
+                        </div>
+                        <p class="format-description">{{ format.description }}</p>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="option-group">
+                <label class="option-label">Include Additional Data</label>
+                <div class="checkbox-options">
+                    <div class="checkbox-option">
+                        <p-checkbox [binary]="true" [ngModel]="exportOptions().includeMetadata"
+                            (onChange)="updateExportOption('includeMetadata', $event.checked)"
+                            inputId="includeMetadata">
+                        </p-checkbox>
+                        <label for="includeMetadata" class="checkbox-label">
+                            Include document metadata
+                        </label>
+                    </div>
+
+                    <div class="checkbox-option">
+                        <p-checkbox [binary]="true" [ngModel]="exportOptions().includeAuditTrail"
+                            (onChange)="updateExportOption('includeAuditTrail', $event.checked)"
+                            inputId="includeAuditTrail">
+                        </p-checkbox>
+                        <label for="includeAuditTrail" class="checkbox-label">
+                            Include audit trail
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Summary -->
+            <div class="export-summary">
+                <div class="summary-item">
+                    <span class="summary-label">Documents to export:</span>
+                    <span class="summary-value">{{ selectedCount }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Format:</span>
+                    <span class="summary-value">{{ getSelectedFormatLabel() }}</span>
+                </div>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer">
+                <p-button label="Cancel" [text]="true" (onClick)="onCancelExport()">
+                </p-button>
+                <p-button label="Export" icon="pi pi-download" (onClick)="onConfirmExport()">
+                </p-button>
+            </div>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Confirmation Dialog -->
+    <p-dialog header="Confirm Action" [modal]="true" [visible]="showConfirmDialog()" (onHide)="onCancelAction()"
+        [style]="{ width: '400px' }" styleClass="confirmation-dialog">
+
+        <div class="confirmation-content">
+            <div class="confirmation-icon">
+                <i class="pi pi-exclamation-triangle warning-icon"></i>
+            </div>
+            <div class="confirmation-message">
+                <p>{{ pendingAction()?.confirmationMessage }}</p>
+                <p class="affected-count">
+                    This will affect {{ selectedCount }} document{{ selectedCount !== 1 ? 's' : '' }}.
+                </p>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <div class="dialog-footer">
+                <p-button label="Cancel" [text]="true" (onClick)="onCancelAction()">
+                </p-button>
+                <p-button label="Confirm" [severity]="getOperationSeverity(pendingAction()?.severity)"
+                    (onClick)="onConfirmAction()">
+                </p-button>
+            </div>
+        </ng-template>
+    </p-dialog>
+
+</div>

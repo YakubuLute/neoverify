@@ -3,6 +3,8 @@
 Thumbs.db
 
 
+
+
 # Root-level node
 node_modules/
 .env

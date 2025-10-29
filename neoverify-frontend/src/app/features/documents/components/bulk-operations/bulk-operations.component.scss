@@ -1,0 +1,279 @@
+// Bulk Operations Component Styles
+.bulk-operations {
+    @apply fixed bottom-0 left-0 right-0 z-50 transform translate-y-full transition-transform duration-300;
+    @apply bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 shadow-2xl;
+
+    &.visible {
+        @apply translate-y-0;
+    }
+
+    // Bulk Actions Bar
+    .bulk-actions-bar {
+        @apply max-w-7xl mx-auto px-6 py-4 flex items-center justify-between;
+
+        // Selection Info
+        .selection-info {
+            @apply flex items-center space-x-4;
+
+            .selection-count {
+                @apply flex items-center space-x-2;
+
+                .selection-icon {
+                    @apply text-cyan-400 text-lg;
+                }
+
+                .count-text {
+                    @apply text-white font-medium;
+                }
+            }
+
+            .clear-selection-btn {
+                ::ng-deep .p-button {
+                    @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                }
+            }
+        }
+
+        // Bulk Actions
+        .bulk-actions {
+            @apply flex items-center space-x-3;
+
+            .action-btn {
+                ::ng-deep .p-button {
+                    @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
+                    @apply transition-all duration-200;
+                }
+
+                &.export-btn {
+                    ::ng-deep .p-button {
+                        @apply text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20;
+                    }
+                }
+            }
+
+            // Bulk Edit Actions
+            .bulk-edit-actions {
+                @apply flex items-center space-x-3;
+
+                .more-actions-menu {
+                    @apply relative;
+
+                    .menu-trigger {
+                        ::ng-deep .p-button {
+                            @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                        }
+                    }
+
+                    &.active .menu-trigger {
+                        ::ng-deep .p-button {
+                            @apply text-cyan-400 bg-cyan-500/20;
+                        }
+                    }
+
+                    .actions-dropdown {
+                        @apply absolute bottom-full right-0 mb-2 w-56 z-20;
+                        @apply bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700;
+                        @apply shadow-xl shadow-black/20 py-2;
+
+                        .action-item {
+                            @apply w-full flex items-center space-x-3 px-4 py-3 text-left;
+                            @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
+                            @apply transition-colors text-sm border-none bg-transparent cursor-pointer;
+
+                            &.danger {
+                                @apply text-red-400 hover:text-red-300 hover:bg-red-500/20;
+                            }
+
+                            &.warning {
+                                @apply text-orange-400 hover:text-orange-300 hover:bg-orange-500/20;
+                            }
+
+                            &.info {
+                                @apply text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20;
+                            }
+
+                            i {
+                                @apply text-sm;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Responsive Design
+    @media (max-width: 768px) {
+        .bulk-actions-bar {
+            @apply flex-col space-y-3 px-4;
+
+            .selection-info,
+            .bulk-actions {
+                @apply w-full justify-center;
+            }
+
+            .bulk-actions {
+                @apply flex-wrap gap-2;
+            }
+        }
+    }
+}
+
+// Export Dialog Styles
+::ng-deep .export-dialog {
+    .p-dialog-content {
+        @apply bg-gray-800 text-white;
+    }
+
+    .export-options {
+        @apply space-y-6;
+
+        .option-group {
+            @apply space-y-3;
+
+            .option-label {
+                @apply block text-sm font-medium text-gray-300 mb-3;
+            }
+
+            // Format Options
+            .format-options {
+                @apply space-y-2;
+
+                .format-option {
+                    @apply p-4 border border-gray-600 rounded-lg cursor-pointer;
+                    @apply hover:border-gray-500 transition-colors;
+
+                    &.selected {
+                        @apply border-cyan-500 bg-cyan-500/10;
+                    }
+
+                    .format-header {
+                        @apply flex items-center justify-between mb-2;
+
+                        .format-name {
+                            @apply font-medium text-white;
+                        }
+
+                        .check-icon {
+                            @apply text-cyan-400 opacity-0 transition-opacity;
+
+                            &.visible {
+                                @apply opacity-100;
+                            }
+                        }
+                    }
+
+                    .format-description {
+                        @apply text-sm text-gray-400;
+                    }
+                }
+            }
+
+            // Checkbox Options
+            .checkbox-options {
+                @apply space-y-3;
+
+                .checkbox-option {
+                    @apply flex items-center space-x-3;
+
+                    .checkbox-label {
+                        @apply text-gray-300 cursor-pointer;
+                    }
+
+                    ::ng-deep .p-checkbox {
+                        .p-checkbox-box {
+                            @apply bg-gray-700/50 border-gray-600;
+
+                            &.p-highlight {
+                                @apply bg-cyan-500 border-cyan-500;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Export Summary
+        .export-summary {
+            @apply bg-gray-700/30 rounded-lg p-4 space-y-2;
+
+            .summary-item {
+                @apply flex items-center justify-between text-sm;
+
+                .summary-label {
+                    @apply text-gray-400;
+                }
+
+                .summary-value {
+                    @apply text-white font-medium;
+                }
+            }
+        }
+    }
+
+    .dialog-footer {
+        @apply flex items-center justify-end space-x-3;
+
+        ::ng-deep .p-button.p-button-text {
+            @apply text-gray-400 hover:text-white;
+        }
+
+        ::ng-deep .p-button:not(.p-button-text) {
+            @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
+        }
+    }
+}
+
+// Confirmation Dialog Styles
+::ng-deep .confirmation-dialog {
+    .p-dialog-content {
+        @apply bg-gray-800 text-white;
+    }
+
+    .confirmation-content {
+        @apply flex items-start space-x-4;
+
+        .confirmation-icon {
+            .warning-icon {
+                @apply text-3xl text-orange-400;
+            }
+        }
+
+        .confirmation-message {
+            @apply flex-1;
+
+            p {
+                @apply text-gray-300 mb-2;
+            }
+
+            .affected-count {
+                @apply text-sm text-gray-400 font-medium;
+            }
+        }
+    }
+
+    .dialog-footer {
+        @apply flex items-center justify-end space-x-3;
+
+        ::ng-deep .p-button.p-button-text {
+            @apply text-gray-400 hover:text-white;
+        }
+    }
+}
+
+// Animation enhancements
+.bulk-operations {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

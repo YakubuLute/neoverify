@@ -1,0 +1,236 @@
+// Document Search Component Styles
+.document-search {
+    @apply space-y-4;
+
+    // Search Input Container
+    .search-input-container {
+        @apply flex items-center space-x-3;
+
+        .search-wrapper {
+            @apply flex-1;
+
+            .search-icon {
+                @apply text-gray-400;
+            }
+
+            .search-input {
+                @apply w-full bg-gray-800/50 border-gray-600 text-white placeholder-gray-400;
+                @apply focus:border-cyan-500 focus:ring-cyan-500/20;
+                @apply transition-all duration-200;
+
+                &:focus {
+                    @apply shadow-lg shadow-cyan-500/10;
+                }
+            }
+        }
+
+        .search-actions {
+            @apply flex items-center space-x-2;
+
+            .clear-filters-btn,
+            .advanced-search-btn {
+                ::ng-deep .p-button {
+                    @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                    @apply transition-all duration-200;
+                }
+            }
+
+            .clear-filters-btn {
+                ::ng-deep .p-button {
+                    @apply text-orange-400 hover:text-orange-300 hover:bg-orange-500/20;
+                }
+            }
+        }
+    }
+
+    // Advanced Filters Panel
+    .advanced-filters-panel {
+        @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
+        @apply shadow-xl shadow-black/10;
+
+        .filters-header {
+            @apply flex items-center justify-between mb-6 pb-4 border-b border-gray-700;
+
+            .filters-title {
+                @apply text-lg font-semibold text-white flex items-center space-x-2;
+
+                i {
+                    @apply text-cyan-400;
+                }
+            }
+
+            .clear-all-btn {
+                ::ng-deep .p-button {
+                    @apply text-orange-400 hover:text-orange-300 hover:bg-orange-500/20;
+                }
+            }
+        }
+
+        .filters-content {
+            @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+
+            .filter-group {
+                @apply space-y-3;
+
+                .filter-label {
+                    @apply block text-sm font-medium text-gray-300 flex items-center space-x-2;
+
+                    i {
+                        @apply text-cyan-400;
+                    }
+                }
+
+                .filter-multiselect,
+                .filter-datepicker {
+                    @apply w-full;
+
+                    ::ng-deep .p-multiselect,
+                    ::ng-deep .p-datepicker {
+                        @apply w-full;
+
+                        .p-multiselect-label,
+                        .p-datepicker-input {
+                            @apply bg-gray-700/50 border-gray-600 text-white min-h-[2.5rem];
+                        }
+
+                        &:not(.p-disabled):hover {
+                            @apply border-gray-500;
+                        }
+
+                        &.p-focus {
+                            @apply border-cyan-500 ring-2 ring-cyan-500/20;
+                        }
+                    }
+
+                    ::ng-deep .p-multiselect-panel {
+                        @apply bg-gray-800 border-gray-600;
+
+                        .p-multiselect-header {
+                            @apply bg-gray-800 border-gray-600;
+
+                            .p-multiselect-filter-container input {
+                                @apply bg-gray-700 border-gray-600 text-white;
+                            }
+                        }
+
+                        .p-multiselect-items {
+                            .p-multiselect-item {
+                                @apply text-gray-300 hover:bg-gray-700;
+
+                                &.p-highlight {
+                                    @apply bg-cyan-500 text-white;
+                                }
+                            }
+                        }
+                    }
+
+                    .selected-items {
+                        @apply flex flex-wrap gap-1;
+
+                        ::ng-deep .p-tag {
+                            @apply text-xs;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Filter Summary
+        .filter-summary {
+            @apply mt-6 pt-4 border-t border-gray-700;
+
+            .summary-header {
+                @apply mb-3;
+
+                .summary-title {
+                    @apply text-sm font-medium text-gray-300;
+                }
+            }
+
+            .summary-tags {
+                @apply flex flex-wrap gap-2;
+
+                ::ng-deep .p-tag {
+                    @apply text-xs;
+
+                    .p-tag-icon {
+                        @apply ml-2 cursor-pointer hover:text-white;
+                    }
+                }
+            }
+        }
+    }
+
+    // Quick Filters
+    .quick-filters {
+        @apply bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4;
+
+        .quick-filter-chips {
+            @apply flex flex-wrap gap-2;
+
+            ::ng-deep .p-button.p-button-text {
+                @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                @apply transition-all duration-200 text-sm;
+
+                &.active {
+                    @apply text-cyan-400 bg-cyan-500/20 border border-cyan-500/30;
+                }
+            }
+        }
+    }
+
+    // Responsive Design
+    @media (max-width: 768px) {
+        .search-input-container {
+            @apply flex-col space-y-3 space-x-0;
+
+            .search-wrapper {
+                @apply w-full;
+            }
+
+            .search-actions {
+                @apply w-full justify-end;
+            }
+        }
+
+        .advanced-filters-panel {
+            .filters-content {
+                @apply grid-cols-1;
+            }
+        }
+
+        .quick-filters .quick-filter-chips {
+            @apply justify-center;
+        }
+    }
+}
+
+// Dark theme enhancements
+.document-search {
+
+    ::ng-deep .p-inputtext,
+    ::ng-deep .p-multiselect,
+    ::ng-deep .p-datepicker {
+        @apply transition-all duration-200;
+
+        &:enabled:focus {
+            @apply shadow-lg;
+        }
+    }
+
+    ::ng-deep .p-button:not(.p-button-text) {
+        @apply transition-all duration-200;
+
+        &:hover {
+            @apply transform scale-105;
+        }
+    }
+
+    ::ng-deep .p-tag {
+        @apply transition-all duration-200;
+
+        &:hover {
+            @apply transform scale-105;
+        }
+    }
+}

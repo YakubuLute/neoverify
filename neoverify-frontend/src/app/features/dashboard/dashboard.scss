@@ -1,0 +1,43 @@
+// Dashboard Content Styles
+
+:host {
+    display: block;
+}
+
+.dashboard-content {
+    // Dashboard-specific styles
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+// Smooth transitions for interactive elements
+.group:hover {
+    transform: translateY(-2px);
+}
+
+// Neon glow effects
+.shadow-cyan-500\/10 {
+    box-shadow: 0 10px 25px -3px rgba(6, 182, 212, 0.1);
+}
+
+.shadow-cyan-500\/25 {
+    box-shadow: 0 10px 25px -3px rgba(6, 182, 212, 0.25);
+}
+
+// Animation
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Focus states
+button:focus-visible {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
+}

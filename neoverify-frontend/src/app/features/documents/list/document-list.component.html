@@ -1,0 +1,291 @@
+<!-- Document List Page -->
+<div class="document-list-container">
+
+    <!-- Header Section -->
+    <div class="document-list-header">
+        <div class="header-content">
+            <div class="title-section">
+                <h1 class="page-title">Documents</h1>
+                <p class="page-subtitle">Manage and organize your documents</p>
+            </div>
+
+            <div class="header-actions">
+                <div *hasPermission="{ action: AuditAction.CREATED, resource: 'document' }">
+                    <p-button label="Upload Document" icon="pi pi-upload" (onClick)="onUploadClick()"
+                        class="upload-btn">
+                    </p-button>
+                </div>
+
+                <p-button icon="pi pi-refresh" [text]="true" (onClick)="refreshDocuments()"
+                    pTooltip="Refresh documents">
+                </p-button>
+
+                <p-button [icon]="viewMode() === 'grid' ? 'pi pi-list' : 'pi pi-th-large'" [text]="true"
+                    (onClick)="toggleViewMode()" [pTooltip]="viewMode() === 'grid' ? 'List view' : 'Grid view'">
+                </p-button>
+
+                <p-button icon="pi pi-filter" [text]="true" (onClick)="toggleFilters()"
+                    [pTooltip]="showFilters() ? 'Hide filters' : 'Show filters'" [class.active]="showFilters()">
+                </p-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters Section -->
+    <div class="search-filters-section">
+        <app-document-search [initialQuery]="searchQuery()" [initialFilters]="filters()"
+            [showAdvancedFilters]="showFilters()" (searchChange)="onSearch($event)"
+            (filtersChange)="onFilterChange($event)" (clearFilters)="clearFilters()">
+        </app-document-search>
+    </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+@if (hasSelection()) {
+<div class="bulk-actions-bar" *hasPermission="'documents:edit:org'">
+    <div class="selection-info">
+        <span>{{ selectedDocuments().length }} document(s) selected</span>
+    </div>
+
+    <div class="bulk-actions">
+        <p-button label="Delete" icon="pi pi-trash" severity="danger" [text]="true"
+            (onClick)="onBulkAction(BulkActionType.DELETE)" [disabled]="!canPerformBulkOperation('delete')">
+        </p-button>
+
+        <p-button label="Add Tags" icon="pi pi-tag" [text]="true" (onClick)="onBulkAction(BulkActionType.ADD_TAGS)"
+            [disabled]="!canPerformBulkOperation('add_tags')">
+        </p-button>
+
+        <p-button label="Export" icon="pi pi-download" [text]="true"
+            (onClick)="onExport({ type: 'csv', includeMetadata: true, includeAuditTrail: false })">
+        </p-button>
+    </div>
+</div>
+}
+
+<!-- Loading State -->
+@if (loading()) {
+<div class="loading-container">
+    <div class="loading-content">
+        <p-progressSpinner></p-progressSpinner>
+        <p>Loading documents...</p>
+    </div>
+</div>
+}
+
+<!-- Error State -->
+@if (error() && !loading()) {
+<div class="error-container">
+    <div class="error-content">
+        <i class="pi pi-exclamation-triangle error-icon"></i>
+        <h3>Error Loading Documents</h3>
+        <p>{{ error() }}</p>
+        <p-button label="Try Again" icon="pi pi-refresh" (onClick)="refreshDocuments()">
+        </p-button>
+    </div>
+</div>
+}
+
+<!-- Empty State -->
+@if (!loading() && !error() && filteredDocuments().length === 0) {
+<div class="empty-container">
+    <div class="empty-content">
+        <i class="pi pi-file empty-icon"></i>
+        <h3>No Documents Found</h3>
+        @if (searchQuery() || getFilterCount() > 0) {
+        <p>No documents match your current search and filter criteria.</p>
+        <p-button label="Clear Filters" icon="pi pi-filter-slash" (onClick)="clearFilters()">
+        </p-button>
+        } @else {
+        <p>You haven't uploaded any documents yet.</p>
+        <div *hasPermission="{ action: AuditAction.CREATED, resource: 'document' }">
+            <p-button label="Upload Your First Document" icon="pi pi-upload" (onClick)="onUploadClick()">
+            </p-button>
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Documents Grid/List -->
+@if (!loading() && !error() && filteredDocuments().length > 0) {
+<div class="documents-content">
+
+    <!-- List Header with Selection and Sorting -->
+    <div class="list-header">
+        <div class="selection-controls" *hasPermission="'documents:edit:org'">
+            <p-checkbox [binary]="true" [ngModel]="isAllSelected()" [indeterminate]="hasSelection() && !isAllSelected()"
+                (onChange)="onSelectAll()" label="Select all">
+            </p-checkbox>
+        </div>
+
+        <div class="sort-controls">
+            <p-select [options]="[
+              { label: 'Upload Date', value: 'uploadedAt' },
+              { label: 'Title', value: 'title' },
+              { label: 'File Size', value: 'fileSize' },
+              { label: 'Status', value: 'status' }
+            ]" optionLabel="label" optionValue="value" [ngModel]="sortBy()"
+                (onChange)="onSortChange($event.value, sortOrder())" placeholder="Sort by">
+            </p-select>
+
+            <p-button [icon]="sortOrder() === 'asc' ? 'pi pi-sort-up' : 'pi pi-sort-down'" [text]="true"
+                (onClick)="onSortChange(sortBy(), sortOrder() === 'asc' ? 'desc' : 'asc')"
+                [pTooltip]="sortOrder() === 'asc' ? 'Sort descending' : 'Sort ascending'">
+            </p-button>
+        </div>
+    </div>
+
+    <!-- Grid View -->
+    @if (viewMode() === 'grid') {
+    <!-- Virtual Scroll Container for large datasets -->
+    @if (enableVirtualScroll() && totalCount() > 50) {
+    <div class="documents-grid-virtual" appVirtualScroll [items]="filteredDocuments()" [config]="virtualScrollConfig()"
+        (viewportChange)="onVirtualScrollViewportChange($event)" (scrollEnd)="onVirtualScrollEnd()">
+
+        <div class="virtual-scroll-content" [style.height.px]="virtualViewport()?.totalHeight || 0">
+
+            <div class="virtual-scroll-viewport"
+                [style.transform]="'translateY(' + (virtualViewport()?.offsetY || 0) + 'px)'">
+
+                @for (document of virtualViewport()?.visibleItems || []; track document.id) {
+                <div class="document-card-wrapper" [style.height.px]="virtualScrollConfig().itemHeight"
+                    *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
+                    <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
+                        [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
+                        (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
+                    </app-document-card>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    } @else {
+    <!-- Regular Grid for smaller datasets -->
+    <div class="documents-grid">
+        @for (document of filteredDocuments(); track document.id) {
+        <div *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
+            <app-document-card [document]="document" [selected]="selectedDocuments().includes(document.id)"
+                [canSelect]="canBulkEdit()" (documentClick)="onDocumentClick(document)"
+                (selectionChange)="onDocumentSelect(document.id, $event)" (quickAction)="onQuickAction($event)">
+            </app-document-card>
+        </div>
+        }
+    </div>
+    }
+    }
+
+    <!-- List View -->
+    @if (viewMode() === 'list') {
+    <div class="documents-table">
+        <p-table [value]="filteredDocuments()" [paginator]="false" [rows]="pageSize()" styleClass="p-datatable-sm">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 3rem" *hasPermission="'documents:edit:org'">
+                        <p-checkbox [binary]="true" [ngModel]="isAllSelected()"
+                            [indeterminate]="hasSelection() && !isAllSelected()" (onChange)="onSelectAll()">
+                        </p-checkbox>
+                    </th>
+                    <th>Document</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Verification</th>
+                    <th>Upload Date</th>
+                    <th>Size</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-document>
+                <tr>
+                    <td *hasPermission="'documents:edit:org'">
+                        <p-checkbox [binary]="true" [ngModel]="selectedDocuments().includes(document.id)"
+                            (onChange)="onDocumentSelect(document.id, $event.checked)">
+                        </p-checkbox>
+                    </td>
+                    <td>
+                        <div class="document-info">
+                            <div class="document-thumbnail">
+                                @if (document.thumbnailUrl) {
+                                <img [src]="document.thumbnailUrl" [alt]="document.title">
+                                } @else {
+                                <i class="pi pi-file document-icon"></i>
+                                }
+                            </div>
+                            <div class="document-details">
+                                <div class="document-title">{{ document.title }}</div>
+                                <div class="document-filename">{{ document.originalFileName }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <p-tag [value]="document.documentType"
+                            [severity]="getDocumentTypeSeverity(document.documentType)">
+                        </p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="document.status" [severity]="getStatusSeverity(document.status)">
+                        </p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="document.verificationStatus"
+                            [severity]="getVerificationSeverity(document.verificationStatus)">
+                        </p-tag>
+                    </td>
+                    <td>{{ document.uploadedAt | date:'short' }}</td>
+                    <td>{{ formatFileSize(document.fileSize) }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <p-button icon="pi pi-eye" [text]="true" size="small" (onClick)="onDocumentClick(document)"
+                                pTooltip="View details"
+                                *hasPermission="{ action: AuditAction.VIEWED, resource: 'document' }; hasPermissionDocument: document">
+                            </p-button>
+                            <p-button icon="pi pi-download" [text]="true" size="small" pTooltip="Download"
+                                *hasPermission="{ action: AuditAction.DOWNLOADED, resource: 'document' }; hasPermissionDocument: document">
+                            </p-button>
+                            <p-button icon="pi pi-share-alt" [text]="true" size="small" pTooltip="Share"
+                                *hasPermission="{ action: AuditAction.SHARED, resource: 'document' }; hasPermissionDocument: document">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    }
+
+    <!-- Pagination -->
+    @if (totalCount() > pageSize()) {
+    <div class="pagination-container">
+        <p-paginator [rows]="pageSize()" [totalRecords]="totalCount()" [first]="(currentPage() - 1) * pageSize()"
+            (onPageChange)="onPageChange(($event.page || 0) + 1)" [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} documents">
+        </p-paginator>
+    </div>
+    }
+</div>
+}
+
+<!-- Bulk Operations -->
+<app-bulk-operations [selectedCount]="selectedDocuments().length" [canBulkEdit]="canBulkEdit()" [canExport]="true"
+    (bulkAction)="onBulkAction($event.type, $event.data)" (exportAction)="onExport($event)"
+    (clearSelection)="selectedDocuments.set([])">
+</app-bulk-operations>
+<!--
+ Status Management Dialog -->
+<app-status-management-dialog [visible]="showStatusDialog()" [document]="selectedDocumentForStatus()"
+    (visibleChange)="showStatusDialog.set($event)" (statusChanged)="onStatusChanged($event)">
+</app-status-management-dialog>
+
+<!-- Status History Dialog -->
+<p-dialog header="Status History" [(visible)]="showHistoryDialog" [modal]="true" [closable]="true"
+    [style]="{ width: '800px', maxHeight: '90vh' }">
+    <app-status-history *ngIf="selectedDocumentForStatus()" [documentId]="selectedDocumentForStatus()?.id || ''">
+    </app-status-history>
+</p-dialog>
+
+<!-- Document Sharing Dialog -->
+<app-document-sharing-dialog [document]="selectedDocumentForSharing()" [visible]="showSharingDialog()"
+    (visibleChange)="showSharingDialog.set($event)" (documentShared)="onDocumentShared()">
+</app-document-sharing-dialog>

@@ -1,0 +1,532 @@
+// Template Versions Component Styles
+.template-versions-container {
+    @apply min-h-screen bg-gray-900 text-white;
+
+    // Header Section
+    .versions-header {
+        @apply bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-6;
+
+        .header-content {
+            @apply max-w-7xl mx-auto flex items-center justify-between;
+
+            .title-section {
+                .breadcrumb {
+                    @apply flex items-center text-sm text-gray-400 mb-2;
+
+                    .breadcrumb-separator {
+                        @apply mx-2;
+                    }
+
+                    .breadcrumb-item {
+                        @apply hover:text-gray-300;
+                    }
+
+                    .breadcrumb-current {
+                        @apply text-white font-medium;
+                    }
+
+                    ::ng-deep .p-button.p-button-text {
+                        @apply text-gray-400 hover:text-white hover:bg-gray-700/50 p-1;
+                    }
+                }
+
+                .page-title {
+                    @apply text-3xl font-semibold text-white mb-2;
+                }
+
+                .page-subtitle {
+                    @apply text-gray-300 font-normal;
+                }
+            }
+
+            .header-actions {
+                @apply flex items-center space-x-3;
+
+                ::ng-deep .p-button {
+                    &.p-button-primary {
+                        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 hover:border-cyan-600;
+                    }
+
+                    &.p-button-outlined {
+                        @apply border-gray-600 text-gray-300 hover:bg-gray-700/50;
+                    }
+                }
+            }
+        }
+    }
+
+    // Template Info Section
+    .template-info-section {
+        @apply bg-gray-800/30 backdrop-blur-sm border-b border-gray-700/50 p-6;
+
+        .template-info-content {
+            @apply max-w-7xl mx-auto flex items-center justify-between;
+
+            .template-details {
+                h2 {
+                    @apply text-2xl font-semibold text-white mb-2;
+                }
+
+                p {
+                    @apply text-gray-300 mb-4;
+                }
+
+                .template-meta {
+                    @apply flex items-center space-x-6;
+
+                    .meta-item {
+                        @apply flex items-center text-sm text-gray-400;
+
+                        i {
+                            @apply mr-2 text-gray-500;
+                        }
+                    }
+                }
+            }
+
+            .template-status {
+                ::ng-deep .p-tag {
+                    &.p-tag-success {
+                        @apply bg-green-500/20 text-green-400 border-green-500/30;
+                    }
+                }
+            }
+        }
+    }
+
+    // Version Actions Bar
+    .version-actions-bar {
+        @apply bg-cyan-500/10 backdrop-blur-sm border-b border-cyan-500/20 p-4;
+        @apply flex items-center justify-between max-w-7xl mx-auto;
+
+        .selection-info {
+            @apply text-cyan-400 font-medium;
+        }
+
+        .version-actions {
+            @apply flex items-center space-x-3;
+
+            ::ng-deep .p-button {
+                &.p-button-outlined {
+                    @apply border-gray-600 text-gray-300 hover:bg-gray-700/50;
+                }
+
+                &.p-button-text {
+                    @apply text-gray-300 hover:text-white;
+                }
+            }
+        }
+    }
+
+    // Loading State
+    .loading-container {
+        @apply flex items-center justify-center py-16;
+
+        .loading-content {
+            @apply text-center;
+
+            ::ng-deep .p-progress-spinner {
+                @apply mb-4;
+
+                .p-progress-spinner-circle {
+                    @apply stroke-cyan-500;
+                }
+            }
+
+            p {
+                @apply text-gray-300;
+            }
+        }
+    }
+
+    // Error State
+    .error-container {
+        @apply flex items-center justify-center py-16;
+
+        .error-content {
+            @apply text-center max-w-md;
+
+            .error-icon {
+                @apply text-6xl text-red-400 mb-4;
+            }
+
+            h3 {
+                @apply text-xl font-semibold text-white mb-2;
+            }
+
+            p {
+                @apply text-gray-300 mb-6;
+            }
+
+            ::ng-deep .p-button {
+                @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
+            }
+        }
+    }
+
+    // Versions Content
+    .versions-content {
+        @apply max-w-7xl mx-auto p-6;
+
+        .versions-list {
+            @apply space-y-4;
+
+            .version-item {
+                @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
+                @apply hover:border-gray-600 hover:bg-gray-800/70 transition-all duration-200;
+
+                &.selected {
+                    @apply border-cyan-500/50 bg-cyan-500/10;
+                }
+
+                .version-header {
+                    @apply flex items-center justify-between mb-4;
+
+                    .version-selection {
+                        @apply mr-4;
+
+                        ::ng-deep .p-checkbox {
+                            .p-checkbox-box {
+                                @apply bg-gray-700/50 border-gray-600;
+
+                                &.p-highlight {
+                                    @apply bg-cyan-500 border-cyan-500;
+                                }
+                            }
+                        }
+                    }
+
+                    .version-info {
+                        @apply flex-1;
+
+                        .version-title {
+                            @apply flex items-center space-x-3 mb-2;
+
+                            h3 {
+                                @apply text-lg font-semibold text-white;
+                            }
+
+                            ::ng-deep .p-tag {
+                                &.p-tag-success {
+                                    @apply bg-green-500/20 text-green-400 border-green-500/30;
+                                }
+                            }
+                        }
+
+                        .version-meta {
+                            @apply flex items-center space-x-4 text-sm text-gray-400;
+
+                            .version-author {
+                                @apply font-medium;
+                            }
+                        }
+                    }
+
+                    .version-actions {
+                        @apply flex items-center space-x-2;
+
+                        ::ng-deep .p-button.p-button-text {
+                            @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
+                        }
+                    }
+                }
+
+                .version-changes {
+                    @apply pl-12;
+
+                    p {
+                        @apply text-gray-300 leading-relaxed;
+                    }
+                }
+            }
+
+            .no-versions {
+                @apply text-center py-16 text-gray-400;
+
+                i {
+                    @apply text-6xl mb-4;
+                }
+
+                h3 {
+                    @apply text-xl font-semibold mb-2;
+                }
+
+                p {
+                    @apply text-gray-500;
+                }
+            }
+        }
+    }
+}
+
+// Dialog Styles
+::ng-deep .p-dialog {
+    .p-dialog-header {
+        @apply bg-gray-800 border-gray-700 text-white;
+    }
+
+    .p-dialog-content {
+        @apply bg-gray-800 text-white;
+    }
+
+    .p-dialog-footer {
+        @apply bg-gray-800 border-gray-700;
+    }
+}
+
+// Comparison Dialog Styles
+.comparison-content {
+    @apply space-y-6;
+
+    .comparison-header {
+        @apply flex items-center justify-between p-4 bg-gray-700/30 rounded-lg;
+
+        .version-info {
+            @apply text-center;
+
+            h4 {
+                @apply text-lg font-semibold text-white mb-1;
+            }
+
+            p {
+                @apply text-sm text-gray-400;
+            }
+        }
+
+        .comparison-separator {
+            @apply text-cyan-400 text-2xl;
+        }
+    }
+
+    .comparison-body {
+        @apply max-h-96 overflow-y-auto;
+
+        ::ng-deep .p-tabview {
+            .p-tabview-nav {
+                @apply bg-gray-700/30 border-gray-600;
+
+                .p-tabview-nav-link {
+                    @apply text-gray-300 hover:text-white;
+
+                    &.p-highlight {
+                        @apply text-white border-cyan-500;
+                    }
+                }
+            }
+
+            .p-tabview-panels {
+                @apply bg-transparent;
+            }
+        }
+
+        .changes-list {
+            @apply space-y-4;
+
+            .change-item {
+                @apply bg-gray-700/30 rounded-lg p-4 border border-gray-600;
+
+                .change-header {
+                    @apply flex items-center space-x-3 mb-3;
+
+                    i {
+                        @apply text-lg;
+                    }
+
+                    .change-type {
+                        ::ng-deep .p-tag {
+                            @apply text-xs;
+
+                            &.p-tag-success {
+                                @apply bg-green-500/20 text-green-400 border-green-500/30;
+                            }
+
+                            &.p-tag-danger {
+                                @apply bg-red-500/20 text-red-400 border-red-500/30;
+                            }
+
+                            &.p-tag-warning {
+                                @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30;
+                            }
+                        }
+                    }
+
+                    .field-name,
+                    .rule-name {
+                        @apply font-medium text-white;
+                    }
+                }
+
+                .change-details {
+                    @apply mb-3;
+
+                    ul {
+                        @apply list-disc list-inside text-sm text-gray-300 space-y-1;
+                    }
+                }
+
+                .field-preview,
+                .rule-preview {
+                    @apply text-sm;
+
+                    strong {
+                        @apply text-gray-300;
+                    }
+
+                    code {
+                        @apply bg-gray-600/50 text-cyan-400 px-2 py-1 rounded text-xs ml-2;
+                    }
+                }
+            }
+
+            .no-changes {
+                @apply text-center py-8 text-gray-400;
+
+                p {
+                    @apply text-sm;
+                }
+            }
+        }
+    }
+}
+
+// Create Version Dialog Styles
+.create-version-content {
+    @apply space-y-4;
+
+    p {
+        @apply text-gray-300 mb-4;
+    }
+
+    .form-group {
+        @apply space-y-2;
+
+        label {
+            @apply block text-sm font-medium text-gray-300;
+        }
+
+        ::ng-deep .p-inputtextarea {
+            @apply bg-gray-700/50 border-gray-600 text-white;
+
+            &:enabled:focus {
+                @apply border-cyan-500 ring-2 ring-cyan-500/20;
+            }
+        }
+    }
+}
+
+// Rollback Dialog Styles
+.rollback-content {
+    @apply space-y-4;
+
+    .warning-message {
+        @apply flex items-center space-x-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg;
+
+        i {
+            @apply text-yellow-400 text-xl;
+        }
+
+        p {
+            @apply text-yellow-300;
+
+            strong {
+                @apply text-yellow-200;
+            }
+        }
+    }
+
+    .rollback-details {
+        @apply bg-gray-700/30 rounded-lg p-4;
+
+        h4 {
+            @apply text-white font-semibold mb-3;
+        }
+
+        ul {
+            @apply space-y-2;
+
+            li {
+                @apply text-sm text-gray-300;
+
+                strong {
+                    @apply text-white;
+                }
+            }
+        }
+    }
+
+    .rollback-warning {
+        @apply p-4 bg-red-500/10 border border-red-500/30 rounded-lg;
+
+        p {
+            @apply text-red-300 text-sm;
+
+            strong {
+                @apply text-red-200;
+            }
+        }
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .template-versions-container {
+        .versions-header .header-content {
+            @apply flex-col items-start space-y-4;
+        }
+
+        .template-info-section .template-info-content {
+            @apply flex-col items-start space-y-4;
+        }
+
+        .version-actions-bar {
+            @apply flex-col items-start space-y-3;
+        }
+
+        .versions-content .version-item .version-header {
+            @apply flex-col items-start space-y-3;
+
+            .version-actions {
+                @apply w-full justify-end;
+            }
+        }
+
+        .comparison-content .comparison-header {
+            @apply flex-col space-y-4;
+
+            .comparison-separator {
+                @apply rotate-90;
+            }
+        }
+    }
+}
+
+// Dark theme glassmorphism effects
+.template-versions-container {
+
+    ::ng-deep .p-card,
+    ::ng-deep .p-panel,
+    ::ng-deep .p-dialog {
+        @apply bg-gray-800/50 backdrop-blur-sm border-gray-700;
+    }
+
+    ::ng-deep .p-button:not(.p-button-text) {
+        @apply bg-gray-700/50 border-gray-600 hover:bg-gray-600/50;
+
+        &.p-button-primary {
+            @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
+        }
+
+        &.p-button-danger {
+            @apply bg-red-500 border-red-500 hover:bg-red-600;
+        }
+    }
+
+    ::ng-deep .p-inputtext,
+    ::ng-deep .p-inputtextarea {
+        @apply bg-gray-700/50 border-gray-600 text-white;
+
+        &:enabled:focus {
+            @apply border-cyan-500 ring-2 ring-cyan-500/20;
+        }
+    }
+}

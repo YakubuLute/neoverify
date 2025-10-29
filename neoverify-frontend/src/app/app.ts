@@ -1,16 +1,27 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { ToolbarModule } from 'primeng/toolbar';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { HeaderComponent } from './layout/header/header.component';
+import { ToastModule } from 'primeng/toast';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ButtonModule, CardModule, ToolbarModule],
+  imports: [RouterOutlet, HeaderComponent, ToastModule],
   templateUrl: './app.html',
-  template:`<h1>Hello woorld</h1>`,
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('NeoVerify Frontend');
+  private readonly router = inject(Router);
+
+  showHeader = true;
+
+  constructor() {
+    // Hide header on certain routes
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        const hideHeaderRoutes = ['/auth/login', '/auth/signup', '/auth/mfa', '/'];
+        this.showHeader = !hideHeaderRoutes.some(route => event.url.startsWith(route));
+      });
+  }
 }
