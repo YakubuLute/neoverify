@@ -6,6 +6,7 @@ import {
     HasManyGetAssociationsMixin,
     BelongsToGetAssociationMixin,
     BelongsToSetAssociationMixin,
+    Op,
 } from 'sequelize';
 import bcrypt from 'bcryptjs';
 import database from '../config/database';
