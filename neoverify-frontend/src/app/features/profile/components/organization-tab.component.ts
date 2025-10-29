@@ -4,22 +4,23 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SHARED_IMPORTS } from '../../../shared';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { PolicyValidationService } from '../../../core/services/policy-validation.service';
 import {
-    OrganizationMembership,
-    OrganizationContext,
-    OrganizationPreferences,
-    OrganizationRole,
-    MembershipStatus,
-    OrganizationPermission,
-    PolicyType,
-    OrganizationSettingsUpdateRequest
+  OrganizationMembership,
+  OrganizationContext,
+  OrganizationPreferences,
+  OrganizationRole,
+  MembershipStatus,
+  OrganizationPermission,
+  PolicyType,
+  OrganizationSettingsUpdateRequest
 } from '../../../shared/models/organization.models';
 
 @Component({
-    selector: 'app-organization-tab',
-    standalone: true,
-    imports: [SHARED_IMPORTS],
-    template: `
+  selector: 'app-organization-tab',
+  standalone: true,
+  imports: [SHARED_IMPORTS],
+  template: `
     <div class="organization-settings-container">
       <!-- Header -->
       <div class="mb-6">
@@ -325,7 +326,25 @@ import {
 
                 <!-- Save Button -->
                 <ng-template pTemplate="footer">
-                  <div class="flex justify-end">
+                  <div class="flex justify-between items-center">
+                    <div class="flex gap-2">
+                      <p-button
+                        label="Check Violations"
+                        icon="pi pi-exclamation-triangle"
+                        severity="warn"
+                        [outlined]="true"
+                        size="small"
+                        (onClick)="showPolicyViolationDetails()"
+                      ></p-button>
+                      <p-button
+                        label="Reset to Defaults"
+                        icon="pi pi-refresh"
+                        severity="secondary"
+                        [outlined]="true"
+                        size="small"
+                        (onClick)="resetToPolicyDefaults()"
+                      ></p-button>
+                    </div>
                     <p-button
                       label="Save Organization Preferences"
                       icon="pi pi-save"
@@ -372,20 +391,24 @@ import {
                   <div class="space-y-3">
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Your Role</span>
-                      <p-tag 
-                        [value]="getRoleDisplayName(currentContext()?.membership.role!)" 
-                        [severity]="getRoleSeverity(currentContext()?.membership.role!)"
-                        size="small"
-                      ></p-tag>
+                      @if (currentContext()?.membership.role) {
+                        <p-tag 
+                          [value]="getRoleDisplayName(currentContext()!.membership.role)" 
+                          [severity]="getRoleSeverity(currentContext()!.membership.role)"
+                          size="small"
+                        ></p-tag>
+                      }
                     </div>
 
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Status</span>
-                      <p-tag 
-                        [value]="getStatusDisplayName(currentContext()?.membership.status!)" 
-                        [severity]="getStatusSeverity(currentContext()?.membership.status!)"
-                        size="small"
-                      ></p-tag>
+                      @if (currentContext()?.membership.status) {
+                        <p-tag 
+                          [value]="getStatusDisplayName(currentContext()!.membership.status)" 
+                          [severity]="getStatusSeverity(currentContext()!.membership.status)"
+                          size="small"
+                        ></p-tag>
+                      }
                     </div>
 
                     <div class="flex items-center justify-between">
@@ -476,12 +499,54 @@ import {
                 </div>
               </p-card>
             }
+
+            <!-- Organization Management Actions -->
+            @if (canModifyOrganizationSettings()) {
+              <p-card>
+                <ng-template pTemplate="header">
+                  <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+                    <h3 class="text-lg font-semibold">Organization Management</h3>
+                  </div>
+                </ng-template>
+
+                <div class="space-y-3">
+                  <p-button
+                    label="Export Settings"
+                    icon="pi pi-download"
+                    [outlined]="true"
+                    size="small"
+                    class="w-full"
+                    (onClick)="exportOrganizationSettings()"
+                  ></p-button>
+                  
+                  <p-button
+                    label="View Audit Log"
+                    icon="pi pi-history"
+                    [outlined]="true"
+                    severity="secondary"
+                    size="small"
+                    class="w-full"
+                    [disabled]="!organizationService.hasPermission(OrganizationPermission.VIEW_AUDIT_LOGS)"
+                  ></p-button>
+                  
+                  <p-button
+                    label="Manage Policies"
+                    icon="pi pi-cog"
+                    [outlined]="true"
+                    severity="info"
+                    size="small"
+                    class="w-full"
+                    [disabled]="!organizationService.hasPermission(OrganizationPermission.MANAGE_ORGANIZATION)"
+                  ></p-button>
+                </div>
+              </p-card>
+            }
           </div>
         </div>
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     :host {
       display: block;
     }
@@ -608,288 +673,480 @@ import {
   `]
 })
 export class OrganizationTabComponent implements OnInit, OnDestroy {
-    private readonly fb = inject(FormBuilder);
-    private readonly organizationService = inject(OrganizationService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly destroy$ = new Subject<void>();
+  private readonly fb = inject(FormBuilder);
+  readonly organizationService = inject(OrganizationService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly policyValidationService = inject(PolicyValidationService);
+  private readonly destroy$ = new Subject<void>();
 
-    readonly loading = this.organizationService.loading;
-    readonly updating = signal<boolean>(false);
-    readonly switchingOrganization = signal<string | null>(null);
-    readonly memberships = this.organizationService.userMemberships;
-    readonly currentContext = this.organizationService.currentOrganizationContext;
+  readonly loading = this.organizationService.loading;
+  readonly updating = signal<boolean>(false);
+  readonly switchingOrganization = signal<string | null>(null);
+  readonly memberships = this.organizationService.userMemberships;
+  readonly currentContext = this.organizationService.currentOrganizationContext;
 
-    readonly verificationLevels = [
-        { label: 'Basic', value: 'basic' },
-        { label: 'Standard', value: 'standard' },
-        { label: 'Comprehensive', value: 'comprehensive' }
-    ];
+  // Expose enums for template use
+  readonly OrganizationPermission = OrganizationPermission;
 
-    readonly visibilityOptions = [
-        { label: 'Private', value: 'private' },
-        { label: 'Organization Only', value: 'organization' },
-        { label: 'Public', value: 'public' }
-    ];
+  readonly verificationLevels = [
+    { label: 'Basic', value: 'basic' },
+    { label: 'Standard', value: 'standard' },
+    { label: 'Comprehensive', value: 'comprehensive' }
+  ];
 
-    readonly activityVisibilityOptions = [
-        { label: 'Private', value: 'private' },
-        { label: 'Organization Only', value: 'organization' }
-    ];
+  readonly visibilityOptions = [
+    { label: 'Private', value: 'private' },
+    { label: 'Organization Only', value: 'organization' },
+    { label: 'Public', value: 'public' }
+  ];
 
-    readonly preferencesForm = this.fb.group({
-        notifications: this.fb.group({
-            inheritFromOrganization: [true],
-            overrides: this.fb.group({
-                organizationUpdates: [true],
-                securityAlerts: [true]
-            })
-        }),
-        verification: this.fb.group({
-            inheritFromOrganization: [false],
-            overrides: this.fb.group({
-                defaultVerificationLevel: ['standard'],
-                autoShare: [false],
-                retentionDays: [365]
-            })
-        }),
-        privacy: this.fb.group({
-            inheritFromOrganization: [true],
-            overrides: this.fb.group({
-                profileVisibility: ['organization'],
-                activityVisibility: ['organization']
-            })
-        })
+  readonly activityVisibilityOptions = [
+    { label: 'Private', value: 'private' },
+    { label: 'Organization Only', value: 'organization' }
+  ];
+
+  readonly preferencesForm = this.fb.group({
+    notifications: this.fb.group({
+      inheritFromOrganization: [true],
+      overrides: this.fb.group({
+        organizationUpdates: [true],
+        securityAlerts: [true]
+      })
+    }),
+    verification: this.fb.group({
+      inheritFromOrganization: [false],
+      overrides: this.fb.group({
+        defaultVerificationLevel: ['standard'],
+        autoShare: [false],
+        retentionDays: [365]
+      })
+    }),
+    privacy: this.fb.group({
+      inheritFromOrganization: [true],
+      overrides: this.fb.group({
+        profileVisibility: ['organization'],
+        activityVisibility: ['organization']
+      })
+    })
+  });
+
+  private initialFormValue: any = null;
+
+  ngOnInit(): void {
+    this.loadMemberships();
+    this.setupFormChangeTracking();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadMemberships(): void {
+    this.organizationService.getUserMemberships().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (memberships) => {
+        // Load context for default organization
+        const defaultMembership = memberships.find(m => m.isDefault);
+        if (defaultMembership) {
+          this.loadOrganizationContext(defaultMembership.organizationId);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load memberships:', error);
+      }
     });
+  }
 
-    private initialFormValue: any = null;
+  private loadOrganizationContext(organizationId: string): void {
+    this.organizationService.getOrganizationContext(organizationId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (context) => {
+        this.loadOrganizationPreferences(organizationId);
+      },
+      error: (error) => {
+        console.error('Failed to load organization context:', error);
+      }
+    });
+  }
 
-    ngOnInit(): void {
+  private loadOrganizationPreferences(organizationId: string): void {
+    this.organizationService.getOrganizationPreferences(organizationId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (preferences) => {
+        this.preferencesForm.patchValue(preferences);
+        this.initialFormValue = this.preferencesForm.value;
+      },
+      error: (error) => {
+        console.error('Failed to load organization preferences:', error);
+      }
+    });
+  }
+
+  private setupFormChangeTracking(): void {
+    this.preferencesForm.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // Form change tracking for hasChanges() method
+    });
+  }
+
+  switchOrganization(organizationId: string): void {
+    this.switchingOrganization.set(organizationId);
+
+    this.organizationService.switchOrganization({ organizationId }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (context) => {
+        this.switchingOrganization.set(null);
+        // Update memberships to reflect new default
         this.loadMemberships();
-        this.setupFormChangeTracking();
+        this.loadOrganizationPreferences(organizationId);
+      },
+      error: (error) => {
+        this.switchingOrganization.set(null);
+        console.error('Failed to switch organization:', error);
+      }
+    });
+  }
+
+  viewOrganizationDetails(membership: OrganizationMembership): void {
+    // This would typically open a dialog or navigate to a details page
+    this.notificationService.info(`Viewing details for ${membership.organizationName}`);
+  }
+
+  savePreferences(): void {
+    if (this.preferencesForm.invalid) {
+      this.notificationService.warn('Please fix the validation errors before saving');
+      return;
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+    const currentMembership = this.currentContext()?.membership;
+    if (!currentMembership) {
+      this.notificationService.error('No organization context available');
+      return;
     }
 
-    private loadMemberships(): void {
-        this.organizationService.getUserMemberships().pipe(
-            takeUntil(this.destroy$)
-        ).subscribe({
-            next: (memberships) => {
-                // Load context for default organization
-                const defaultMembership = memberships.find(m => m.isDefault);
-                if (defaultMembership) {
-                    this.loadOrganizationContext(defaultMembership.organizationId);
-                }
-            },
-            error: (error) => {
-                console.error('Failed to load memberships:', error);
-            }
-        });
+    // Validate against organization policies
+    const formValues = this.preferencesForm.value;
+    const policyErrors = this.policyValidationService.validateSettings(this.flattenFormValues(formValues));
+
+    if (policyErrors.length > 0) {
+      const errorMessage = policyErrors.map(e => `${e.setting}: ${e.error}`).join('; ');
+      this.notificationService.error(`Policy violations: ${errorMessage}`);
+      return;
     }
 
-    private loadOrganizationContext(organizationId: string): void {
-        this.organizationService.getOrganizationContext(organizationId).pipe(
-            takeUntil(this.destroy$)
-        ).subscribe({
-            next: (context) => {
-                this.loadOrganizationPreferences(organizationId);
-            },
-            error: (error) => {
-                console.error('Failed to load organization context:', error);
-            }
-        });
+    // Sanitize settings to ensure policy compliance
+    const { sanitized, warnings } = this.policyValidationService.sanitizeSettings(this.flattenFormValues(formValues));
+
+    if (warnings.length > 0) {
+      warnings.forEach(warning => {
+        this.notificationService.warn(`${warning.setting}: ${warning.message}`);
+      });
     }
 
-    private loadOrganizationPreferences(organizationId: string): void {
-        this.organizationService.getOrganizationPreferences(organizationId).pipe(
-            takeUntil(this.destroy$)
-        ).subscribe({
-            next: (preferences) => {
-                this.preferencesForm.patchValue(preferences);
-                this.initialFormValue = this.preferencesForm.value;
-            },
-            error: (error) => {
-                console.error('Failed to load organization preferences:', error);
-            }
-        });
-    }
+    this.updating.set(true);
+    const preferences = this.preferencesForm.value as OrganizationPreferences;
 
-    private setupFormChangeTracking(): void {
-        this.preferencesForm.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            takeUntil(this.destroy$)
-        ).subscribe(() => {
-            // Form change tracking for hasChanges() method
-        });
-    }
+    const request: OrganizationSettingsUpdateRequest = {
+      organizationId: currentMembership.organizationId,
+      preferences
+    };
 
-    switchOrganization(organizationId: string): void {
-        this.switchingOrganization.set(organizationId);
-
-        this.organizationService.switchOrganization({ organizationId }).pipe(
-            takeUntil(this.destroy$)
-        ).subscribe({
-            next: (context) => {
-                this.switchingOrganization.set(null);
-                // Update memberships to reflect new default
-                this.loadMemberships();
-                this.loadOrganizationPreferences(organizationId);
-            },
-            error: (error) => {
-                this.switchingOrganization.set(null);
-                console.error('Failed to switch organization:', error);
-            }
-        });
-    }
-
-    viewOrganizationDetails(membership: OrganizationMembership): void {
-        // This would typically open a dialog or navigate to a details page
-        this.notificationService.info(`Viewing details for ${membership.organizationName}`);
-    }
-
-    savePreferences(): void {
-        if (this.preferencesForm.invalid) {
-            this.notificationService.warn('Please fix the validation errors before saving');
-            return;
+    this.organizationService.updateOrganizationPreferences(request).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        this.updating.set(false);
+        if (response.success) {
+          this.initialFormValue = this.preferencesForm.value;
         }
+      },
+      error: (error) => {
+        this.updating.set(false);
+        console.error('Failed to save organization preferences:', error);
+      }
+    });
+  }
 
-        const currentMembership = this.currentContext()?.membership;
-        if (!currentMembership) {
-            this.notificationService.error('No organization context available');
-            return;
+  hasChanges(): boolean {
+    return JSON.stringify(this.preferencesForm.value) !== JSON.stringify(this.initialFormValue);
+  }
+
+  isSettingRestricted(settingPath: string): boolean {
+    return this.organizationService.isSettingRestricted(settingPath);
+  }
+
+  getRestrictionReason(settingPath: string): string {
+    const restriction = this.organizationService.getSettingRestriction(settingPath);
+    return restriction?.reason || 'This setting is restricted by organization policy';
+  }
+
+  getRoleDisplayName(role: OrganizationRole): string {
+    return this.organizationService.getRoleDisplayName(role);
+  }
+
+  getPermissionDisplayName(permission: OrganizationPermission): string {
+    return this.organizationService.getPermissionDisplayName(permission);
+  }
+
+  getRoleSeverity(role: OrganizationRole): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | null | undefined {
+    const severityMap: Record<OrganizationRole, "success" | "secondary" | "info" | "warn" | "danger"> = {
+      [OrganizationRole.OWNER]: 'danger',
+      [OrganizationRole.ADMIN]: 'warn',
+      [OrganizationRole.MANAGER]: 'info',
+      [OrganizationRole.MEMBER]: 'success',
+      [OrganizationRole.VIEWER]: 'secondary'
+    };
+    return severityMap[role] || 'secondary';
+  }
+
+  getStatusDisplayName(status: MembershipStatus): string {
+    const statusNames = {
+      [MembershipStatus.ACTIVE]: 'Active',
+      [MembershipStatus.PENDING]: 'Pending',
+      [MembershipStatus.SUSPENDED]: 'Suspended',
+      [MembershipStatus.INACTIVE]: 'Inactive'
+    };
+    return statusNames[status] || status;
+  }
+
+  getStatusSeverity(status: MembershipStatus): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | null | undefined {
+    const severityMap: Record<MembershipStatus, "success" | "secondary" | "info" | "warn" | "danger"> = {
+      [MembershipStatus.ACTIVE]: 'success',
+      [MembershipStatus.PENDING]: 'warn',
+      [MembershipStatus.SUSPENDED]: 'danger',
+      [MembershipStatus.INACTIVE]: 'secondary'
+    };
+    return severityMap[status] || 'secondary';
+  }
+
+  getPolicyIcon(type: PolicyType): string {
+    const iconMap = {
+      [PolicyType.SECURITY]: 'pi pi-shield',
+      [PolicyType.NOTIFICATION]: 'pi pi-bell',
+      [PolicyType.VERIFICATION]: 'pi pi-verified',
+      [PolicyType.DATA_RETENTION]: 'pi pi-database',
+      [PolicyType.API_ACCESS]: 'pi pi-key'
+    };
+    return iconMap[type] || 'pi pi-cog';
+  }
+
+  getPolicyTypeDisplayName(type: PolicyType): string {
+    const typeNames = {
+      [PolicyType.SECURITY]: 'Security',
+      [PolicyType.NOTIFICATION]: 'Notification',
+      [PolicyType.VERIFICATION]: 'Verification',
+      [PolicyType.DATA_RETENTION]: 'Data Retention',
+      [PolicyType.API_ACCESS]: 'API Access'
+    };
+    return typeNames[type] || type;
+  }
+
+  getPolicyTypeSeverity(type: PolicyType): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | null | undefined {
+    const severityMap: Record<PolicyType, "success" | "secondary" | "info" | "warn" | "danger"> = {
+      [PolicyType.SECURITY]: 'danger',
+      [PolicyType.NOTIFICATION]: 'info',
+      [PolicyType.VERIFICATION]: 'success',
+      [PolicyType.DATA_RETENTION]: 'warn',
+      [PolicyType.API_ACCESS]: 'secondary'
+    };
+    return severityMap[type] || 'secondary';
+  }
+
+  formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString();
+  }
+
+  formatRelativeDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 1) {
+      return 'just now';
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    } else {
+      return this.formatDate(date);
+    }
+  }
+
+  /**
+   * Flatten nested form values for policy validation
+   */
+  private flattenFormValues(obj: any, prefix = ''): Record<string, any> {
+    const flattened: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      const newKey = prefix ? `${prefix}.${key}` : key;
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        Object.assign(flattened, this.flattenFormValues(value, newKey));
+      } else {
+        flattened[newKey] = value;
+      }
+    }
+
+    return flattened;
+  }
+
+  /**
+   * Check if a specific form control should be disabled due to policy
+   */
+  isControlDisabled(controlPath: string): boolean {
+    return this.policyValidationService.isControlDisabled(controlPath);
+  }
+
+  /**
+   * Get policy restriction message for a control
+   */
+  getControlRestrictionMessage(controlPath: string): string | null {
+    return this.policyValidationService.getRestrictionMessage(controlPath);
+  }
+
+  /**
+   * Validate a form control value against policies
+   */
+  validateControlValue(controlPath: string, value: any): { isValid: boolean; message?: string } {
+    const validation = this.organizationService.validateSettingChange(controlPath, value);
+    return {
+      isValid: validation.isValid,
+      message: validation.reason
+    };
+  }
+
+  /**
+   * Get policy-compliant default value for a setting
+   */
+  getPolicyCompliantDefault(settingPath: string, defaultValue: any): any {
+    return this.policyValidationService.getPolicyCompliantDefault(settingPath, defaultValue);
+  }
+
+  /**
+   * Check if user can modify organization settings
+   */
+  canModifyOrganizationSettings(): boolean {
+    return this.organizationService.hasAnyPermission([
+      OrganizationPermission.MANAGE_ORGANIZATION,
+      OrganizationPermission.VIEW_ORGANIZATION
+    ]);
+  }
+
+  /**
+   * Get all current policy violations
+   */
+  getCurrentPolicyViolations(): Array<{ setting: string; violation: string; policyName: string }> {
+    const formValues = this.flattenFormValues(this.preferencesForm.value);
+    return this.organizationService.getPolicyViolations(formValues);
+  }
+
+  /**
+   * Show policy violation details
+   */
+  showPolicyViolationDetails(): void {
+    const violations = this.getCurrentPolicyViolations();
+
+    if (violations.length === 0) {
+      this.notificationService.info('No policy violations found');
+      return;
+    }
+
+    const violationMessage = violations.map(v =>
+      `• ${v.setting}: ${v.violation} (Policy: ${v.policyName})`
+    ).join('\n');
+
+    this.notificationService.warn(`Policy Violations:\n${violationMessage}`);
+  }
+
+  /**
+   * Reset form to policy-compliant defaults
+   */
+  resetToPolicyDefaults(): void {
+    const currentValues = this.preferencesForm.value;
+    const compliantValues: any = {};
+
+    // Apply policy-compliant defaults
+    for (const [key, value] of Object.entries(this.flattenFormValues(currentValues))) {
+      compliantValues[key] = this.getPolicyCompliantDefault(key, value);
+    }
+
+    // Reconstruct nested form structure
+    const nestedValues = this.unflattenFormValues(compliantValues);
+    this.preferencesForm.patchValue(nestedValues);
+
+    this.notificationService.success('Form reset to policy-compliant defaults');
+  }
+
+  /**
+   * Convert flattened values back to nested structure
+   */
+  private unflattenFormValues(flattened: Record<string, any>): any {
+    const nested: any = {};
+
+    for (const [key, value] of Object.entries(flattened)) {
+      const keys = key.split('.');
+      let current = nested;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) {
+          current[keys[i]] = {};
         }
+        current = current[keys[i]];
+      }
 
-        this.updating.set(true);
-        const preferences = this.preferencesForm.value as OrganizationPreferences;
-
-        const request: OrganizationSettingsUpdateRequest = {
-            organizationId: currentMembership.organizationId,
-            preferences
-        };
-
-        this.organizationService.updateOrganizationPreferences(request).pipe(
-            takeUntil(this.destroy$)
-        ).subscribe({
-            next: (response) => {
-                this.updating.set(false);
-                if (response.success) {
-                    this.initialFormValue = this.preferencesForm.value;
-                }
-            },
-            error: (error) => {
-                this.updating.set(false);
-                console.error('Failed to save organization preferences:', error);
-            }
-        });
+      current[keys[keys.length - 1]] = value;
     }
 
-    hasChanges(): boolean {
-        return JSON.stringify(this.preferencesForm.value) !== JSON.stringify(this.initialFormValue);
+    return nested;
+  }
+
+  /**
+   * Export organization settings for audit purposes
+   */
+  exportOrganizationSettings(): void {
+    if (!this.organizationService.hasPermission(OrganizationPermission.EXPORT_DATA)) {
+      this.notificationService.error('You do not have permission to export organization data');
+      return;
     }
 
-    isSettingRestricted(settingPath: string): boolean {
-        return this.organizationService.isSettingRestricted(settingPath);
+    const context = this.currentContext();
+    if (!context) {
+      this.notificationService.error('No organization context available');
+      return;
     }
 
-    getRestrictionReason(settingPath: string): string {
-        const restriction = this.organizationService.getSettingRestriction(settingPath);
-        return restriction?.reason || 'This setting is restricted by organization policy';
-    }
+    const exportData = {
+      organization: {
+        id: context.membership.organizationId,
+        name: context.membership.organizationName,
+        domain: context.membership.organizationDomain
+      },
+      membership: context.membership,
+      policies: context.policies,
+      restrictions: context.restrictions,
+      preferences: this.preferencesForm.value,
+      exportedAt: new Date().toISOString(),
+      exportedBy: context.membership.id
+    };
 
-    getRoleDisplayName(role: OrganizationRole): string {
-        return this.organizationService.getRoleDisplayName(role);
-    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `organization-settings-${context.membership.organizationName}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
 
-    getPermissionDisplayName(permission: OrganizationPermission): string {
-        return this.organizationService.getPermissionDisplayName(permission);
-    }
-
-    getRoleSeverity(role: OrganizationRole): string {
-        const severityMap = {
-            [OrganizationRole.OWNER]: 'danger',
-            [OrganizationRole.ADMIN]: 'warn',
-            [OrganizationRole.MANAGER]: 'info',
-            [OrganizationRole.MEMBER]: 'success',
-            [OrganizationRole.VIEWER]: 'secondary'
-        };
-        return severityMap[role] || 'secondary';
-    }
-
-    getStatusDisplayName(status: MembershipStatus): string {
-        const statusNames = {
-            [MembershipStatus.ACTIVE]: 'Active',
-            [MembershipStatus.PENDING]: 'Pending',
-            [MembershipStatus.SUSPENDED]: 'Suspended',
-            [MembershipStatus.INACTIVE]: 'Inactive'
-        };
-        return statusNames[status] || status;
-    }
-
-    getStatusSeverity(status: MembershipStatus): string {
-        const severityMap = {
-            [MembershipStatus.ACTIVE]: 'success',
-            [MembershipStatus.PENDING]: 'warn',
-            [MembershipStatus.SUSPENDED]: 'danger',
-            [MembershipStatus.INACTIVE]: 'secondary'
-        };
-        return severityMap[status] || 'secondary';
-    }
-
-    getPolicyIcon(type: PolicyType): string {
-        const iconMap = {
-            [PolicyType.SECURITY]: 'pi pi-shield',
-            [PolicyType.NOTIFICATION]: 'pi pi-bell',
-            [PolicyType.VERIFICATION]: 'pi pi-verified',
-            [PolicyType.DATA_RETENTION]: 'pi pi-database',
-            [PolicyType.API_ACCESS]: 'pi pi-key'
-        };
-        return iconMap[type] || 'pi pi-cog';
-    }
-
-    getPolicyTypeDisplayName(type: PolicyType): string {
-        const typeNames = {
-            [PolicyType.SECURITY]: 'Security',
-            [PolicyType.NOTIFICATION]: 'Notification',
-            [PolicyType.VERIFICATION]: 'Verification',
-            [PolicyType.DATA_RETENTION]: 'Data Retention',
-            [PolicyType.API_ACCESS]: 'API Access'
-        };
-        return typeNames[type] || type;
-    }
-
-    getPolicyTypeSeverity(type: PolicyType): string {
-        const severityMap = {
-            [PolicyType.SECURITY]: 'danger',
-            [PolicyType.NOTIFICATION]: 'info',
-            [PolicyType.VERIFICATION]: 'success',
-            [PolicyType.DATA_RETENTION]: 'warn',
-            [PolicyType.API_ACCESS]: 'secondary'
-        };
-        return severityMap[type] || 'secondary';
-    }
-
-    formatDate(date: Date): string {
-        return new Date(date).toLocaleDateString();
-    }
-
-    formatRelativeDate(date: Date): string {
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffHours / 24);
-
-        if (diffHours < 1) {
-            return 'just now';
-        } else if (diffHours < 24) {
-            return `${diffHours}h ago`;
-        } else if (diffDays < 7) {
-            return `${diffDays}d ago`;
-        } else {
-            return this.formatDate(date);
-        }
-    }
+    this.notificationService.success('Organization settings exported successfully');
+  }
 }
