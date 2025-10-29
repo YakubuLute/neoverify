@@ -338,7 +338,8 @@ router.get('/stats/realtime', authenticateToken, async (req: Request, res: Respo
 async function checkDatabaseHealth() {
     try {
         const startTime = Date.now();
-        await database.authenticate();
+        // Use a simple query to test database connectivity
+        await database.sequelize.query('SELECT 1');
         const responseTime = Date.now() - startTime;
 
         return {
@@ -352,7 +353,7 @@ async function checkDatabaseHealth() {
             status: 'unhealthy',
             responseTime: null,
             connected: false,
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         };
     }
 }
@@ -378,7 +379,7 @@ async function checkRedisHealth() {
             status: 'unhealthy',
             responseTime: null,
             connected: false,
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         };
     }
 }

@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger';
+import  logger  from '../utils/logger';
 import Document, { VerificationStatus, VerificationResults } from '../models/Document';
 import Verification, {
     VerificationType,

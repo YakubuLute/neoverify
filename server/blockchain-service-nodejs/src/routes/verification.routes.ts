@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { body, param, query } from 'express-validator';
-import { authenticate } from '../middleware/auth';
-import { validate } from '../middleware/validation';
+import { authenticate, validate } from '../middleware';
 import {
     startVerification,
     getVerificationStatus,

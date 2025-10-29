@@ -1,6 +1,7 @@
 // Authentication middleware
 export {
     authenticateToken,
+    authenticateToken as authenticate, // Alias for backward compatibility
     optionalAuth,
     requireRole,
     requirePermission,
@@ -42,6 +43,7 @@ export {
 
 // Validation middleware
 export {
+    validate,
     validateDocumentUpload,
     validateDocumentUpdate,
     validateDocumentListing,

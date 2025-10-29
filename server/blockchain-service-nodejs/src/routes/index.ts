@@ -11,12 +11,12 @@ import { apiVersioning, versionDeprecation, backwardCompatibility, apiMonitoring
 const router = Router();
 
 // Apply API monitoring to all routes
-router.use(apiMonitoring);
+router.use(apiMonitoring as any);
 
 // Apply API versioning middleware
-router.use(apiVersioning);
-router.use(versionDeprecation);
-router.use(backwardCompatibility);
+router.use(apiVersioning as any);
+router.use(versionDeprecation as any);
+router.use(backwardCompatibility as any);
 
 // Mount route modules with versioning support
 router.use('/v1/auth', authRoutes);

@@ -240,7 +240,7 @@
   - Implement verification result aggregation and reporting
   - _Requirements: 5.5, 5.2_
 
-- [-] 9. Set up API documentation
+- [x] 9. Set up API documentation
   - Create comprehensive API documentation with Swagger
   - Implement API versioning and backward compatibility
   <!-- - Set up automated testing suite with Jest -->
@@ -254,7 +254,7 @@
   - Implement API schema validation
   - _Requirements: 8.3_
 
-- [-] 9.2 Implement API versioning and monitoring
+- [x] 9.2 Implement API versioning and monitoring
   - Set up API versioning strategy with proper routing
   - Create API health check and status endpoints
   - Implement API usage analytics and monitoring

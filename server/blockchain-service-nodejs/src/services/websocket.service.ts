@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { logger } from '../utils/logger';
+import  logger  from '../utils/logger';
 import User from '../models/User';
 import { verificationService } from './verification.service';
 
