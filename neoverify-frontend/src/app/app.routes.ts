@@ -57,7 +57,8 @@ export const routes: Routes = [
   // Protected routes with dashboard layout
   {
     path: '',
-    canActivate: [authGuard],
+    // TODO: remove this when backend is ready
+    // canActivate: [authGuard], 
     loadComponent: () => import('./layout/dashboard-layout/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
     children: [
       // Dashboard home

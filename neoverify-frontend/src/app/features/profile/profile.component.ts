@@ -29,20 +29,22 @@ interface ProfileTab {
   imports: [
     SHARED_IMPORTS,
     DynamicDialogModule,
-    MfaSetupDialogComponent,
-    SessionManagementComponent,
     EnhancedPasswordChangeComponent,
     NotificationTabComponent
   ],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <div class="max-w-6xl mx-auto">
+    <div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+      <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+        <div class="text-center mb-8">
+          <div class="mx-auto h-20 w-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <i class="pi pi-user text-white text-3xl"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
             Profile Settings
           </h1>
-          <p class="text-surface-600 dark:text-surface-400">
+          <p class="text-gray-600 text-lg">
             Manage your account information, security settings, and preferences
           </p>
         </div>
@@ -75,7 +77,7 @@ interface ProfileTab {
                         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                           <!-- Profile Form -->
                           <div class="xl:col-span-2">
-                            <p-card>
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                               <ng-template pTemplate="header">
                                 <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                                   <h2 class="text-xl font-semibold">Basic Information</h2>
@@ -245,7 +247,7 @@ interface ProfileTab {
                           <!-- Account Overview Sidebar -->
                           <div class="space-y-6">
                             <!-- Account Status -->
-                            <p-card>
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                               <ng-template pTemplate="header">
                                 <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                                   <h3 class="text-lg font-semibold">Account Status</h3>
@@ -310,7 +312,7 @@ interface ProfileTab {
                           <!-- Security Settings Sidebar -->
                           <div class="space-y-6">
                             <!-- Security Settings -->
-                            <p-card>
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                               <ng-template pTemplate="header">
                                 <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                                   <h3 class="text-lg font-semibold">Security Settings</h3>
@@ -370,7 +372,7 @@ interface ProfileTab {
                             </p-card>
 
                             <!-- Security Status -->
-                            <p-card>
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                               <ng-template pTemplate="header">
                                 <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                                   <h3 class="text-lg font-semibold">Security Status</h3>
@@ -411,7 +413,7 @@ interface ProfileTab {
                             </p-card>
 
                             <!-- Danger Zone -->
-                            <p-card>
+                            <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                               <ng-template pTemplate="header">
                                 <div class="p-4 border-b border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
                                   <h3 class="text-lg font-semibold text-red-700 dark:text-red-300">Danger Zone</h3>
@@ -445,7 +447,7 @@ interface ProfileTab {
                     }
                     @default {
                       <div class="coming-soon-tab">
-                        <p-card>
+                        <p-card styleClass="bg-white rounded-3xl shadow-2xl border border-gray-100">
                           <ng-template pTemplate="header">
                             <div class="p-4 border-b border-surface-200 dark:border-surface-700">
                               <h2 class="text-xl font-semibold">{{ profileTabs()[activeTabIndex()]?.label }}</h2>
@@ -465,6 +467,7 @@ interface ProfileTab {
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
   `,
@@ -478,15 +481,17 @@ interface ProfileTab {
     }
 
     .profile-tabs-container {
-      background: var(--surface-card);
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-1);
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid #f3f4f6;
+      overflow: hidden;
     }
 
     .tab-navigation {
       display: flex;
-      background: var(--surface-50);
-      border-bottom: 1px solid var(--surface-200);
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
       padding: 0 1rem;
       overflow-x: auto;
       scrollbar-width: none;
@@ -504,25 +509,25 @@ interface ProfileTab {
       padding: 1rem 1.5rem;
       border: none;
       background: transparent;
-      color: var(--text-color-secondary);
+      color: #64748b;
       font-weight: 500;
       font-size: 0.875rem;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border-radius: 0.75rem 0.75rem 0 0;
       margin-bottom: -1px;
     }
 
     .tab-button:hover:not(:disabled) {
-      background: var(--surface-100);
-      color: var(--text-color);
+      background: #f1f5f9;
+      color: #334155;
     }
 
     .tab-button.active {
-      background: var(--primary-color);
-      color: var(--primary-color-text);
-      border-bottom: 2px solid var(--primary-color);
+      background: linear-gradient(to right, #8b5cf6, #3b82f6);
+      color: white;
+      border-bottom: 2px solid #8b5cf6;
     }
 
     .tab-button:disabled {
@@ -536,7 +541,7 @@ interface ProfileTab {
 
     .tab-content-container {
       padding: 2rem;
-      background: var(--surface-card);
+      background: white;
     }
 
     .tab-content {
