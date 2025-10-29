@@ -291,4 +291,392 @@ class VerificationAnalyticsService {
 
             // Monthly trends
             const monthlyQuery = `
-                SELEC
+                SELECT 
+                    DATE_TRUNC('month', created_at) as month,
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
+                    COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed,
+                    AVG(CASE 
+                        WHEN status = 'completed' AND completed_at IS NOT NULL 
+                        THEN EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000 
+                    END) as average_time
+                FROM verifications 
+                WHERE created_at BETWEEN :startDate AND :endDate ${orgCondition}
+                GROUP BY DATE_TRUNC('month', created_at)
+                ORDER BY month
+            `;
+
+            const [dailyResults, weeklyResults, monthlyResults] = await Promise.all([
+                database.getSequelize().query(dailyQuery, {
+                    type: QueryTypes.SELECT,
+                    replacements: { startDate, endDate },
+                }),
+                database.getSequelize().query(weeklyQuery, {
+                    type: QueryTypes.SELECT,
+                    replacements: { startDate, endDate },
+                }),
+                database.getSequelize().query(monthlyQuery, {
+                    type: QueryTypes.SELECT,
+                    replacements: { startDate, endDate },
+                }),
+            ]);
+
+            const trends: VerificationTrends = {
+                daily: (dailyResults as any[]).map(row => ({
+                    date: row.date,
+                    total: parseInt(row.total),
+                    completed: parseInt(row.completed),
+                    failed: parseInt(row.failed),
+                    averageTime: parseFloat(row.average_time) || 0,
+                })),
+                weekly: (weeklyResults as any[]).map(row => ({
+                    week: row.week,
+                    total: parseInt(row.total),
+                    completed: parseInt(row.completed),
+                    failed: parseInt(row.failed),
+                    averageTime: parseFloat(row.average_time) || 0,
+                })),
+                monthly: (monthlyResults as any[]).map(row => ({
+                    month: row.month,
+                    total: parseInt(row.total),
+                    completed: parseInt(row.completed),
+                    failed: parseInt(row.failed),
+                    averageTime: parseFloat(row.average_time) || 0,
+                })),
+            };
+
+            // Cache the results
+            await cacheService.set(cacheKey, trends, this.CACHE_TTL);
+
+            return trends;
+        } catch (error: any) {
+            logger.error('Failed to get verification trends', {
+                error: error.message,
+                startDate,
+                endDate,
+                organizationId,
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Get service performance metrics
+     */
+    async getServicePerformance(
+        startDate: Date,
+        endDate: Date
+    ): Promise<ServicePerformance> {
+        try {
+            const cacheKey = `service-performance:${startDate.toISOString()}:${endDate.toISOString()}`;
+            const cached = await cacheService.get(cacheKey);
+            if (cached) {
+                return cached;
+            }
+
+            logger.info('Calculating service performance metrics', {
+                startDate,
+                endDate,
+            });
+
+            const whereConditions = {
+                createdAt: {
+                    [Op.between]: [startDate, endDate],
+                },
+            };
+
+            // AI Forensics performance
+            const aiForensicsVerifications = await Verification.findAll({
+                where: {
+                    ...whereConditions,
+                    type: VerificationType.AI_FORENSICS,
+                },
+            });
+
+            const aiForensicsMetrics = this.calculateServiceMetrics(
+                aiForensicsVerifications,
+                'aiForensics'
+            );
+
+            // Blockchain performance
+            const blockchainVerifications = await Verification.findAll({
+                where: {
+                    ...whereConditions,
+                    type: VerificationType.BLOCKCHAIN,
+                },
+            });
+
+            const blockchainMetrics = this.calculateServiceMetrics(
+                blockchainVerifications,
+                'blockchain'
+            );
+
+            // IPFS performance
+            const ipfsVerifications = await Verification.findAll({
+                where: {
+                    ...whereConditions,
+                    type: VerificationType.IPFS,
+                },
+            });
+
+            const ipfsMetrics = this.calculateServiceMetrics(
+                ipfsVerifications,
+                'ipfs'
+            );
+
+            const performance: ServicePerformance = {
+                aiForensics: aiForensicsMetrics,
+                blockchain: blockchainMetrics,
+                ipfs: ipfsMetrics,
+            };
+
+            // Cache the results
+            await cacheService.set(cacheKey, performance, this.CACHE_TTL);
+
+            return performance;
+        } catch (error: any) {
+            logger.error('Failed to get service performance', {
+                error: error.message,
+                startDate,
+                endDate,
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Generate comprehensive verification report
+     */
+    async generateVerificationReport(
+        startDate: Date,
+        endDate: Date,
+        organizationId?: string
+    ): Promise<VerificationReport> {
+        try {
+            logger.info('Generating verification report', {
+                startDate,
+                endDate,
+                organizationId,
+            });
+
+            const [metrics, trends, servicePerformance] = await Promise.all([
+                this.getVerificationMetrics(startDate, endDate, organizationId),
+                this.getVerificationTrends(startDate, endDate, organizationId),
+                this.getServicePerformance(startDate, endDate),
+            ]);
+
+            // Generate recommendations based on metrics
+            const recommendations = this.generateRecommendations(metrics, servicePerformance);
+
+            const report: VerificationReport = {
+                reportId: `report-${Date.now()}`,
+                generatedAt: new Date(),
+                period: { start: startDate, end: endDate },
+                metrics,
+                trends,
+                servicePerformance,
+                recommendations,
+            };
+
+            logger.info('Verification report generated successfully', {
+                reportId: report.reportId,
+                totalVerifications: metrics.totalVerifications,
+                successRate: metrics.successRate,
+            });
+
+            return report;
+        } catch (error: any) {
+            logger.error('Failed to generate verification report', {
+                error: error.message,
+                startDate,
+                endDate,
+                organizationId,
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Calculate service-specific metrics
+     */
+    private calculateServiceMetrics(verifications: Verification[], serviceType: string): any {
+        const totalJobs = verifications.length;
+        const completedJobs = verifications.filter(v => v.isCompleted()).length;
+        const failedJobs = verifications.filter(v => v.isFailed()).length;
+
+        const completedVerifications = verifications.filter(v => v.isCompleted());
+        const averageProcessingTime = completedVerifications.length > 0
+            ? completedVerifications.reduce((sum, v) => sum + (v.getProcessingTime() || 0), 0) / completedVerifications.length
+            : 0;
+
+        let serviceSpecificMetrics = {};
+
+        if (serviceType === 'aiForensics') {
+            const accuracyScores = completedVerifications
+                .map(v => v.results.aiForensics?.confidence)
+                .filter(score => score !== undefined);
+
+            const averageAccuracy = accuracyScores.length > 0
+                ? accuracyScores.reduce((sum, score) => sum + score!, 0) / accuracyScores.length
+                : 0;
+
+            serviceSpecificMetrics = {
+                averageAccuracy,
+            };
+        } else if (serviceType === 'blockchain') {
+            const gasCosts = completedVerifications
+                .map(v => parseFloat(v.results.blockchain?.gasPrice || '0'))
+                .filter(cost => cost > 0);
+
+            const averageGasCost = gasCosts.length > 0
+                ? gasCosts.reduce((sum, cost) => sum + cost, 0) / gasCosts.length
+                : 0;
+
+            serviceSpecificMetrics = {
+                averageGasCost,
+                averageConfirmationTime: averageProcessingTime,
+            };
+        } else if (serviceType === 'ipfs') {
+            const uploadSizes = completedVerifications
+                .map(v => v.results.ipfs?.size || 0)
+                .filter(size => size > 0);
+
+            const totalStorageUsed = uploadSizes.reduce((sum, size) => sum + size, 0);
+
+            serviceSpecificMetrics = {
+                totalStorageUsed,
+                averageUploadTime: averageProcessingTime,
+            };
+        }
+
+        return {
+            totalJobs,
+            completedJobs,
+            failedJobs,
+            averageProcessingTime,
+            uptime: totalJobs > 0 ? (completedJobs / totalJobs) * 100 : 100,
+            ...serviceSpecificMetrics,
+        };
+    }
+
+    /**
+     * Generate recommendations based on metrics
+     */
+    private generateRecommendations(
+        metrics: VerificationMetrics,
+        servicePerformance: ServicePerformance
+    ): string[] {
+        const recommendations: string[] = [];
+
+        // Success rate recommendations
+        if (metrics.successRate < 90) {
+            recommendations.push(
+                `Success rate is ${metrics.successRate.toFixed(1)}%. Consider investigating failed verifications and improving error handling.`
+            );
+        }
+
+        // Processing time recommendations
+        if (metrics.averageProcessingTime > 300000) { // 5 minutes
+            recommendations.push(
+                'Average processing time is high. Consider optimizing verification workflows or scaling resources.'
+            );
+        }
+
+        // Service-specific recommendations
+        if (servicePerformance.aiForensics.uptime < 95) {
+            recommendations.push(
+                'AI Forensics service uptime is below 95%. Check service health and consider implementing redundancy.'
+            );
+        }
+
+        if (servicePerformance.blockchain.uptime < 95) {
+            recommendations.push(
+                'Blockchain service uptime is below 95%. Monitor network conditions and gas prices.'
+            );
+        }
+
+        if (servicePerformance.ipfs.uptime < 95) {
+            recommendations.push(
+                'IPFS service uptime is below 95%. Check IPFS node connectivity and pinning services.'
+            );
+        }
+
+        // Volume recommendations
+        if (metrics.pendingVerifications > metrics.completedVerifications * 0.1) {
+            recommendations.push(
+                'High number of pending verifications. Consider scaling processing capacity.'
+            );
+        }
+
+        return recommendations;
+    }
+
+    /**
+     * Get real-time verification statistics
+     */
+    async getRealTimeStats(): Promise<{
+        activeVerifications: number;
+        queuedVerifications: number;
+        completedToday: number;
+        failedToday: number;
+        averageWaitTime: number;
+    }> {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const [
+                activeVerifications,
+                queuedVerifications,
+                completedToday,
+                failedToday,
+            ] = await Promise.all([
+                Verification.count({
+                    where: { status: VerificationStatus.IN_PROGRESS },
+                }),
+                Verification.count({
+                    where: { status: VerificationStatus.PENDING },
+                }),
+                Verification.count({
+                    where: {
+                        status: VerificationStatus.COMPLETED,
+                        completedAt: { [Op.gte]: today },
+                    },
+                }),
+                Verification.count({
+                    where: {
+                        status: VerificationStatus.FAILED,
+                        updatedAt: { [Op.gte]: today },
+                    },
+                }),
+            ]);
+
+            // Calculate average wait time for pending verifications
+            const pendingVerifications = await Verification.findAll({
+                where: { status: VerificationStatus.PENDING },
+                attributes: ['startedAt'],
+            });
+
+            const averageWaitTime = pendingVerifications.length > 0
+                ? pendingVerifications.reduce((sum, v) => {
+                    return sum + (Date.now() - v.startedAt.getTime());
+                }, 0) / pendingVerifications.length
+                : 0;
+
+            return {
+                activeVerifications,
+                queuedVerifications,
+                completedToday,
+                failedToday,
+                averageWaitTime,
+            };
+        } catch (error: any) {
+            logger.error('Failed to get real-time stats', { error: error.message });
+            throw error;
+        }
+    }
+}
+
+// Export singleton instance
+export const verificationAnalyticsService = new VerificationAnalyticsService();
+export default verificationAnalyticsService;

@@ -6,3 +6,5 @@ export { aiForensicsService } from './ai-forensics.service';
 export { blockchainService } from './blockchain.service';
 export { ipfsService } from './ipfs.service';
 export { verificationService } from './verification.service';
+export { verificationAnalyticsService } from './verification-analytics.service';
+export { initializeWebSocketService, getWebSocketService } from './websocket.service';

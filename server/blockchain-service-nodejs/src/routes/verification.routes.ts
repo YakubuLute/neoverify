@@ -11,6 +11,9 @@ import {
     handleAIForensicsWebhook,
     handleBlockchainWebhook,
     getServiceHealth,
+    getVerificationAnalytics,
+    generateVerificationReport,
+    getRealTimeStats,
 } from '../controllers/verification.controller';
 import { VerificationType, VerificationPriority } from '../models/Verification';
 
@@ -398,6 +401,146 @@ router.post('/webhooks/ai-forensics', handleAIForensicsWebhook);
  *         description: Invalid webhook payload
  */
 router.post('/webhooks/blockchain', handleBlockchainWebhook);
+
+/**
+ * @swagger
+ * /api/verification/analytics:
+ *   get:
+ *     summary: Get verification analytics and metrics
+ *     tags: [Verification]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for analytics period
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for analytics period
+ *       - in: query
+ *         name: organizationId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Organization ID (optional, defaults to user's organization)
+ *     responses:
+ *       200:
+ *         description: Analytics data retrieved successfully
+ *       400:
+ *         description: Invalid date parameters
+ */
+router.get(
+    '/analytics',
+    authenticate,
+    [
+        query('startDate')
+            .isISO8601()
+            .withMessage('Start date must be a valid ISO 8601 date'),
+        query('endDate')
+            .isISO8601()
+            .withMessage('End date must be a valid ISO 8601 date'),
+        query('organizationId')
+            .optional()
+            .isUUID()
+            .withMessage('Organization ID must be a valid UUID'),
+    ],
+    validate,
+    getVerificationAnalytics
+);
+
+/**
+ * @swagger
+ * /api/verification/reports/generate:
+ *   post:
+ *     summary: Generate comprehensive verification report
+ *     tags: [Verification]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - startDate
+ *               - endDate
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               organizationId:
+ *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       200:
+ *         description: Report generated successfully
+ *       400:
+ *         description: Invalid request parameters
+ */
+router.post(
+    '/reports/generate',
+    authenticate,
+    [
+        body('startDate')
+            .isISO8601()
+            .withMessage('Start date must be a valid ISO 8601 date'),
+        body('endDate')
+            .isISO8601()
+            .withMessage('End date must be a valid ISO 8601 date'),
+        body('organizationId')
+            .optional()
+            .isUUID()
+            .withMessage('Organization ID must be a valid UUID'),
+    ],
+    validate,
+    generateVerificationReport
+);
+
+/**
+ * @swagger
+ * /api/verification/stats/realtime:
+ *   get:
+ *     summary: Get real-time verification statistics
+ *     tags: [Verification]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Real-time statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     activeVerifications:
+ *                       type: number
+ *                     queuedVerifications:
+ *                       type: number
+ *                     completedToday:
+ *                       type: number
+ *                     failedToday:
+ *                       type: number
+ *                     averageWaitTime:
+ *                       type: number
+ */
+router.get('/stats/realtime', authenticate, getRealTimeStats);
 
 /**
  * @swagger

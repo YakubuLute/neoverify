@@ -526,3 +526,157 @@ export const getServiceHealth = async (
         next(error);
     }
 };
+
+/**
+ * Get verification analytics and metrics
+ */
+export const getVerificationAnalytics = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { startDate, endDate, organizationId } = req.query;
+
+        // Validate date parameters
+        if (!startDate || !endDate) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: 'MISSING_DATE_PARAMETERS',
+                    message: 'Start date and end date are required',
+                },
+            });
+            return;
+        }
+
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_DATE_FORMAT',
+                    message: 'Invalid date format',
+                },
+            });
+            return;
+        }
+
+        // Use organization ID from user if not provided and user is not admin
+        const targetOrgId = organizationId as string || req.user!.organizationId;
+
+        const { verificationAnalyticsService } = require('../services/verification-analytics.service');
+
+        const [metrics, trends] = await Promise.all([
+            verificationAnalyticsService.getVerificationMetrics(start, end, targetOrgId),
+            verificationAnalyticsService.getVerificationTrends(start, end, targetOrgId),
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                metrics,
+                trends,
+                period: { start, end },
+            },
+        });
+    } catch (error: any) {
+        logger.error('Failed to get verification analytics', {
+            error: error.message,
+            userId: req.user?.id,
+            stack: error.stack,
+        });
+        next(error);
+    }
+};
+
+/**
+ * Generate verification report
+ */
+export const generateVerificationReport = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { startDate, endDate, organizationId } = req.body;
+
+        // Validate date parameters
+        if (!startDate || !endDate) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: 'MISSING_DATE_PARAMETERS',
+                    message: 'Start date and end date are required',
+                },
+            });
+            return;
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_DATE_FORMAT',
+                    message: 'Invalid date format',
+                },
+            });
+            return;
+        }
+
+        // Use organization ID from user if not provided and user is not admin
+        const targetOrgId = organizationId || req.user!.organizationId;
+
+        const { verificationAnalyticsService } = require('../services/verification-analytics.service');
+
+        const report = await verificationAnalyticsService.generateVerificationReport(
+            start,
+            end,
+            targetOrgId
+        );
+
+        res.json({
+            success: true,
+            data: report,
+        });
+    } catch (error: any) {
+        logger.error('Failed to generate verification report', {
+            error: error.message,
+            userId: req.user?.id,
+            stack: error.stack,
+        });
+        next(error);
+    }
+};
+
+/**
+ * Get real-time verification statistics
+ */
+export const getRealTimeStats = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { verificationAnalyticsService } = require('../services/verification-analytics.service');
+
+        const stats = await verificationAnalyticsService.getRealTimeStats();
+
+        res.json({
+            success: true,
+            data: stats,
+        });
+    } catch (error: any) {
+        logger.error('Failed to get real-time stats', {
+            error: error.message,
+            userId: req.user?.id,
+            stack: error.stack,
+        });
+        next(error);
+    }
+};
