@@ -78,20 +78,35 @@ const createRateLimiter = () => {
         },
         standardHeaders: true,
         legacyHeaders: false,
-        // Use Redis for distributed rate limiting
-        store: redisClient.isReady ? {
+        // Use Redis for distributed rate limiting when available
+        store: redisClient.isClientConnected() ? {
             incr: async (key: string) => {
-                const current = await redisClient.incr(key);
-                if (current === 1) {
-                    await redisClient.expire(key, Math.ceil(config.rateLimit.windowMs / 1000));
+                try {
+                    const client = redisClient.getClient();
+                    const current = await client.incr(key);
+                    if (current === 1) {
+                        await client.expire(key, Math.ceil(config.rateLimit.windowMs / 1000));
+                    }
+                    return { totalHits: current, resetTime: new Date(Date.now() + config.rateLimit.windowMs) };
+                } catch (error) {
+                    logger.warn('Redis rate limiting failed, falling back to memory store');
+                    return { totalHits: 1, resetTime: new Date(Date.now() + config.rateLimit.windowMs) };
                 }
-                return { totalHits: current, resetTime: new Date(Date.now() + config.rateLimit.windowMs) };
             },
             decrement: async (key: string) => {
-                await redisClient.decr(key);
+                try {
+                    const client = redisClient.getClient();
+                    await client.decr(key);
+                } catch (error) {
+                    logger.warn('Redis decrement failed');
+                }
             },
             resetKey: async (key: string) => {
-                await redisClient.del(key);
+                try {
+                    await redisClient.del(key);
+                } catch (error) {
+                    logger.warn('Redis key reset failed');
+                }
             },
         } : undefined,
     });
@@ -110,7 +125,10 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Request logging middleware
+// Enhanced request logging middleware
+app.use(requestLogger);
+
+// Morgan for additional HTTP logging
 const morganFormat = config.env === 'production'
     ? 'combined'
     : ':method :url :status :res[content-length] - :response-time ms';
@@ -121,7 +139,7 @@ app.use(morgan(morganFormat, {
             logger.info(message.trim());
         },
     },
-    skip: (req: Request, res: Response) => {
+    skip: (req: Request) => {
         // Skip logging for health checks in production
         return config.env === 'production' && req.url === '/health';
     },
@@ -148,15 +166,9 @@ app.use('/api', (req: Request, res: Response, next: NextFunction) => {
 });
 
 // 404 handler for undefined routes
-app.use('*', (req: Request, res: Response) => {
-    res.status(404).json({
-        success: false,
-        error: {
-            code: 'ROUTE_NOT_FOUND',
-            message: `Route ${req.method} ${req.originalUrl} not found`,
-            timestamp: new Date().toISOString(),
-        },
-    });
-});
+app.use('*', notFoundHandler);
+
+// Global error handling middleware (must be last)
+app.use(globalErrorHandler);
 
 export default app;

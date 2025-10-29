@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ValidationError } from 'express-validator';
+import { ValidationError as ExpressValidationError } from 'express-validator';
 import { ValidationError as SequelizeValidationError, DatabaseError } from 'sequelize';
 import { config } from '../config';
 import logger from '../utils/logger';
@@ -129,11 +129,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
 /**
  * Validation error formatter middleware
  */
-export const formatValidationErrors = (errors: ValidationError[]): any => {
+export const formatValidationErrors = (errors: ExpressValidationError[]): any => {
     const formattedErrors: Record<string, string[]> = {};
 
     errors.forEach((error) => {
-        const field = error.path || 'general';
+        const field = error.type === 'field' ? error.path : 'general';
         if (!formattedErrors[field]) {
             formattedErrors[field] = [];
         }

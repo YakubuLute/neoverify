@@ -1,5 +1,7 @@
 import { config, database, redisClient } from './config';
 import logger from './utils/logger';
+import app from './app';
+import { gracefulShutdown } from './middleware';
 
 async function startServer(): Promise<void> {
     try {
@@ -10,9 +12,18 @@ async function startServer(): Promise<void> {
         await redisClient.connect();
 
         logger.info(`Server configuration loaded for environment: ${config.env}`);
-        logger.info(`Server will run on port: ${config.port}`);
+        logger.info(`Database connected successfully`);
+        logger.info(`Redis connected successfully`);
 
-        // TODO: Initialize Express app in next task
+        // Start Express server
+        const server = app.listen(config.port, () => {
+            logger.info(`Server is running on port ${config.port}`);
+            logger.info(`Environment: ${config.env}`);
+            logger.info(`Health check available at: http://localhost:${config.port}/health`);
+        });
+
+        // Setup graceful shutdown
+        gracefulShutdown(server);
 
     } catch (error) {
         logger.error('Failed to start server:', error);

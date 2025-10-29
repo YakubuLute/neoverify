@@ -81,13 +81,13 @@ export class JwtUtils {
         const refreshTokenKey = `refresh_token:${payload.id}:${Date.now()}`;
         const refreshTokenTTL = this.getTokenTTL(config.jwt.refreshExpiresIn);
 
-        await redisClient.setex(refreshTokenKey, refreshTokenTTL, refreshToken);
+        await redisClient.set(refreshTokenKey, refreshToken, refreshTokenTTL);
 
         // Store mapping from user to refresh token for rotation
-        await redisClient.setex(
+        await redisClient.set(
             `user_refresh:${payload.id}`,
-            refreshTokenTTL,
-            refreshTokenKey
+            refreshTokenKey,
+            refreshTokenTTL
         );
 
         return {
@@ -184,7 +184,7 @@ export class JwtUtils {
             const ttl = decoded.exp - Math.floor(Date.now() / 1000);
 
             if (ttl > 0) {
-                await redisClient.setex(`blacklist:${token}`, ttl, '1');
+                await redisClient.set(`blacklist:${token}`, '1', ttl);
             }
         } catch (error) {
             // Token is already invalid, no need to blacklist
