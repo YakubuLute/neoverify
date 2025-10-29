@@ -22,7 +22,7 @@ const envSchema = Joi.object({
   // Redis configuration
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().port().default(6379),
-  REDIS_PASSWORD: Joi.string().optional(),
+  REDIS_PASSWORD: Joi.string().allow('').optional(),
   REDIS_DB: Joi.number().default(0),
 
   // JWT configuration
@@ -167,11 +167,11 @@ const config: Config = {
   externalServices: {
     ...(envVars.AI_FORENSICS_API_URL &&
       envVars.AI_FORENSICS_API_KEY && {
-        aiForensics: {
-          apiUrl: envVars.AI_FORENSICS_API_URL,
-          apiKey: envVars.AI_FORENSICS_API_KEY,
-        },
-      }),
+      aiForensics: {
+        apiUrl: envVars.AI_FORENSICS_API_URL,
+        apiKey: envVars.AI_FORENSICS_API_KEY,
+      },
+    }),
     ...(envVars.BLOCKCHAIN_SERVICE_URL && {
       blockchain: {
         serviceUrl: envVars.BLOCKCHAIN_SERVICE_URL,

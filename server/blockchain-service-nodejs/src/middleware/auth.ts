@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 import { config, redisClient } from '../config';
 import logger from '../utils/logger';
 
@@ -46,7 +47,7 @@ export class JwtUtils {
     static generateAccessToken(payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'>): string {
         const tokenPayload = { ...payload, type: 'access' as const };
         const options: SignOptions = {
-            expiresIn: config.jwt.expiresIn as string,
+            expiresIn: config.jwt.expiresIn as StringValue,
             issuer: 'neoverify-api',
             audience: 'neoverify-client',
         };
@@ -59,7 +60,7 @@ export class JwtUtils {
     static generateRefreshToken(payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'>): string {
         const tokenPayload = { ...payload, type: 'refresh' as const };
         const options: SignOptions = {
-            expiresIn: config.jwt.refreshExpiresIn,
+            expiresIn: config.jwt.refreshExpiresIn as StringValue,
             issuer: 'neoverify-api',
             audience: 'neoverify-client',
         };
