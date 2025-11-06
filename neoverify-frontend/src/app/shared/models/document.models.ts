@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+// Audit action enumeration
+export enum AuditAction {
+  VIEWED = 'viewed',
+  CREATED = 'created',
+  UPDATED = 'updated',
+  DELETED = 'deleted',
+  SHARED = 'shared',
+  DOWNLOADED = 'downloaded',
+  UPLOADED = 'uploaded',
+  VERIFIED = 'verified',
+  REJECTED = 'rejected',
+  ARCHIVED = 'archived',
+  RESTORED = 'restored'
+}
+
 // Document verification status enumeration
 export enum VerificationStatus {
   PENDING = 'pending',
@@ -110,6 +125,9 @@ export interface Document {
   expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  // Additional properties for permissions
+  uploadedBy?: string; // User ID who uploaded the document
+  permissions?: DocumentPermissions;
 }
 
 // Document upload request interface
@@ -208,6 +226,30 @@ export interface DocumentStatistics {
   verificationsThisMonth: number;
 }
 
+// Document permissions interface
+export interface DocumentPermissions {
+  canView: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canShare: boolean;
+  canDownload: boolean;
+  sharedWith?: SharedUser[];
+}
+
+// Shared user interface
+export interface SharedUser {
+  userId: string;
+  email: string;
+  name: string;
+  permissions: {
+    canView: boolean;
+    canEdit: boolean;
+    canDownload: boolean;
+  };
+  sharedAt: Date;
+  expiresAt?: Date;
+}
+
 // Zod Schemas for Runtime Validation
 export const DocumentMetadataSchema = z.object({
   fileSize: z.number().min(0),
@@ -270,6 +312,28 @@ export const SharingSettingsSchema = z.object({
   shareToken: z.string().optional()
 });
 
+export const SharedUserSchema = z.object({
+  userId: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string(),
+  permissions: z.object({
+    canView: z.boolean(),
+    canEdit: z.boolean(),
+    canDownload: z.boolean()
+  }),
+  sharedAt: z.string().datetime(),
+  expiresAt: z.string().datetime().optional()
+});
+
+export const DocumentPermissionsSchema = z.object({
+  canView: z.boolean(),
+  canEdit: z.boolean(),
+  canDelete: z.boolean(),
+  canShare: z.boolean(),
+  canDownload: z.boolean(),
+  sharedWith: z.array(SharedUserSchema).optional()
+});
+
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
@@ -294,7 +358,9 @@ export const DocumentSchema = z.object({
   lastAccessedAt: z.string().datetime().optional(),
   expiresAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime()
+  updatedAt: z.string().datetime(),
+  uploadedBy: z.string().uuid().optional(),
+  permissions: DocumentPermissionsSchema.optional()
 });
 
 export const DocumentFiltersSchema = z.object({

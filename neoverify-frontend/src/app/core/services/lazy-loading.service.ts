@@ -137,12 +137,12 @@ export class LazyLoadingService {
                 cacheKey,
                 () => this.documentService.getDocument(documentId).pipe(
                     map(doc => ({
-                        title: doc.title,
+                        title: doc.originalName,
                         description: doc.description,
-                        fileSize: doc.fileSize,
-                        uploadedAt: doc.uploadedAt,
+                        fileSize: doc.size,
+                        uploadedAt: doc.createdAt,
                         tags: doc.tags,
-                        status: doc.status,
+                        status: null,
                         verificationStatus: doc.verificationStatus
                     }))
                 ),
@@ -156,12 +156,12 @@ export class LazyLoadingService {
             cacheKey,
             () => this.documentService.getDocument(documentId).pipe(
                 map(doc => ({
-                    title: doc.title,
+                    title: doc.filename,
                     description: doc.description,
-                    fileSize: doc.fileSize,
-                    uploadedAt: doc.uploadedAt,
+                    fileSize: doc.size,
+                    uploadedAt: doc.createdAt,
                     tags: doc.tags,
-                    status: doc.status,
+                    status: null,
                     verificationStatus: doc.verificationStatus
                 }))
             ),

@@ -1,7 +1,7 @@
 import { Injectable, inject, computed, signal } from '@angular/core';
 import { AuthService } from './auth.service';
 import { UserRole } from '../../shared/models/auth.models';
-import { Document, DocumentPermissions, AuditAction } from '../../shared/models/document.models';
+import { Document, AuditAction, DocumentPermissions } from '../../shared/models/document.models';
 
 export interface DocumentOperation {
     action: AuditAction;
