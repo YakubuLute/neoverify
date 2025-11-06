@@ -87,6 +87,17 @@ export interface SubscriptionLimits {
     maxApiCalls: number;
 }
 
+// Organization interface (alias for OrganizationDetails)
+export interface Organization {
+    id: string;
+    name: string;
+    domain: string;
+    description?: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 // Organization interface
 export interface OrganizationDetails {
     id: string;

@@ -146,8 +146,9 @@ export const UserProfileResponseSchema = z.object({
     }),
     organization: z.any().optional(),
     permissions: z.array(z.string())
-});// Ad
-ditional auth - related types
+});
+
+// Additional auth-related types
 export interface CreateUserRequest {
     email: string;
     firstName: string;

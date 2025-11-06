@@ -891,8 +891,9 @@ export interface SharePermissions {
   canDownload: boolean;
   canShare: boolean;
   expiresAt?: Date;
-}// Add
-itional missing types
+}
+
+// Additional missing types
 export interface AuditEntry {
   id: string;
   documentId: string;
@@ -917,37 +918,3 @@ export interface BulkIssuanceResult {
   results: any[];
 }
 
-// Add missing Organization type alias
-export interface Organization {
-  id: string;
-  name: string;
-  domain: string;
-  description?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface InviteUserRequest {
-  email: string;
-  role: string;
-  organizationId: string;
-}
-
-export interface CreateUserRequest {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: any;
-  expiresAt: Date;
-}
