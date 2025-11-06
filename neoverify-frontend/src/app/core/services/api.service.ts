@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams, HttpHeaders, HttpEvent, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams, HttpHeaders, HttpEvent, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Observable, throwError, timer, EMPTY, forkJoin, of } from 'rxjs';
 import { catchError, retry, retryWhen, mergeMap, delay, take, timeout, map, filter, finalize } from 'rxjs/operators';
 import { z } from 'zod';
@@ -17,14 +17,14 @@ import {
   ApiResponseSchema
 } from '../types/api.types';
 import { ApiUtils } from '../utils/api.utils';
-import { RequestManagerService } from './request-manager.service';
+import { EnhancedRequestManagerService } from './enhanced-request-manager.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly requestManager = inject(RequestManagerService);
+  private readonly requestManager = inject(EnhancedRequestManagerService);
 
   private readonly config: ApiServiceConfig = {
     baseUrl: environment.apiUrl,
@@ -207,10 +207,10 @@ export class ApiService {
   }
 
   /**
-   * Get pending requests count
+   * Get request statistics
    */
-  getPendingRequestsCount(): number {
-    return this.requestManager.getPendingRequestsCount();
+  getRequestStats(): { pending: number; queued: number; offline: number; cached: number } {
+    return this.requestManager.getRequestStats();
   }
 
   /**
@@ -357,12 +357,12 @@ export class ApiService {
       ...headers
     });
 
-    return this.http.post(url, formData, {
+    const req = new HttpRequest('POST', url, formData, {
       headers: httpHeaders,
-      reportProgress: true,
-      observe: 'events',
-      signal
-    }).pipe(
+      reportProgress: true
+    });
+
+    return this.http.request(req).pipe(
       timeout(requestTimeout),
       map((event: HttpEvent<any>) => {
         switch (event.type) {

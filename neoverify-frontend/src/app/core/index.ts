@@ -1,20 +1,20 @@
 // Services
 export * from './services/api.service';
-export * from './services/auth.service';
-export * from './services/notification.service';
-export * from './services/loading.service';
-export * from './services/document.service';
-export * from './services/template.service';
-export * from './services/upload.service';
-export * from './services/audit.service';
-export * from './services/permissions.service';
-export * from './services/document-sharing.service';
+export * from './services/enhanced-request-manager.service';
+
+// Types
+export * from './types/api.types';
+export * from './types/api-endpoints.types';
+
+// Utils
+export * from './utils/api.utils';
+export * from './utils/api-transformers.utils';
 
 // Guards
 export * from './guards/auth.guard';
-export * from './guards/role.guard';
-export * from './guards/guest.guard';
 export * from './guards/document-permission.guard';
+export * from './guards/guest.guard';
+export * from './guards/role.guard';
 
 // Interceptors
 export * from './interceptors/auth.interceptor';
