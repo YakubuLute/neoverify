@@ -12,7 +12,13 @@ export enum AuditAction {
   VERIFIED = 'verified',
   REJECTED = 'rejected',
   ARCHIVED = 'archived',
-  RESTORED = 'restored'
+  RESTORED = 'restored',
+  REVOKED = 'revoked',
+  PERMISSION_CHANGED = 'permission_changed',
+  STATUS_CHANGED = 'status_changed',
+  VERIFICATION_STARTED = 'verification_started',
+  VERIFICATION_COMPLETED = 'verification_completed',
+  VERIFICATION_FAILED = 'verification_failed'
 }
 
 // Document status enumeration
@@ -23,7 +29,7 @@ export enum DocumentStatus {
   REVOKED = 'revoked',
   EXPIRED = 'expired',
   ARCHIVED = 'archived',
-  VERIFIED =  'verified',
+  VERIFIED = 'verified',
   REJECTED = 'rejected',
   UPLOADED = 'uploaded'
 }
@@ -53,6 +59,7 @@ export enum DocumentType {
   CERTIFICATE = "CERTIFICATE",
   LICENSE = "LICENSE",
   TRANSCRIPT = "TRANSCRIPT",
+  ID_DOCUMENT = "ID_DOCUMENT"
 }
 
 // Document metadata interface
@@ -81,6 +88,10 @@ export interface DocumentMetadata {
     userAgent?: string;
     ipAddress?: string;
   };
+  issueDate?: Date;
+  recipientName?: string;
+  description?: string;
+  customFields?: Record<string, any>;
 }
 
 // Verification results interface
@@ -124,14 +135,16 @@ export interface SharingSettings {
 export interface Document {
   id: string;
   userId: string;
-  title:string;
+  title: string;
   forensicsResult?: ForensicsResult;
   organizationId?: string;
   filename: string;
   originalName: string;
+  originalFileName?: string; // Alias for originalName for backward compatibility
   filePath: string;
   mimeType: string;
   size: number;
+  fileSize?: number; // Alias for size for backward compatibility
   hash: string;
   canonicalHash: string; // Hash used for verification
   ipfsHash?: string;
@@ -152,6 +165,8 @@ export interface Document {
   expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  uploadedAt?: Date; // When the document was uploaded
+  thumbnailUrl?: string; // URL to document thumbnail
   // Additional properties for permissions
   uploadedBy?: string; // User ID who uploaded the document
   permissions?: DocumentPermissions;
@@ -179,16 +194,19 @@ export interface DocumentUpdateRequest {
 // Document search/filter interface
 export interface DocumentFilters {
   search?: string;
-  documentType?: DocumentType;
-  verificationStatus?: VerificationStatus;
+  documentType?: DocumentType | DocumentType[];
+  verificationStatus?: VerificationStatus | VerificationStatus[];
+  status?: DocumentStatus | DocumentStatus[];
   tags?: string[];
   userId?: string;
   organizationId?: string;
   isPublic?: boolean;
   dateFrom?: Date;
   dateTo?: Date;
+  dateRange?: { start: Date; end: Date };
   sizeMin?: number;
   sizeMax?: number;
+  issuer?: string[];
 }
 
 // Document list response interface
@@ -420,7 +438,7 @@ export enum StatusTrigger {
   SCHEDULED = 'scheduled',
   API = 'api',
   WEBHOOK = 'webhook',
-  AUTOMATED='automated',
+  AUTOMATED = 'automated',
   VERIFICATION_RESULT = 'verification_result'
 }
 
@@ -598,7 +616,7 @@ export const ForensicsResultSchema = z.object({
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
-  title:z.string(),
+  title: z.string(),
   organizationId: z.string().uuid().optional(),
   filename: z.string(),
   originalName: z.string(),
@@ -712,3 +730,142 @@ export const DocumentStatisticsSchema = z.object({
   uploadsThisMonth: z.number(),
   verificationsThisMonth: z.number()
 });
+
+// Bulk operations
+export enum BulkActionType {
+  DELETE = 'delete',
+  ARCHIVE = 'archive',
+  RESTORE = 'restore',
+  VERIFY = 'verify',
+  EXPORT = 'export',
+  SHARE = 'share',
+  TAG = 'tag',
+  MOVE = 'move'
+}
+
+export interface BulkAction {
+  type: BulkActionType;
+  documentIds: string[];
+  parameters?: Record<string, any>;
+}
+
+// Export formats
+export enum ExportFormat {
+  PDF = 'pdf',
+  CSV = 'csv',
+  JSON = 'json',
+  XML = 'xml',
+  ZIP = 'zip'
+}
+
+// Upload progress
+export enum UploadStatus {
+  PENDING = 'pending',
+  UPLOADING = 'uploading',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
+}
+
+export interface DocumentUploadProgress {
+  id: string;
+  filename: string;
+  size: number;
+  uploaded: number;
+  progress: number; // 0-100
+  status: UploadStatus;
+  error?: string;
+  startedAt: Date;
+  completedAt?: Date;
+}
+
+// Document templates
+export interface DocumentTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  documentType: DocumentType;
+  fields: TemplateField[];
+  validationRules: ValidationRule[];
+  isActive: boolean;
+  version: number;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TemplateField {
+  id: string;
+  name: string;
+  label: string;
+  type: FieldType;
+  required: boolean;
+  defaultValue?: any;
+  validation?: FieldValidation;
+  options?: string[]; // For select/radio fields
+  placeholder?: string;
+  helpText?: string;
+  order: number;
+}
+
+export enum FieldType {
+  TEXT = 'text',
+  NUMBER = 'number',
+  DATE = 'date',
+  EMAIL = 'email',
+  URL = 'url',
+  SELECT = 'select',
+  RADIO = 'radio',
+  CHECKBOX = 'checkbox',
+  TEXTAREA = 'textarea',
+  FILE = 'file'
+}
+
+export interface ValidationRule {
+  id: string;
+  fieldId: string;
+  type: ValidationType;
+  value: any;
+  message: string;
+}
+
+export enum ValidationType {
+  REQUIRED = 'required',
+  MIN_LENGTH = 'minLength',
+  MAX_LENGTH = 'maxLength',
+  PATTERN = 'pattern',
+  MIN_VALUE = 'minValue',
+  MAX_VALUE = 'maxValue',
+  EMAIL = 'email',
+  URL = 'url',
+  CUSTOM = 'custom'
+}
+
+export interface FieldValidation {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  minValue?: number;
+  maxValue?: number;
+  custom?: (value: any) => boolean | string;
+}
+
+export interface TemplateVersion {
+  id: string;
+  templateId: string;
+  version: number;
+  changes: string;
+  createdBy: string;
+  createdAt: Date;
+}
+
+// Share permissions
+export interface SharePermissions {
+  canView: boolean;
+  canEdit: boolean;
+  canDownload: boolean;
+  canShare: boolean;
+  expiresAt?: Date;
+}

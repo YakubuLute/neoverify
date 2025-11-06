@@ -348,4 +348,66 @@ export const OrganizationStatisticsSchema = z.object({
         users: z.number().min(0).max(100),
         apiCalls: z.number().min(0).max(100)
     })
-});
+});// Addit
+ional organization types
+export interface OrganizationMembership {
+    id: string;
+    organizationId: string;
+    userId: string;
+    role: OrganizationRole;
+    status: MembershipStatus;
+    permissions: OrganizationPermission[];
+    joinedAt: Date;
+    updatedAt: Date;
+}
+
+export interface OrganizationPreferences {
+    notifications: {
+        email: boolean;
+        push: boolean;
+        sms: boolean;
+    };
+    privacy: {
+        profileVisible: boolean;
+        activityVisible: boolean;
+    };
+    language: string;
+    timezone: string;
+}
+
+export enum OrganizationRole {
+    OWNER = 'owner',
+    ADMIN = 'admin',
+    MANAGER = 'manager',
+    MEMBER = 'member',
+    VIEWER = 'viewer'
+}
+
+export enum MembershipStatus {
+    ACTIVE = 'active',
+    PENDING = 'pending',
+    SUSPENDED = 'suspended',
+    INACTIVE = 'inactive'
+}
+
+export enum OrganizationPermission {
+    READ_DOCUMENTS = 'read_documents',
+    WRITE_DOCUMENTS = 'write_documents',
+    DELETE_DOCUMENTS = 'delete_documents',
+    MANAGE_USERS = 'manage_users',
+    MANAGE_SETTINGS = 'manage_settings',
+    MANAGE_BILLING = 'manage_billing',
+    VIEW_ANALYTICS = 'view_analytics'
+}
+
+export enum PolicyType {
+    DOCUMENT_RETENTION = 'document_retention',
+    ACCESS_CONTROL = 'access_control',
+    DATA_PRIVACY = 'data_privacy',
+    SECURITY = 'security'
+}
+
+export interface OrganizationSettingsUpdateRequest {
+    settings: Partial<OrganizationSettings>;
+    preferences?: Partial<OrganizationPreferences>;
+}
