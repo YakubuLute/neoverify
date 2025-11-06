@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
 import {
@@ -355,7 +355,7 @@ export class OrganizationService {
      */
     getPoliciesByType(type: PolicyType) {
         const context = this.currentOrganizationContext();
-        return context?.policies.filter(p => p.type === type) || [];
+        return context?.policies.filter(p => p?.type === type) || [];
     }
 
     /**
@@ -436,7 +436,7 @@ export class OrganizationService {
 
         // Check specific policy validations
         for (const policy of context.policies) {
-            if (!policy.isEnforced) continue;
+            if (!policy?.isEnforced) continue;
 
             const validation = this.validateAgainstPolicy(policy, settingPath, newValue);
             if (!validation.isValid) {
@@ -459,7 +459,7 @@ export class OrganizationService {
         const violations: Array<{ setting: string; violation: string; policyId: string; policyName: string }> = [];
 
         for (const policy of context.policies) {
-            if (!policy.isEnforced) continue;
+            if (!policy?.isEnforced) continue;
 
             const policyViolations = this.checkPolicyViolations(policy, currentSettings);
             violations.push(...policyViolations);
@@ -479,7 +479,7 @@ export class OrganizationService {
 
         // Check if setting is overridden by policy
         for (const policy of context.policies) {
-            if (!policy.isEnforced) continue;
+            if (!policy?.isEnforced) continue;
 
             const effectiveValue = this.getPolicyEffectiveValue(policy, settingPath, userValue);
             if (effectiveValue !== undefined) {
