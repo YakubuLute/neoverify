@@ -22,7 +22,10 @@ export enum DocumentStatus {
   PROCESSING = 'processing',
   REVOKED = 'revoked',
   EXPIRED = 'expired',
-  ARCHIVED = 'archived'
+  ARCHIVED = 'archived',
+  VERIFIED =  'verified',
+  REJECTED = 'rejected',
+  UPLOADED = 'uploaded'
 }
 
 // Document verification status enumeration
@@ -121,6 +124,7 @@ export interface SharingSettings {
 export interface Document {
   id: string;
   userId: string;
+  title:string;
   forensicsResult?: ForensicsResult;
   organizationId?: string;
   filename: string;
@@ -280,6 +284,7 @@ export interface VerificationProgress {
   progress: number; // 0-100
   stage: VerificationStage; // Current stage
   currentStage: string;
+  message: string; // Current progress message
   stages: VerificationStageDetail[];
   details?: VerificationStageDetail[];
   startedAt: Date;
@@ -291,11 +296,13 @@ export interface VerificationProgress {
 // Verification stage detail interface
 export interface VerificationStageDetail {
   name: string;
+  stage: VerificationStage;
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
   progress: number; // 0-100
+  message: string;
   startedAt?: Date;
   completedAt?: Date;
-  error?: string;
+  error?: VerificationError;
   details?: any;
 }
 
@@ -401,6 +408,7 @@ export interface StatusTransition {
   label: string;
   description?: string;
   requiresReason: boolean;
+  allowed: boolean;
   allowedRoles?: string[];
   conditions?: Record<string, any>;
 }
@@ -411,7 +419,9 @@ export enum StatusTrigger {
   SYSTEM = 'system',
   SCHEDULED = 'scheduled',
   API = 'api',
-  WEBHOOK = 'webhook'
+  WEBHOOK = 'webhook',
+  AUTOMATED='automated',
+  VERIFICATION_RESULT = 'verification_result'
 }
 
 // Status notification interface
@@ -443,14 +453,19 @@ export enum NotificationType {
 // Verification stage enumeration
 export enum VerificationStage {
   PENDING = 'pending',
+  QUEUED = 'queued',
   PREPROCESSING = 'preprocessing',
   FORENSIC_ANALYSIS = 'forensic_analysis',
   BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
+  SIGNATURE_VALIDATION = 'signature_validation',
+  METADATA_EXTRACTION = 'metadata_extraction',
   FINAL_VALIDATION = 'final_validation',
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled'
 }
+
+
 
 // Zod Schemas for Runtime Validation
 export const DocumentMetadataSchema = z.object({
@@ -583,6 +598,7 @@ export const ForensicsResultSchema = z.object({
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
+  title:z.string(),
   organizationId: z.string().uuid().optional(),
   filename: z.string(),
   originalName: z.string(),
@@ -649,13 +665,24 @@ export const DocumentVerificationJobSchema = z.object({
   updatedAt: z.string().datetime()
 });
 
+// Verification error schema
+export const VerificationErrorSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  details: z.any().optional(),
+  severity: z.enum(['low', 'medium', 'high']),
+  category: z.enum(['technical', 'validation', 'security', 'network'])
+});
+
 export const VerificationStageDetailSchema = z.object({
   name: z.string(),
+  stage: z.nativeEnum(VerificationStage),
   status: z.enum(['pending', 'in_progress', 'completed', 'failed', 'skipped']),
   progress: z.number().min(0).max(100),
+  message: z.string(),
   startedAt: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),
-  error: z.string().optional(),
+  error: VerificationErrorSchema.optional(),
   details: z.any().optional()
 });
 
@@ -665,6 +692,7 @@ export const VerificationProgressSchema = z.object({
   progress: z.number().min(0).max(100),
   stage: z.nativeEnum(VerificationStage),
   currentStage: z.string(),
+  message: z.string(),
   stages: z.array(VerificationStageDetailSchema),
   details: z.array(VerificationStageDetailSchema).optional(),
   startedAt: z.string().datetime(),

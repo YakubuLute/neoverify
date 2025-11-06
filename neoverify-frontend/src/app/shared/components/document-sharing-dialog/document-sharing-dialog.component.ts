@@ -68,7 +68,7 @@ import { User } from '../../models/auth.models';
             <i class="pi pi-file document-icon"></i>
             <div class="document-details">
               <h3>{{ document.title }}</h3>
-              <p class="document-filename">{{ document.originalFileName }}</p>
+              <p class="document-filename">{{ document.originalName }}</p>
             </div>
           </div>
         </div>
