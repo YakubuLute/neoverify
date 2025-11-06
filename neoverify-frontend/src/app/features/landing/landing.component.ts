@@ -205,13 +205,13 @@ interface ActionCard {
             @for (actionCard of actionCards; track actionCard.title) {
               <div [class]="'group p-8 rounded-xl border hover:shadow-xl transition-all duration-300 ' + actionCard.color">
                 <div class="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-sm rounded-lg mb-6">
-                  <i [class]="actionCard.icon + ' text-2xl text-white'"></i>
+                  <i [class]="actionCard.icon + ' text-2xl text-gray-300'"></i>
                 </div>
                 <h3 class="text-xl font-semibold text-white mb-4">{{ actionCard.title }}</h3>
-                <p class="text-gray-300 leading-relaxed text-base mb-6 font-normal">{{ actionCard.description }}</p>
+                <p class="text-gray-400 leading-relaxed text-base mb-6 font-normal">{{ actionCard.description }}</p>
                 <button 
                   (click)="navigate(actionCard.route)"
-                  class="bg-white hover:bg-gray-100 text-gray-900 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 w-full"
+                  class="bg-[#2f254e] hover:bg-[#36295e] text-[#a479e3] px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 w-full"
                 >
                   {{ actionCard.buttonText }}
                 </button>
@@ -372,12 +372,12 @@ interface ActionCard {
           </div>
 
           <!-- Risk-Free Guarantee -->
-          <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-6 max-w-2xl mx-auto">
+          <div class="bg-gray-900/50 border border-gray-700 rounded-xl p-10 max-w-2xl mx-auto">
             <div class="flex items-center justify-center mb-3">
               <i class="pi pi-check-circle text-cyan-400 text-xl mr-3"></i>
               <span class="text-lg font-semibold text-white">30-Day Money-Back Guarantee</span>
             </div>
-            <p class="text-gray-300 text-base font-normal">
+            <p class="text-gray-300 text-base font-light mt-6">
               Try NeoVerify risk-free. If you're not completely satisfied, 
               we'll refund your money within 30 days.
             </p>
