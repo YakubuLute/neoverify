@@ -8,13 +8,19 @@ export enum SubscriptionTier {
     ENTERPRISE = 'enterprise',
 }
 
+export interface OrganizationSettingsResponse {
+    success: boolean;
+    message: string;
+    preferences: Partial<OrganizationPreferences>;
+}
+
 // Organization settings interface
 export interface OrganizationSettings {
     // General settings
     allowPublicDocuments: boolean;
     requireEmailVerification: boolean;
     enableMfaForAllUsers: boolean;
-
+    requireMfa: boolean;
     // Document settings
     maxDocumentSize: number; // in bytes
     allowedFileTypes: string[];
@@ -361,6 +367,38 @@ export const OrganizationStatisticsSchema = z.object({
     })
 });
 
+// orgnizational policy interface
+export interface OrganizationPolicy {
+    id: string;
+    name: string;
+    description: string;
+    scope: string;
+    isEnforced: boolean;
+    settings?: OrganizationSettings;
+    organizationId: string;
+    type: PolicyType;
+    policy: string;
+    createdAt: Date;
+    updatedAt?: Date;
+}
+
+export interface OrganizationRestriction {
+    setting: string;
+    reason: string;
+    policyId: string;
+    policyName: string;
+    canOverride: boolean;
+}
+
+// interface for organization context switch request
+export interface OrganizationContext {
+    membership: OrganizationMembership;
+    policies: Partial<OrganizationPolicy[]>;
+    preferences: OrganizationPreferences | undefined;
+    effectivePermissions: OrganizationPermission[];
+    restrictions: OrganizationRestriction[];
+}
+
 // Additional organization types
 export interface OrganizationMembership {
     id: string;
@@ -370,7 +408,7 @@ export interface OrganizationMembership {
     status: MembershipStatus;
     permissions: OrganizationPermission[];
     joinedAt: Date;
-    updatedAt: Date;
+    updatedAt?: Date;
     isDefault?: boolean;
     organizationName?: string;
     organizationLogo?: string;
@@ -383,6 +421,7 @@ export interface OrganizationPreferences {
         email: boolean;
         push: boolean;
         sms: boolean;
+        inheritFromOrganization: boolean
     };
     privacy: {
         profileVisible: boolean;
@@ -417,8 +456,13 @@ export enum OrganizationPermission {
     VIEW_ANALYTICS = 'view_analytics',
     VIEW_AUDIT_LOGS = 'view_audit_logs',
     MANAGE_ORGANIZATION = 'manage_organization',
+    MANAGE_API_KEYS = 'manage_api_keys',
+    MANAGE_DOCUMENTS = 'manage_documents',
     VIEW_ORGANIZATION = 'view_organization',
-    EXPORT_DATA = 'export_data'
+    EXPORT_DATA = 'export_data',
+    VERIFY_DOCUMENTS = 'verify_document',
+    VIEW_DOCUMENTS = 'view_documents',
+    USE_API = 'use_api'
 }
 
 export enum PolicyType {

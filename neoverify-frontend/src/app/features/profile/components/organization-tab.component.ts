@@ -957,7 +957,10 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
       [PolicyType.NOTIFICATION]: 'info',
       [PolicyType.VERIFICATION]: 'success',
       [PolicyType.DATA_RETENTION]: 'warn',
-      [PolicyType.API_ACCESS]: 'secondary'
+      [PolicyType.API_ACCESS]: 'secondary',
+      [PolicyType.DOCUMENT_RETENTION]: 'success',
+      [PolicyType.ACCESS_CONTROL]: 'success',
+      [PolicyType.DATA_PRIVACY]: 'success'
     };
     return severityMap[type] || 'secondary';
   }

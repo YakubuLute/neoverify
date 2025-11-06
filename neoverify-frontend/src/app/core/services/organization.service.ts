@@ -8,7 +8,7 @@ import {
     OrganizationContext,
     OrganizationPolicy,
     OrganizationPreferences,
-    OrganizationSwitchRequest,
+
     OrganizationSettingsUpdateRequest,
     OrganizationSettingsResponse,
     OrganizationRole,
@@ -53,7 +53,9 @@ export class OrganizationService {
                     OrganizationPermission.MANAGE_API_KEYS,
                     OrganizationPermission.VIEW_AUDIT_LOGS
                 ],
-                isDefault: true
+                isDefault: true,
+                userId: '',
+                updatedAt: undefined
             },
             {
                 id: 'membership-2',
@@ -69,7 +71,9 @@ export class OrganizationService {
                     OrganizationPermission.VIEW_DOCUMENTS,
                     OrganizationPermission.USE_API
                 ],
-                isDefault: false
+                isDefault: false,
+                userId: '',
+                updatedAt: undefined
             }
         ];
 
@@ -109,12 +113,27 @@ export class OrganizationService {
                         requireLowercase: true,
                         requireNumbers: true,
                         requireSpecialChars: true,
-                        preventReuse: 5,
                         maxAge: 90
-                    }
+                    },
+                    allowPublicDocuments: false,
+                    requireEmailVerification: false,
+                    enableMfaForAllUsers: false,
+                    maxDocumentSize: 0,
+                    allowedFileTypes: [],
+                    autoVerifyDocuments: false,
+                    retentionPeriod: 0,
+                    emailNotifications: {
+                        documentUploaded: false,
+                        verificationCompleted: false,
+                        userInvited: false,
+                        weeklyReports: false
+                    },
+                    apiRateLimit: 0
                 },
                 createdAt: new Date('2024-01-01'),
-                updatedAt: new Date('2024-01-15')
+                updatedAt: new Date('2024-01-15'),
+                organizationId: '',
+                policy: ''
             },
             {
                 id: 'policy-2',
@@ -124,12 +143,34 @@ export class OrganizationService {
                 scope: 'organization' as any,
                 isEnforced: true,
                 settings: {
-                    documentRetentionDays: 365,
-                    auditLogRetentionDays: 2555, // 7 years
-                    autoDeleteEnabled: true
+                    requireMfa: true,
+                    passwordPolicy: {
+                        minLength: 12,
+                        requireUppercase: true,
+                        requireLowercase: true,
+                        requireNumbers: true,
+                        requireSpecialChars: true,
+                        maxAge: 90
+                    },
+                    allowPublicDocuments: false,
+                    requireEmailVerification: false,
+                    enableMfaForAllUsers: false,
+                    maxDocumentSize: 0,
+                    allowedFileTypes: [],
+                    autoVerifyDocuments: false,
+                    retentionPeriod: 0,
+                    emailNotifications: {
+                        documentUploaded: false,
+                        verificationCompleted: false,
+                        userInvited: false,
+                        weeklyReports: false
+                    },
+                    apiRateLimit: 0
                 },
                 createdAt: new Date('2024-01-01'),
-                updatedAt: new Date('2024-01-10')
+                updatedAt: new Date('2024-01-10'),
+                organizationId: '',
+                policy: ''
             },
             {
                 id: 'policy-3',
@@ -139,11 +180,34 @@ export class OrganizationService {
                 scope: 'organization' as any,
                 isEnforced: true,
                 settings: {
-                    requiredVerificationLevel: 'standard',
-                    allowAutoSharing: false
+                    requireMfa: true,
+                    passwordPolicy: {
+                        minLength: 12,
+                        requireUppercase: true,
+                        requireLowercase: true,
+                        requireNumbers: true,
+                        requireSpecialChars: true,
+                        maxAge: 90
+                    },
+                    allowPublicDocuments: false,
+                    requireEmailVerification: false,
+                    enableMfaForAllUsers: false,
+                    maxDocumentSize: 0,
+                    allowedFileTypes: [],
+                    autoVerifyDocuments: false,
+                    retentionPeriod: 0,
+                    emailNotifications: {
+                        documentUploaded: false,
+                        verificationCompleted: false,
+                        userInvited: false,
+                        weeklyReports: false
+                    },
+                    apiRateLimit: 0
                 },
                 createdAt: new Date('2024-01-01'),
-                updatedAt: new Date('2024-02-01')
+                updatedAt: new Date('2024-02-01'),
+                organizationId: '',
+                policy: ''
             }
         ];
 
@@ -174,7 +238,8 @@ export class OrganizationService {
                     policyName: 'Verification Standards',
                     canOverride: false
                 }
-            ]
+            ],
+            preferences: undefined
         };
 
         return of(mockContext).pipe(
@@ -190,18 +255,6 @@ export class OrganizationService {
         );
     }
 
-    /**
-     * Switch to different organization context
-     */
-    switchOrganization(request: OrganizationSwitchRequest): Observable<OrganizationContext> {
-        this.loading.set(true);
-
-        return this.getOrganizationContext(request.organizationId).pipe(
-            tap(context => {
-                this.notificationService.success(`Switched to ${context.membership.organizationName}`);
-            })
-        );
-    }
 
     /**
      * Get organization-specific preferences
@@ -211,20 +264,16 @@ export class OrganizationService {
         const mockPreferences: OrganizationPreferences = {
             notifications: {
                 inheritFromOrganization: true,
-                overrides: {}
-            },
-            verification: {
-                inheritFromOrganization: false,
-                overrides: {
-                    defaultVerificationLevel: 'comprehensive',
-                    autoShare: false,
-                    retentionDays: 180
-                }
+                email: true,
+                push: true,
+                sms: false
             },
             privacy: {
-                inheritFromOrganization: true,
-                overrides: {}
-            }
+                profileVisible: true,
+                activityVisible: true
+            },
+            language: 'English',
+            timezone: 'GMT'
         };
 
         return of(mockPreferences).pipe(
@@ -245,7 +294,7 @@ export class OrganizationService {
         const response: OrganizationSettingsResponse = {
             success: true,
             message: 'Organization preferences updated successfully',
-            preferences: request.preferences
+            preferences: request.preferences || {}
         };
 
         return of(response).pipe(
@@ -290,7 +339,7 @@ export class OrganizationService {
      */
     isSettingRestricted(settingPath: string): boolean {
         const context = this.currentOrganizationContext();
-        return context?.restrictions.some(r => r.setting === settingPath) || false;
+        return context?.restrictions.some((r: { setting: string }) => r.setting === settingPath) || false;
     }
 
     /**
@@ -298,7 +347,7 @@ export class OrganizationService {
      */
     getSettingRestriction(settingPath: string) {
         const context = this.currentOrganizationContext();
-        return context?.restrictions.find(r => r.setting === settingPath);
+        return context?.restrictions.find((r: { setting: string }) => r.setting === settingPath);
     }
 
     /**
@@ -343,10 +392,8 @@ export class OrganizationService {
      * Get formatted permission display name
      */
     getPermissionDisplayName(permission: OrganizationPermission): string {
-        const permissionNames = {
+        const permissionNames: Record<OrganizationPermission, string> = {
             [OrganizationPermission.MANAGE_USERS]: 'Manage Users',
-            [OrganizationPermission.INVITE_USERS]: 'Invite Users',
-            [OrganizationPermission.VIEW_USERS]: 'View Users',
             [OrganizationPermission.MANAGE_DOCUMENTS]: 'Manage Documents',
             [OrganizationPermission.VERIFY_DOCUMENTS]: 'Verify Documents',
             [OrganizationPermission.VIEW_DOCUMENTS]: 'View Documents',
@@ -356,10 +403,17 @@ export class OrganizationService {
             [OrganizationPermission.MANAGE_API_KEYS]: 'Manage API Keys',
             [OrganizationPermission.USE_API]: 'Use API',
             [OrganizationPermission.VIEW_AUDIT_LOGS]: 'View Audit Logs',
-            [OrganizationPermission.EXPORT_DATA]: 'Export Data'
+            [OrganizationPermission.EXPORT_DATA]: 'Export Data',
+            [OrganizationPermission.READ_DOCUMENTS]: 'Read Documents',
+            [OrganizationPermission.WRITE_DOCUMENTS]: 'Write Documents',
+            [OrganizationPermission.DELETE_DOCUMENTS]: 'Delete Documents',
+            [OrganizationPermission.MANAGE_SETTINGS]: 'Manage Settings',
+            [OrganizationPermission.VIEW_ANALYTICS]: 'View Analytics',
         };
+
         return permissionNames[permission] || permission;
     }
+
 
     /**
      * Validate setting change against organization policies
@@ -371,7 +425,7 @@ export class OrganizationService {
         }
 
         // Check if setting is restricted
-        const restriction = context.restrictions.find(r => r.setting === settingPath);
+        const restriction = context.restrictions.find((r: { setting: string }) => r.setting === settingPath);
         if (restriction && !restriction.canOverride) {
             return {
                 isValid: false,

@@ -2,7 +2,7 @@
 export * from './shared.module';
 export * from './models/auth.models';
 export * from './models/document.models';
-export * from './models/common.models';
+// export * from './models/common.models';
 export * from './models/notification.models';
 
 // Explicitly export non-conflicting items from organization models

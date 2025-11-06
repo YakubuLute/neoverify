@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { UserRole, User } from './auth.models';
 
 // Re-export User for external use
-export { User, UserRole };
+export type { User, UserRole };
 
 // User preferences interface (unique to user.models.ts)
 export interface UserPreferences {

@@ -524,14 +524,16 @@ export class DocumentSharingDialogComponent implements OnInit, OnDestroy {
   sharePermissions: SharePermissions = {
     canView: true,
     canEdit: false,
-    canDownload: false
+    canDownload: false,
+    canShare: false
   };
 
   // Link sharing state
   linkPermissions: SharePermissions = {
     canView: true,
     canEdit: false,
-    canDownload: false
+    canDownload: false,
+    canShare:false
   };
   linkHasPassword = false;
   linkPassword = '';
@@ -574,7 +576,8 @@ export class DocumentSharingDialogComponent implements OnInit, OnDestroy {
     this.sharePermissions = {
       canView: true,
       canEdit: false,
-      canDownload: false
+      canDownload: false,
+      canShare:false,
     };
     this.resetLinkForm();
   }
@@ -583,7 +586,8 @@ export class DocumentSharingDialogComponent implements OnInit, OnDestroy {
     this.linkPermissions = {
       canView: true,
       canEdit: false,
-      canDownload: false
+      canDownload: false,
+      canShare:false
     };
     this.linkHasPassword = false;
     this.linkPassword = '';
