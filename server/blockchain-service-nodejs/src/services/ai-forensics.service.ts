@@ -1,8 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
-import path from 'path';
-import { logger } from '../utils/logger';
+import  logger  from '../utils/logger';
 import { AIForensicsResults } from '../models/Verification';
 
 // AI Forensics API configuration
