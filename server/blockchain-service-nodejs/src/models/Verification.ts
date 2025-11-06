@@ -53,6 +53,7 @@ export interface AIForensicsResults {
     };
     modelVersion: string;
     processingNode: string;
+    completedAt: Date;
 }
 
 // Blockchain results interface

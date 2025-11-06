@@ -3,7 +3,7 @@ import logger from '../utils/logger';
 import { verificationService, VerificationRequest } from '../services/verification.service';
 import Document, { VerificationStatus } from '../models/Document';
 import Verification, { VerificationType, VerificationPriority } from '../models/Verification';
-import { AuthenticatedRequest } from '../middleware';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 /**
  * Start a new verification process

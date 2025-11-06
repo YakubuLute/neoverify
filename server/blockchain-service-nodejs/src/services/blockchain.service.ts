@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { BlockchainResults } from '../models/Verification';
 
 // Blockchain service configuration

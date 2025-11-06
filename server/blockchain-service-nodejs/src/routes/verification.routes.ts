@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body, param, query } from 'express-validator';
-import { authenticate, validate } from '../middleware';
+import { authenticateToken as authenticate } from '../middleware/auth';
+import { validate } from '../middleware';
 import {
     startVerification,
     getVerificationStatus,
@@ -149,7 +150,7 @@ router.post(
             .withMessage('Skip existing must be a boolean'),
     ],
     validate,
-    startVerification
+    startVerification as any
 );
 
 /**
@@ -211,7 +212,7 @@ router.get(
             .withMessage('Verification ID must be a valid UUID'),
     ],
     validate,
-    getVerificationStatus
+    getVerificationStatus as any
 );
 
 /**
@@ -249,7 +250,7 @@ router.get(
             .withMessage('Verification ID must be a valid UUID'),
     ],
     validate,
-    getVerificationResults
+    getVerificationResults as any
 );
 
 /**
@@ -318,7 +319,7 @@ router.get(
             .withMessage('Invalid verification type'),
     ],
     validate,
-    getDocumentVerificationHistory
+    getDocumentVerificationHistory as any
 );
 
 /**
@@ -356,7 +357,7 @@ router.post(
             .withMessage('Verification ID must be a valid UUID'),
     ],
     validate,
-    cancelVerification
+    cancelVerification as any
 );
 
 /**
@@ -452,7 +453,7 @@ router.get(
             .withMessage('Organization ID must be a valid UUID'),
     ],
     validate,
-    getVerificationAnalytics
+    getVerificationAnalytics as any
 );
 
 /**
@@ -504,7 +505,7 @@ router.post(
             .withMessage('Organization ID must be a valid UUID'),
     ],
     validate,
-    generateVerificationReport
+    generateVerificationReport as any
 );
 
 /**
@@ -539,7 +540,7 @@ router.post(
  *                     averageWaitTime:
  *                       type: number
  */
-router.get('/stats/realtime', authenticate, getRealTimeStats);
+router.get('/stats/realtime', authenticate, getRealTimeStats as any);
 
 /**
  * @swagger

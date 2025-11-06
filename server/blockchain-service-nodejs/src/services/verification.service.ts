@@ -1,4 +1,4 @@
-import  logger  from '../utils/logger';
+import logger from '../utils/logger';
 import Document, { VerificationStatus, VerificationResults } from '../models/Document';
 import Verification, {
     VerificationType,
@@ -479,7 +479,7 @@ class VerificationService extends EventEmitter {
                     progress: update.progress,
                     updatedAt: new Date(),
                 },
-                this.CACHE_TTL
+                { ttl: this.CACHE_TTL }
             );
 
             // Emit status update event
@@ -538,7 +538,7 @@ class VerificationService extends EventEmitter {
             await cacheService.set(
                 `verification:${verificationId}:status`,
                 result,
-                this.CACHE_TTL
+                { ttl: this.CACHE_TTL }
             );
 
             return result;
