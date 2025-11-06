@@ -15,6 +15,16 @@ export enum AuditAction {
   RESTORED = 'restored'
 }
 
+// Document status enumeration
+export enum DocumentStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  REVOKED = 'revoked',
+  EXPIRED = 'expired',
+  ARCHIVED = 'archived'
+}
+
 // Document verification status enumeration
 export enum VerificationStatus {
   PENDING = 'pending',
@@ -22,6 +32,8 @@ export enum VerificationStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  VERIFIED = "VERIFIED",
+  EXPIRED = "EXPIRED",
 }
 
 // Document type enumeration
@@ -33,10 +45,16 @@ export enum DocumentType {
   POWERPOINT = 'powerpoint',
   TEXT = 'text',
   OTHER = 'other',
+  // Zod Schemas for Runtime Validation
+  DEGREE = "DEGREE",
+  CERTIFICATE = "CERTIFICATE",
+  LICENSE = "LICENSE",
+  TRANSCRIPT = "TRANSCRIPT",
 }
 
 // Document metadata interface
 export interface DocumentMetadata {
+  expiryDate: any;
   fileSize: number;
   mimeType: string;
   dimensions?: {
@@ -113,6 +131,7 @@ export interface Document {
   ipfsHash?: string;
   documentType: DocumentType;
   metadata: DocumentMetadata;
+  status: DocumentStatus;
   verificationStatus: VerificationStatus;
   verificationResults?: VerificationResults;
   sharingSettings: SharingSettings;
@@ -250,6 +269,30 @@ export interface SharedUser {
   expiresAt?: Date;
 }
 
+// Verification progress interface
+export interface VerificationProgress {
+  documentId: string;
+  status: VerificationStatus;
+  progress: number; // 0-100
+  currentStage: string;
+  stages: VerificationStage[];
+  startedAt: Date;
+  estimatedCompletion?: Date;
+  completedAt?: Date;
+  error?: string;
+}
+
+// Verification stage interface
+export interface VerificationStage {
+  name: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
+  progress: number; // 0-100
+  startedAt?: Date;
+  completedAt?: Date;
+  error?: string;
+  details?: any;
+}
+
 // Zod Schemas for Runtime Validation
 export const DocumentMetadataSchema = z.object({
   fileSize: z.number().min(0),
@@ -271,6 +314,7 @@ export const DocumentMetadataSchema = z.object({
   language: z.string().optional(),
   checksum: z.string(),
   uploadedFrom: z.string().optional(),
+  expiryDate: z.string().datetime().optional(),
   clientInfo: z.object({
     userAgent: z.string().optional(),
     ipAddress: z.string().optional()
@@ -347,6 +391,7 @@ export const DocumentSchema = z.object({
   ipfsHash: z.string().optional(),
   documentType: z.nativeEnum(DocumentType),
   metadata: DocumentMetadataSchema,
+  status: z.nativeEnum(DocumentStatus),
   verificationStatus: z.nativeEnum(VerificationStatus),
   verificationResults: VerificationResultsSchema.optional(),
   sharingSettings: SharingSettingsSchema,
@@ -396,6 +441,28 @@ export const DocumentVerificationJobSchema = z.object({
   results: VerificationResultsSchema.optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
+});
+
+export const VerificationStageSchema = z.object({
+  name: z.string(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'failed', 'skipped']),
+  progress: z.number().min(0).max(100),
+  startedAt: z.string().datetime().optional(),
+  completedAt: z.string().datetime().optional(),
+  error: z.string().optional(),
+  details: z.any().optional()
+});
+
+export const VerificationProgressSchema = z.object({
+  documentId: z.string().uuid(),
+  status: z.nativeEnum(VerificationStatus),
+  progress: z.number().min(0).max(100),
+  currentStage: z.string(),
+  stages: z.array(VerificationStageSchema),
+  startedAt: z.string().datetime(),
+  estimatedCompletion: z.string().datetime().optional(),
+  completedAt: z.string().datetime().optional(),
+  error: z.string().optional()
 });
 
 export const DocumentStatisticsSchema = z.object({

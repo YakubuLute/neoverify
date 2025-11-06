@@ -4,7 +4,7 @@ import { SHARED_IMPORTS } from '../../../../shared';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { VerificationProgressComponent } from '../../../../shared/components/verification-progress/verification-progress.component';
 import { DocumentStatusService } from '../../../../core/services/document-status.service';
-import { Document, DocumentStatus, DocumentType, VerificationStatus, VerificationProgress } from '../../../../shared/models/document.models';
+import { Document, DocumentType, VerificationStatus, DocumentStatus, VerificationProgress } from '../../../../shared/models/document.models';
 
 @Component({
     selector: 'app-document-card',
@@ -37,8 +37,8 @@ export class DocumentCardComponent implements OnInit, OnDestroy {
     readonly statusSeverity = computed(() => this.getStatusSeverity(this.document.status));
     readonly verificationSeverity = computed(() => this.getVerificationSeverity(this.document.verificationStatus));
     readonly documentTypeSeverity = computed(() => this.getDocumentTypeSeverity(this.document.documentType));
-    readonly formattedFileSize = computed(() => this.formatFileSize(this.document.fileSize));
-    readonly uploadedDate = computed(() => new Date(this.document.uploadedAt));
+    readonly formattedFileSize = computed(() => this.formatFileSize(this.document.size));
+    readonly uploadedDate = computed(() => new Date(this.document.createdAt));
     readonly isExpiringSoon = computed(() => {
         if (!this.document.metadata.expiryDate) return false;
         const expiryDate = new Date(this.document.metadata.expiryDate);
