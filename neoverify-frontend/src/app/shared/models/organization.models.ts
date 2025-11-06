@@ -88,7 +88,7 @@ export interface SubscriptionLimits {
 }
 
 // Organization interface
-export interface Organization {
+export interface OrganizationDetails {
     id: string;
     name: string;
     domain: string;
@@ -172,7 +172,7 @@ export interface OrganizationInvitation {
 }
 
 // Organization invitation request interface
-export interface InviteUserRequest {
+export interface OrganizationInviteUserRequest {
     email: string;
     role: string;
     message?: string;

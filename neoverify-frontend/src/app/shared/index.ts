@@ -4,6 +4,23 @@ export * from './models/auth.models';
 export * from './models/document.models';
 export * from './models/common.models';
 export * from './models/notification.models';
+
+// Explicitly export non-conflicting items from organization models
+export { SubscriptionTier } from './models/organization.models';
+export type {
+  OrganizationSettings,
+  OrganizationDetails,
+  BillingInfo,
+  UsageStats,
+  SubscriptionLimits,
+  CreateOrganizationRequest,
+  UpdateOrganizationRequest,
+  UpdateSubscriptionRequest,
+  OrganizationStatistics,
+  OrganizationInviteUserRequest,
+  OrganizationMember,
+  OrganizationInvitation
+} from './models/organization.models';
 export * from './utils/form.utils';
 export * from './utils/date.utils';
 export * from './components/loading-spinner/loading-spinner.component';

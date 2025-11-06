@@ -1,14 +1,7 @@
 import { z } from 'zod';
+import { UserRole, User } from './auth.models';
 
-// User role enumeration
-export enum UserRole {
-    ADMIN = 'admin',
-    MANAGER = 'manager',
-    USER = 'user',
-    VIEWER = 'viewer',
-}
-
-// User preferences interface
+// User preferences interface (unique to user.models.ts)
 export interface UserPreferences {
     emailNotifications: boolean;
     smsNotifications: boolean;
@@ -20,35 +13,12 @@ export interface UserPreferences {
     theme: 'light' | 'dark' | 'auto';
 }
 
-// User interface
-export interface User {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    isEmailVerified: boolean;
-    mfaEnabled: boolean;
-    lastLoginAt?: Date;
-    organizationId?: string;
-    role: UserRole;
+// Extended user interface with preferences (unique to user.models.ts)
+export interface UserWithPreferences extends User {
     preferences: UserPreferences;
-    profilePicture?: string;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
 }
 
-// User creation interface
-export interface CreateUserRequest {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    organizationId?: string;
-    role?: UserRole;
-}
-
-// User update interface
+// User update interface (unique to user.models.ts)
 export interface UpdateUserRequest {
     firstName?: string;
     lastName?: string;
@@ -56,15 +26,7 @@ export interface UpdateUserRequest {
     profilePicture?: string;
 }
 
-// Login request interface
-export interface LoginRequest {
-    email: string;
-    password: string;
-    mfaCode?: string;
-    rememberMe?: boolean;
-}
-
-// Register request interface
+// Register request interface (unique to user.models.ts)
 export interface RegisterRequest {
     email: string;
     password: string;
@@ -74,65 +36,54 @@ export interface RegisterRequest {
     organizationDomain?: string;
 }
 
-// Password reset request interface
+// Password reset request interface (unique to user.models.ts)
 export interface PasswordResetRequest {
     email: string;
 }
 
-// Password reset confirm interface
+// Password reset confirm interface (unique to user.models.ts)
 export interface PasswordResetConfirmRequest {
     token: string;
     newPassword: string;
 }
 
-// Change password request interface
+// Change password request interface (unique to user.models.ts)
 export interface ChangePasswordRequest {
     currentPassword: string;
     newPassword: string;
 }
 
-// MFA setup request interface
+// MFA setup request interface (unique to user.models.ts)
 export interface MfaSetupRequest {
     secret: string;
     code: string;
 }
 
-// MFA verify request interface
+// MFA verify request interface (unique to user.models.ts)
 export interface MfaVerifyRequest {
     code: string;
 }
 
-// Email verification request interface
+// Email verification request interface (unique to user.models.ts)
 export interface EmailVerificationRequest {
     token: string;
 }
 
-// Authentication response interface
-export interface AuthResponse {
-    user: User;
-    tokens: {
-        accessToken: string;
-        refreshToken: string;
-        expiresIn: number;
-    };
-    organization?: any; // Will be defined in organization.models.ts
-}
-
-// Token response interface
+// Token response interface (unique to user.models.ts)
 export interface TokenResponse {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
 }
 
-// Refresh token request interface
+// Refresh token request interface (unique to user.models.ts)
 export interface RefreshTokenRequest {
     refreshToken: string;
 }
 
-// User profile response interface
+// User profile response interface (unique to user.models.ts)
 export interface UserProfileResponse {
-    user: User;
+    user: UserWithPreferences;
     organization?: any;
     permissions: string[];
 }
@@ -149,44 +100,11 @@ export const UserPreferencesSchema = z.object({
     theme: z.enum(['light', 'dark', 'auto'])
 });
 
-export const UserSchema = z.object({
-    id: z.string().uuid(),
-    email: z.string().email(),
-    firstName: z.string().min(1).max(50),
-    lastName: z.string().min(1).max(50),
-    isEmailVerified: z.boolean(),
-    mfaEnabled: z.boolean(),
-    lastLoginAt: z.string().datetime().optional(),
-    organizationId: z.string().uuid().optional(),
-    role: z.nativeEnum(UserRole),
-    preferences: UserPreferencesSchema,
-    profilePicture: z.string().url().optional(),
-    isActive: z.boolean(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime()
-});
-
-export const CreateUserRequestSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8).max(128),
-    firstName: z.string().min(1).max(50),
-    lastName: z.string().min(1).max(50),
-    organizationId: z.string().uuid().optional(),
-    role: z.nativeEnum(UserRole).optional()
-});
-
 export const UpdateUserRequestSchema = z.object({
     firstName: z.string().min(1).max(50).optional(),
     lastName: z.string().min(1).max(50).optional(),
     preferences: UserPreferencesSchema.partial().optional(),
     profilePicture: z.string().url().optional()
-});
-
-export const LoginRequestSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(1),
-    mfaCode: z.string().length(6).optional(),
-    rememberMe: z.boolean().optional()
 });
 
 export const RegisterRequestSchema = z.object({
@@ -198,16 +116,6 @@ export const RegisterRequestSchema = z.object({
     organizationDomain: z.string().min(1).max(100).optional()
 });
 
-export const AuthResponseSchema = z.object({
-    user: UserSchema,
-    tokens: z.object({
-        accessToken: z.string(),
-        refreshToken: z.string(),
-        expiresIn: z.number()
-    }),
-    organization: z.any().optional()
-});
-
 export const TokenResponseSchema = z.object({
     accessToken: z.string(),
     refreshToken: z.string(),
@@ -215,7 +123,24 @@ export const TokenResponseSchema = z.object({
 });
 
 export const UserProfileResponseSchema = z.object({
-    user: UserSchema,
+    user: z.object({
+        id: z.string().uuid(),
+        email: z.string().email(),
+        name: z.string(),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        phone: z.string().optional(),
+        role: z.nativeEnum(UserRole),
+        organizationId: z.string(),
+        organizationName: z.string().optional(),
+        avatar: z.string().optional(),
+        mfaEnabled: z.boolean(),
+        emailVerified: z.boolean(),
+        lastLoginAt: z.string().datetime().optional(),
+        createdAt: z.string().datetime(),
+        updatedAt: z.string().datetime(),
+        preferences: UserPreferencesSchema
+    }),
     organization: z.any().optional(),
     permissions: z.array(z.string())
 });
