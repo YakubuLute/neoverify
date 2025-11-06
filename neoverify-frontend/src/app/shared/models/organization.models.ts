@@ -477,6 +477,7 @@ export enum PolicyType {
 }
 
 export interface OrganizationSettingsUpdateRequest {
-    settings: Partial<OrganizationSettings>;
+    organizationId:string;
+    settings?: Partial<OrganizationSettings>;
     preferences?: Partial<OrganizationPreferences>;
 }

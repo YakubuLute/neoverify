@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, ErrorObserver } from 'rxjs';
 import { SHARED_IMPORTS } from '../../../shared';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -448,10 +448,10 @@ import {
                         </div>
                         <div class="flex-1 min-w-0">
                           <p class="text-sm font-medium text-surface-900 dark:text-surface-0">
-                            {{ policy.name }}
+                            {{ policy?.name }}
                           </p>
                           <p class="text-xs text-surface-600 dark:text-surface-400 mt-1">
-                            {{ policy.description }}
+                            {{ policy?.description }}
                           </p>
                           <div class="flex items-center gap-2 mt-2">
                             <p-tag 
@@ -778,7 +778,7 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
     this.organizationService.getOrganizationPreferences(organizationId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (preferences) => {
+      next: (preferences: any) => {
         this.preferencesForm.patchValue(preferences);
         this.initialFormValue = this.preferencesForm.value;
       },
@@ -804,13 +804,13 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
     this.organizationService.switchOrganization({ organizationId }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (context) => {
+      next: () => {
         this.switchingOrganization.set(null);
         // Update memberships to reflect new default
         this.loadMemberships();
         this.loadOrganizationPreferences(organizationId);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.switchingOrganization.set(null);
         console.error('Failed to switch organization:', error);
       }
@@ -858,7 +858,7 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
 
     const request: OrganizationSettingsUpdateRequest = {
       organizationId: currentMembership.organizationId,
-      preferences
+      preferences,
     };
 
     this.organizationService.updateOrganizationPreferences(request).pipe(
@@ -930,23 +930,29 @@ export class OrganizationTabComponent implements OnInit, OnDestroy {
   }
 
   getPolicyIcon(type: PolicyType): string {
-    const iconMap = {
+    const iconMap: Record<PolicyType, string> = {
       [PolicyType.SECURITY]: 'pi pi-shield',
       [PolicyType.NOTIFICATION]: 'pi pi-bell',
       [PolicyType.VERIFICATION]: 'pi pi-verified',
       [PolicyType.DATA_RETENTION]: 'pi pi-database',
-      [PolicyType.API_ACCESS]: 'pi pi-key'
+      [PolicyType.API_ACCESS]: 'pi pi-key',
+      [PolicyType.DOCUMENT_RETENTION]: '',
+      [PolicyType.ACCESS_CONTROL]: '',
+      [PolicyType.DATA_PRIVACY]: ''
     };
     return iconMap[type] || 'pi pi-cog';
   }
 
   getPolicyTypeDisplayName(type: PolicyType): string {
-    const typeNames = {
+    const typeNames: Record<PolicyType, string> = {
       [PolicyType.SECURITY]: 'Security',
       [PolicyType.NOTIFICATION]: 'Notification',
       [PolicyType.VERIFICATION]: 'Verification',
       [PolicyType.DATA_RETENTION]: 'Data Retention',
-      [PolicyType.API_ACCESS]: 'API Access'
+      [PolicyType.API_ACCESS]: 'API Access',
+      [PolicyType.DOCUMENT_RETENTION]: '',
+      [PolicyType.ACCESS_CONTROL]: '',
+      [PolicyType.DATA_PRIVACY]: ''
     };
     return typeNames[type] || type;
   }
