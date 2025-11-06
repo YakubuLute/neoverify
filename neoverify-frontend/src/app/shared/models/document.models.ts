@@ -740,13 +740,17 @@ export enum BulkActionType {
   EXPORT = 'export',
   SHARE = 'share',
   TAG = 'tag',
-  MOVE = 'move'
+  MOVE = 'move',
+  UPDATE_STATUS = 'update_status',
+  ADD_TAGS = 'add_tags',
+  REMOVE_TAGS = 'remove_tags'
 }
 
 export interface BulkAction {
   type: BulkActionType;
   documentIds: string[];
   parameters?: Record<string, any>;
+  data?: any; // Additional data for the action
 }
 
 // Export formats
@@ -755,7 +759,15 @@ export enum ExportFormat {
   CSV = 'csv',
   JSON = 'json',
   XML = 'xml',
-  ZIP = 'zip'
+  ZIP = 'zip',
+  EXCEL = 'excel'
+}
+
+// Export configuration interface
+export interface ExportConfig {
+  type: ExportFormat | string;
+  includeMetadata?: boolean;
+  includeAuditTrail?: boolean;
 }
 
 // Upload progress
@@ -770,7 +782,9 @@ export enum UploadStatus {
 
 export interface DocumentUploadProgress {
   id: string;
+  fileId?: string; // Unique file identifier
   filename: string;
+  fileName?: string; // Alias for filename
   size: number;
   uploaded: number;
   progress: number; // 0-100
@@ -789,10 +803,13 @@ export interface DocumentTemplate {
   fields: TemplateField[];
   validationRules: ValidationRule[];
   isActive: boolean;
-  version: number;
+  version: string; // Changed to string to support semantic versioning
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+  category?: string;
+  previewUrl?: string;
+  usageCount?: number;
 }
 
 export interface TemplateField {
@@ -807,6 +824,7 @@ export interface TemplateField {
   placeholder?: string;
   helpText?: string;
   order: number;
+  position?: { x: number; y: number }; // For visual positioning
 }
 
 export enum FieldType {
@@ -819,7 +837,9 @@ export enum FieldType {
   RADIO = 'radio',
   CHECKBOX = 'checkbox',
   TEXTAREA = 'textarea',
-  FILE = 'file'
+  FILE = 'file',
+  DROPDOWN = 'dropdown', // Alias for SELECT
+  PHONE = 'phone'
 }
 
 export interface ValidationRule {
@@ -849,16 +869,19 @@ export interface FieldValidation {
   pattern?: string;
   minValue?: number;
   maxValue?: number;
+  min?: number; // Alias for minValue
+  max?: number; // Alias for maxValue
   custom?: (value: any) => boolean | string;
 }
 
 export interface TemplateVersion {
   id: string;
   templateId: string;
-  version: number;
+  version: string; // Changed to string to support semantic versioning
   changes: string;
   createdBy: string;
   createdAt: Date;
+  isActive?: boolean;
 }
 
 // Share permissions
@@ -868,4 +891,63 @@ export interface SharePermissions {
   canDownload: boolean;
   canShare: boolean;
   expiresAt?: Date;
+}// Add
+itional missing types
+export interface AuditEntry {
+  id: string;
+  documentId: string;
+  action: AuditAction;
+  userId: string;
+  timestamp: Date;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+export interface BulkIssuanceRequest {
+  documents: any[];
+  templateId?: string;
+  organizationId?: string;
+}
+
+export interface BulkIssuanceResult {
+  success: boolean;
+  processedCount: number;
+  failedCount: number;
+  results: any[];
+}
+
+// Add missing Organization type alias
+export interface Organization {
+  id: string;
+  name: string;
+  domain: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InviteUserRequest {
+  email: string;
+  role: string;
+  organizationId: string;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: any;
+  expiresAt: Date;
 }

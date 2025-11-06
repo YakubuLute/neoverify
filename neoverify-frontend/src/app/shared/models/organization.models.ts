@@ -348,8 +348,9 @@ export const OrganizationStatisticsSchema = z.object({
         users: z.number().min(0).max(100),
         apiCalls: z.number().min(0).max(100)
     })
-});// Addit
-ional organization types
+});
+
+// Additional organization types
 export interface OrganizationMembership {
     id: string;
     organizationId: string;
@@ -359,6 +360,11 @@ export interface OrganizationMembership {
     permissions: OrganizationPermission[];
     joinedAt: Date;
     updatedAt: Date;
+    isDefault?: boolean;
+    organizationName?: string;
+    organizationLogo?: string;
+    organizationDomain?: string;
+    lastActiveAt?: Date;
 }
 
 export interface OrganizationPreferences {
@@ -397,14 +403,22 @@ export enum OrganizationPermission {
     MANAGE_USERS = 'manage_users',
     MANAGE_SETTINGS = 'manage_settings',
     MANAGE_BILLING = 'manage_billing',
-    VIEW_ANALYTICS = 'view_analytics'
+    VIEW_ANALYTICS = 'view_analytics',
+    VIEW_AUDIT_LOGS = 'view_audit_logs',
+    MANAGE_ORGANIZATION = 'manage_organization',
+    VIEW_ORGANIZATION = 'view_organization',
+    EXPORT_DATA = 'export_data'
 }
 
 export enum PolicyType {
     DOCUMENT_RETENTION = 'document_retention',
     ACCESS_CONTROL = 'access_control',
     DATA_PRIVACY = 'data_privacy',
-    SECURITY = 'security'
+    SECURITY = 'security',
+    NOTIFICATION = 'notification',
+    VERIFICATION = 'verification',
+    DATA_RETENTION = 'data_retention',
+    API_ACCESS = 'api_access'
 }
 
 export interface OrganizationSettingsUpdateRequest {

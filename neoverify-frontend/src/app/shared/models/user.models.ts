@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { UserRole, User } from './auth.models';
 
+// Re-export User for external use
+export { User, UserRole };
+
 // User preferences interface (unique to user.models.ts)
 export interface UserPreferences {
     emailNotifications: boolean;
@@ -143,4 +146,26 @@ export const UserProfileResponseSchema = z.object({
     }),
     organization: z.any().optional(),
     permissions: z.array(z.string())
-});
+});// Ad
+ditional auth - related types
+export interface CreateUserRequest {
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+    role?: UserRole;
+    organizationId?: string;
+}
+
+export interface LoginRequest {
+    email: string;
+    password: string;
+    rememberMe?: boolean;
+}
+
+export interface AuthResponse {
+    token: string;
+    refreshToken?: string;
+    user: User;
+    expiresAt: Date;
+}

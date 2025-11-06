@@ -1,5 +1,6 @@
 // Services
 export * from './services/api.service';
+export * from './services/auth.service';
 export * from './services/enhanced-request-manager.service';
 
 // Types
