@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { IPFSResults } from '../models/Verification';
 
 // IPFS service configuration
@@ -180,9 +180,9 @@ class IPFSService {
             );
 
             const result: IPFSUploadResponse = {
-                hash: response.data.hash || response.data.Hash,
-                size: response.data.size || response.data.Size,
-                name: response.data.name || response.data.Name || request.filename,
+                hash: response.data.hash || (response.data as any).Hash,
+                size: response.data.size || (response.data as any).Size,
+                name: response.data.name || (response.data as any).Name || request.filename,
                 pinned: request.pin || false,
                 gateway: this.config.gateway,
             };

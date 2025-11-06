@@ -1,494 +1,345 @@
-export interface Document {
-  id: string;
-  verificationId: string;
-  originalFileName: string;
-  canonicalHash: string;
-  documentType: DocumentType;
-  status: DocumentStatus;
-  metadata: DocumentMetadata;
-  blockchainRecord?: BlockchainRecord;
-  forensicsResult?: ForensicsResult;
-  qrCodeUrl?: string;
-  issuerId: string;
-  organizationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  revokedAt?: Date;
-  revocationReason?: string;
-  // Document Management System fields
-  title: string;
-  description?: string;
-  fileUrl: string;
-  thumbnailUrl?: string;
-  fileSize: number;
-  mimeType: string;
-  uploadedBy: string;
-  uploadedAt: Date;
-  verifiedAt?: Date;
-  verificationStatus: VerificationStatus;
-  tags: string[];
-  permissions: DocumentPermissions;
-  auditTrail: AuditEntry[];
-  templateId?: string;
-}
+import { z } from 'zod';
 
-export enum DocumentType {
-  DEGREE = 'degree',
-  CERTIFICATE = 'certificate',
-  LICENSE = 'license',
-  TRANSCRIPT = 'transcript',
-  ID_DOCUMENT = 'id_document',
-  OTHER = 'other'
-}
-
-export enum DocumentStatus {
-  UPLOADED = 'uploaded',
-  PROCESSING = 'processing',
-  VERIFIED = 'verified',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired',
-  PENDING = 'pending',
-  ACTIVE = 'active',
-  REVOKED = 'revoked'
-}
-
-export interface DocumentMetadata {
-  title?: string;
-  description?: string;
-  recipientName?: string;
-  issueDate?: Date;
-  expiryDate?: Date;
-  customFields?: Record<string, any>;
-}
-
-export interface BlockchainRecord {
-  transactionHash: string;
-  blockNumber: number;
-  network: string;
-  timestamp: Date;
-  gasUsed?: number;
-  status: 'pending' | 'confirmed' | 'failed';
-}
-
-export interface ForensicsResult {
-  riskScore: number; // 0-100
-  status: 'genuine' | 'suspicious' | 'invalid';
-  flags: ForensicsFlag[];
-  modelVersion: string;
-  processingTime: number;
-  artifacts?: ForensicsArtifact[];
-}
-
-export interface ForensicsFlag {
-  type: string;
-  severity: 'low' | 'medium' | 'high';
-  description: string;
-  confidence: number;
-}
-
-export interface ForensicsArtifact {
-  type: 'heatmap' | 'diff' | 'metadata';
-  url: string;
-  description: string;
-}
-
-export interface VerificationRequest {
-  type: 'file' | 'hash' | 'id';
-  file?: File;
-  hash?: string;
-  verificationId?: string;
-  runForensics?: boolean;
-}
-
-export interface VerificationResult {
-  document?: Document;
-  status: 'genuine' | 'suspicious' | 'invalid' | 'not_found';
-  forensicsResult?: ForensicsResult;
-  evidence: VerificationEvidence;
-  timestamp: Date;
-}
-
-export interface VerificationEvidence {
-  transactionHash?: string;
-  blockNumber?: number;
-  network?: string;
-  issuerOrganization?: string;
-  verificationReceiptUrl?: string;
-}
-
-export interface BulkIssuanceRequest {
-  documents: BulkDocumentItem[];
-  documentType: DocumentType;
-  template?: string;
-}
-
-export interface BulkDocumentItem {
-  file: File;
-  metadata: DocumentMetadata;
-}
-
-export interface BulkIssuanceResult {
-  jobId: string;
-  totalItems: number;
-  processedItems: number;
-  successCount: number;
-  errorCount: number;
-  results: BulkItemResult[];
-}
-
-export interface BulkItemResult {
-  fileName: string;
-  status: 'success' | 'error';
-  documentId?: string;
-  verificationId?: string;
-  error?: string;
-}
-
-// Document Management System Models
-
-export interface DocumentTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  version: string;
-  isActive: boolean;
-  fields: TemplateField[];
-  validationRules: ValidationRule[];
-  previewUrl?: string;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-  usageCount: number;
-  organizationId: string;
-}
-
-export interface TemplateField {
-  id: string;
-  name: string;
-  type: FieldType;
-  required: boolean;
-  defaultValue?: any;
-  validation?: FieldValidation;
-  position: { x: number; y: number };
-  placeholder?: string;
-  options?: string[]; // For dropdown/select fields
-}
-
-export enum FieldType {
-  TEXT = 'text',
-  NUMBER = 'number',
-  DATE = 'date',
-  EMAIL = 'email',
-  PHONE = 'phone',
-  DROPDOWN = 'dropdown',
-  CHECKBOX = 'checkbox',
-  TEXTAREA = 'textarea',
-  FILE = 'file'
-}
-
-export interface FieldValidation {
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  min?: number;
-  max?: number;
-  required?: boolean;
-  customMessage?: string;
-}
-
-export interface ValidationRule {
-  id: string;
-  fieldId: string;
-  type: ValidationType;
-  value: any;
-  message: string;
-}
-
-export enum ValidationType {
-  REQUIRED = 'required',
-  MIN_LENGTH = 'minLength',
-  MAX_LENGTH = 'maxLength',
-  PATTERN = 'pattern',
-  MIN_VALUE = 'minValue',
-  MAX_VALUE = 'maxValue',
-  CUSTOM = 'custom'
-}
-
-export interface TemplateVersion {
-  id: string;
-  templateId: string;
-  version: string;
-  changes: string;
-  createdBy: string;
-  createdAt: Date;
-  isActive: boolean;
-}
-
-export interface DocumentFilters {
-  documentType?: DocumentType[];
-  status?: DocumentStatus[];
-  dateRange?: {
-    start: Date;
-    end: Date;
-  };
-  issuer?: string[];
-  tags?: string[];
-  verificationStatus?: VerificationStatus[];
-}
-
+// Document verification status enumeration
 export enum VerificationStatus {
   PENDING = 'pending',
-  VERIFIED = 'verified',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
   FAILED = 'failed',
-  EXPIRED = 'expired'
+  CANCELLED = 'cancelled',
 }
 
-export interface DocumentPermissions {
-  canView: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
-  canShare: boolean;
-  canDownload: boolean;
-  sharedWith?: SharedUser[];
+// Document type enumeration
+export enum DocumentType {
+  PDF = 'pdf',
+  IMAGE = 'image',
+  WORD = 'word',
+  EXCEL = 'excel',
+  POWERPOINT = 'powerpoint',
+  TEXT = 'text',
+  OTHER = 'other',
 }
 
-export interface SharedUser {
+// Document metadata interface
+export interface DocumentMetadata {
+  fileSize: number;
+  mimeType: string;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  pages?: number;
+  author?: string;
+  title?: string;
+  subject?: string;
+  keywords?: string[];
+  creationDate?: Date;
+  modificationDate?: Date;
+  producer?: string;
+  creator?: string;
+  extractedText?: string;
+  language?: string;
+  checksum: string;
+  uploadedFrom?: string;
+  clientInfo?: {
+    userAgent?: string;
+    ipAddress?: string;
+  };
+}
+
+// Verification results interface
+export interface VerificationResults {
+  aiForensics?: {
+    authenticity: number;
+    tampering: number;
+    confidence: number;
+    details: any;
+    completedAt: Date;
+  };
+  blockchain?: {
+    transactionHash: string;
+    blockNumber?: number;
+    timestamp: Date;
+    status: 'pending' | 'confirmed' | 'failed';
+  };
+  ipfs?: {
+    hash: string;
+    size: number;
+    timestamp: Date;
+  };
+  overall?: {
+    score: number;
+    status: 'authentic' | 'suspicious' | 'tampered' | 'inconclusive';
+    summary: string;
+  };
+}
+
+// Document sharing settings interface
+export interface SharingSettings {
+  isPublic: boolean;
+  allowDownload: boolean;
+  expiresAt?: Date;
+  password?: string;
+  allowedEmails?: string[];
+  shareToken?: string;
+}
+
+// Document interface
+export interface Document {
+  id: string;
   userId: string;
-  email: string;
-  permissions: SharePermissions;
-  sharedAt: Date;
+  organizationId?: string;
+  filename: string;
+  originalName: string;
+  filePath: string;
+  mimeType: string;
+  size: number;
+  hash: string;
+  ipfsHash?: string;
+  documentType: DocumentType;
+  metadata: DocumentMetadata;
+  verificationStatus: VerificationStatus;
+  verificationResults?: VerificationResults;
+  sharingSettings: SharingSettings;
+  tags: string[];
+  description?: string;
+  isPublic: boolean;
+  downloadCount: number;
+  viewCount: number;
+  lastAccessedAt?: Date;
+  expiresAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Document upload request interface
+export interface DocumentUploadRequest {
+  file: File;
+  description?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  sharingSettings?: Partial<SharingSettings>;
   expiresAt?: Date;
 }
 
-export interface SharePermissions {
-  canView: boolean;
-  canEdit: boolean;
-  canDownload: boolean;
+// Document update request interface
+export interface DocumentUpdateRequest {
+  description?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  sharingSettings?: Partial<SharingSettings>;
+  expiresAt?: Date;
 }
 
-export interface AuditEntry {
-  id: string;
-  documentId: string;
-  action: AuditAction;
-  userId: string;
-  userEmail: string;
-  timestamp: Date;
-  ipAddress?: string;
-  userAgent?: string;
-  details?: Record<string, any>;
-  previousStatus?: DocumentStatus;
-  newStatus?: DocumentStatus;
-  reason?: string;
-}
-
-export enum AuditAction {
-  CREATED = 'created',
-  VIEWED = 'viewed',
-  UPDATED = 'updated',
-  DELETED = 'deleted',
-  SHARED = 'shared',
-  DOWNLOADED = 'downloaded',
-  VERIFIED = 'verified',
-  REVOKED = 'revoked',
-  PERMISSION_CHANGED = 'permission_changed',
-  STATUS_CHANGED = 'status_changed',
-  VERIFICATION_STARTED = 'verification_started',
-  VERIFICATION_COMPLETED = 'verification_completed',
-  VERIFICATION_FAILED = 'verification_failed'
-}
-
-export interface DocumentUploadProgress {
-  fileId: string;
-  fileName: string;
-  progress: number; // 0-100
-  status: UploadStatus;
-  error?: string;
-  documentId?: string;
-}
-
-export enum UploadStatus {
-  PENDING = 'pending',
-  UPLOADING = 'uploading',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
-}
-
-export interface BulkAction {
-  type: BulkActionType;
-  documentIds: string[];
-  data?: any;
-}
-
-export enum BulkActionType {
-  DELETE = 'delete',
-  UPDATE_STATUS = 'update_status',
-  ADD_TAGS = 'add_tags',
-  REMOVE_TAGS = 'remove_tags',
-  EXPORT = 'export',
-  SHARE = 'share'
-}
-
-export interface ExportFormat {
-  type: 'csv' | 'excel' | 'pdf';
-  includeMetadata: boolean;
-  includeAuditTrail: boolean;
-}
-
-export interface DocumentSearchResult {
-  documents: Document[];
-  totalCount: number;
-  facets: SearchFacets;
-  suggestions?: string[];
-}
-
-export interface SearchFacets {
-  documentTypes: FacetCount[];
-  statuses: FacetCount[];
-  issuers: FacetCount[];
-  tags: FacetCount[];
-}
-
-export interface FacetCount {
-  value: string;
-  count: number;
-}
-
-// Status Tracking and Verification Models
-
-export interface DocumentStatusHistory {
-  id: string;
-  documentId: string;
-  previousStatus: DocumentStatus;
-  newStatus: DocumentStatus;
-  reason?: string;
-  triggeredBy: StatusTrigger;
+// Document search/filter interface
+export interface DocumentFilters {
+  search?: string;
+  documentType?: DocumentType;
+  verificationStatus?: VerificationStatus;
+  tags?: string[];
   userId?: string;
-  userEmail?: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
+  organizationId?: string;
+  isPublic?: boolean;
+  dateFrom?: Date;
+  dateTo?: Date;
+  sizeMin?: number;
+  sizeMax?: number;
 }
 
-export enum StatusTrigger {
-  MANUAL = 'manual',
-  AUTOMATED = 'automated',
-  VERIFICATION_RESULT = 'verification_result',
-  SYSTEM = 'system',
-  SCHEDULED = 'scheduled'
+// Document list response interface
+export interface DocumentListResponse {
+  documents: Document[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
-export interface StatusTransition {
-  from: DocumentStatus;
-  to: DocumentStatus;
-  allowed: boolean;
-  requiresReason: boolean;
-  requiresPermission?: string;
-  conditions?: StatusCondition[];
-}
-
-export interface StatusCondition {
-  type: 'user_role' | 'document_age' | 'verification_status' | 'custom';
-  value: any;
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
-}
-
-export interface VerificationProgress {
+// Document verification request interface
+export interface DocumentVerificationRequest {
   documentId: string;
-  stage: VerificationStage;
-  progress: number; // 0-100
-  message: string;
-  startedAt: Date;
-  estimatedCompletion?: Date;
-  details?: VerificationStageDetail[];
+  verificationTypes?: ('aiForensics' | 'blockchain' | 'ipfs')[];
+  priority?: 'low' | 'normal' | 'high';
 }
 
-export enum VerificationStage {
-  QUEUED = 'queued',
-  PREPROCESSING = 'preprocessing',
-  FORENSIC_ANALYSIS = 'forensic_analysis',
-  BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
-  SIGNATURE_VALIDATION = 'signature_validation',
-  METADATA_EXTRACTION = 'metadata_extraction',
-  FINAL_VALIDATION = 'final_validation',
-  COMPLETED = 'completed',
-  FAILED = 'failed'
-}
-
-export interface VerificationStageDetail {
-  stage: VerificationStage;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
-  startedAt?: Date;
-  completedAt?: Date;
-  progress: number;
-  message: string;
-  error?: VerificationError;
-}
-
-export interface VerificationError {
-  code: string;
-  message: string;
-  details?: string;
-  remediation?: RemediationStep[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface RemediationStep {
-  id: string;
-  title: string;
-  description: string;
-  action?: RemediationAction;
-  priority: number;
-}
-
-export interface RemediationAction {
-  type: 'retry' | 'manual_review' | 'contact_support' | 'reupload' | 'update_metadata';
-  label: string;
-  endpoint?: string;
-  parameters?: Record<string, any>;
-}
-
-export interface VerificationHistoryEntry {
+// Document verification job interface
+export interface DocumentVerificationJob {
   id: string;
   documentId: string;
-  verificationId: string;
   status: VerificationStatus;
-  startedAt: Date;
-  completedAt?: Date;
-  duration?: number; // in milliseconds
-  triggeredBy: string; // user ID or 'system'
-  result?: VerificationResult;
-  error?: VerificationError;
-  forensicsEnabled: boolean;
-  metadata?: Record<string, any>;
-}
-
-export interface StatusNotification {
-  id: string;
-  documentId: string;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  status: NotificationStatus;
+  progress: number;
+  estimatedCompletion?: Date;
+  results?: Partial<VerificationResults>;
   createdAt: Date;
-  readAt?: Date;
-  actionUrl?: string;
-  metadata?: Record<string, any>;
+  updatedAt: Date;
 }
 
-export enum NotificationType {
-  STATUS_CHANGE = 'status_change',
-  VERIFICATION_COMPLETE = 'verification_complete',
-  VERIFICATION_FAILED = 'verification_failed',
-  DOCUMENT_EXPIRED = 'document_expired',
-  PERMISSION_CHANGED = 'permission_changed',
-  BULK_OPERATION_COMPLETE = 'bulk_operation_complete'
+// Document share request interface
+export interface DocumentShareRequest {
+  documentId: string;
+  settings: Partial<SharingSettings>;
 }
 
-export enum NotificationStatus {
-  UNREAD = 'unread',
-  READ = 'read',
-  DISMISSED = 'dismissed'
+// Document share response interface
+export interface DocumentShareResponse {
+  shareUrl: string;
+  shareToken: string;
+  expiresAt?: Date;
 }
+
+// Document download request interface
+export interface DocumentDownloadRequest {
+  documentId: string;
+  shareToken?: string;
+}
+
+// Document statistics interface
+export interface DocumentStatistics {
+  totalDocuments: number;
+  totalSize: number;
+  verifiedDocuments: number;
+  pendingVerifications: number;
+  failedVerifications: number;
+  documentsByType: Record<DocumentType, number>;
+  documentsByStatus: Record<VerificationStatus, number>;
+  uploadsThisMonth: number;
+  verificationsThisMonth: number;
+}
+
+// Zod Schemas for Runtime Validation
+export const DocumentMetadataSchema = z.object({
+  fileSize: z.number().min(0),
+  mimeType: z.string(),
+  dimensions: z.object({
+    width: z.number(),
+    height: z.number()
+  }).optional(),
+  pages: z.number().optional(),
+  author: z.string().optional(),
+  title: z.string().optional(),
+  subject: z.string().optional(),
+  keywords: z.array(z.string()).optional(),
+  creationDate: z.string().datetime().optional(),
+  modificationDate: z.string().datetime().optional(),
+  producer: z.string().optional(),
+  creator: z.string().optional(),
+  extractedText: z.string().optional(),
+  language: z.string().optional(),
+  checksum: z.string(),
+  uploadedFrom: z.string().optional(),
+  clientInfo: z.object({
+    userAgent: z.string().optional(),
+    ipAddress: z.string().optional()
+  }).optional()
+});
+
+export const VerificationResultsSchema = z.object({
+  aiForensics: z.object({
+    authenticity: z.number().min(0).max(1),
+    tampering: z.number().min(0).max(1),
+    confidence: z.number().min(0).max(1),
+    details: z.any(),
+    completedAt: z.string().datetime()
+  }).optional(),
+  blockchain: z.object({
+    transactionHash: z.string(),
+    blockNumber: z.number().optional(),
+    timestamp: z.string().datetime(),
+    status: z.enum(['pending', 'confirmed', 'failed'])
+  }).optional(),
+  ipfs: z.object({
+    hash: z.string(),
+    size: z.number(),
+    timestamp: z.string().datetime()
+  }).optional(),
+  overall: z.object({
+    score: z.number().min(0).max(1),
+    status: z.enum(['authentic', 'suspicious', 'tampered', 'inconclusive']),
+    summary: z.string()
+  }).optional()
+});
+
+export const SharingSettingsSchema = z.object({
+  isPublic: z.boolean(),
+  allowDownload: z.boolean(),
+  expiresAt: z.string().datetime().optional(),
+  password: z.string().optional(),
+  allowedEmails: z.array(z.string().email()).optional(),
+  shareToken: z.string().optional()
+});
+
+export const DocumentSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  organizationId: z.string().uuid().optional(),
+  filename: z.string(),
+  originalName: z.string(),
+  filePath: z.string(),
+  mimeType: z.string(),
+  size: z.number().min(0),
+  hash: z.string(),
+  ipfsHash: z.string().optional(),
+  documentType: z.nativeEnum(DocumentType),
+  metadata: DocumentMetadataSchema,
+  verificationStatus: z.nativeEnum(VerificationStatus),
+  verificationResults: VerificationResultsSchema.optional(),
+  sharingSettings: SharingSettingsSchema,
+  tags: z.array(z.string()),
+  description: z.string().optional(),
+  isPublic: z.boolean(),
+  downloadCount: z.number().min(0),
+  viewCount: z.number().min(0),
+  lastAccessedAt: z.string().datetime().optional(),
+  expiresAt: z.string().datetime().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+
+export const DocumentFiltersSchema = z.object({
+  search: z.string().optional(),
+  documentType: z.nativeEnum(DocumentType).optional(),
+  verificationStatus: z.nativeEnum(VerificationStatus).optional(),
+  tags: z.array(z.string()).optional(),
+  userId: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  isPublic: z.boolean().optional(),
+  dateFrom: z.string().datetime().optional(),
+  dateTo: z.string().datetime().optional(),
+  sizeMin: z.number().min(0).optional(),
+  sizeMax: z.number().min(0).optional()
+});
+
+export const DocumentListResponseSchema = z.object({
+  documents: z.array(DocumentSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+  hasNext: z.boolean(),
+  hasPrev: z.boolean()
+});
+
+export const DocumentVerificationJobSchema = z.object({
+  id: z.string().uuid(),
+  documentId: z.string().uuid(),
+  status: z.nativeEnum(VerificationStatus),
+  progress: z.number().min(0).max(100),
+  estimatedCompletion: z.string().datetime().optional(),
+  results: VerificationResultsSchema.optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
+});
+
+export const DocumentStatisticsSchema = z.object({
+  totalDocuments: z.number(),
+  totalSize: z.number(),
+  verifiedDocuments: z.number(),
+  pendingVerifications: z.number(),
+  failedVerifications: z.number(),
+  documentsByType: z.record(z.nativeEnum(DocumentType), z.number()),
+  documentsByStatus: z.record(z.nativeEnum(VerificationStatus), z.number()),
+  uploadsThisMonth: z.number(),
+  verificationsThisMonth: z.number()
+});

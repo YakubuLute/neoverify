@@ -1,5 +1,5 @@
 import { Op, QueryTypes } from 'sequelize';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import database from '../config/database';
 import Verification, { VerificationType, VerificationPriority } from '../models/Verification';
 import Document, { VerificationStatus } from '../models/Document';
