@@ -48,3 +48,8 @@ export interface NotificationMessage {
   duration?: number;
   timestamp: Date;
 }
+
+// Re-export new models
+export * from './user.models';
+export * from './document.models';
+export * from './organization.models';

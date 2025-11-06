@@ -5,7 +5,6 @@ import { catchError, retry, retryWhen, mergeMap, delay, take, timeout, map, filt
 import { z } from 'zod';
 import { environment } from '../../../environments/environment';
 import {
-  ApiResponse,
   ApiError,
   RequestOptions,
   BatchRequest,
@@ -13,8 +12,7 @@ import {
   UploadProgress,
   ApiServiceConfig,
   RequestPriority,
-  ErrorType,
-  ApiResponseSchema
+  ErrorType
 } from '../types/api.types';
 import { ApiUtils } from '../utils/api.utils';
 import { EnhancedRequestManagerService } from './enhanced-request-manager.service';
