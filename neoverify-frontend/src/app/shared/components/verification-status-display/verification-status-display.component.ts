@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, inject, computed, signal } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -15,7 +15,6 @@ import {
   VerificationStatus,
   VerificationHistoryEntry,
   VerificationProgress,
-  VerificationError,
   RemediationStep
 } from '../../models/document.models';
 
@@ -33,7 +32,7 @@ import {
     StatusBadgeComponent,
     VerificationProgressComponent
   ],
-  templateUrl:'./verification-status-display.component.html',
+  templateUrl: './verification-status-display.component.html',
   styles: [`
     .verification-status-display {
       @apply w-full;
@@ -279,7 +278,7 @@ export class VerificationStatusDisplayComponent implements OnInit, OnDestroy {
     };
 
     const stageName = stageMap[step];
-    const stageDetail = progress.details.find(d => d.stage.toString() === stageName);
+    const stageDetail = progress.details.find(d => d.name === stageName);
     return stageDetail?.status === 'completed';
   }
 
@@ -291,7 +290,7 @@ export class VerificationStatusDisplayComponent implements OnInit, OnDestroy {
     return `${baseClass} pi-circle text-gray-400`;
   }
 
-  trackByHistoryEntry(index: number, entry: VerificationHistoryEntry): string {
+  trackByHistoryEntry(_index: number, entry: VerificationHistoryEntry): string {
     return entry.id;
   }
 

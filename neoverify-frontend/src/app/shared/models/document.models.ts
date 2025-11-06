@@ -121,6 +121,7 @@ export interface SharingSettings {
 export interface Document {
   id: string;
   userId: string;
+  forensicsResult?: ForensicsResult;
   organizationId?: string;
   filename: string;
   originalName: string;
@@ -128,12 +129,15 @@ export interface Document {
   mimeType: string;
   size: number;
   hash: string;
+  canonicalHash: string; // Hash used for verification
   ipfsHash?: string;
   documentType: DocumentType;
   metadata: DocumentMetadata;
   status: DocumentStatus;
   verificationStatus: VerificationStatus;
   verificationResults?: VerificationResults;
+  verifiedAt?: Date; // When the document was verified
+  blockchainRecord?: BlockchainRecord; // Blockchain verification record
   sharingSettings: SharingSettings;
   tags: string[];
   description?: string;
@@ -274,16 +278,18 @@ export interface VerificationProgress {
   documentId: string;
   status: VerificationStatus;
   progress: number; // 0-100
+  stage: VerificationStage; // Current stage
   currentStage: string;
-  stages: VerificationStage[];
+  stages: VerificationStageDetail[];
+  details?: VerificationStageDetail[];
   startedAt: Date;
   estimatedCompletion?: Date;
   completedAt?: Date;
   error?: string;
 }
 
-// Verification stage interface
-export interface VerificationStage {
+// Verification stage detail interface
+export interface VerificationStageDetail {
   name: string;
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'skipped';
   progress: number; // 0-100
@@ -291,6 +297,159 @@ export interface VerificationStage {
   completedAt?: Date;
   error?: string;
   details?: any;
+}
+
+// Verification history entry interface
+export interface VerificationHistoryEntry {
+  id: string;
+  verificationId: string;
+  documentId: string;
+  status: VerificationStatus;
+  startedAt: Date;
+  completedAt?: Date;
+  duration?: number;
+  error?: VerificationError;
+  results?: VerificationResults;
+  triggeredBy: string;
+  metadata?: any;
+}
+
+// Verification error interface
+export interface VerificationError {
+  code: string;
+  message: string;
+  details?: any;
+  severity: 'low' | 'medium' | 'high';
+  category: 'technical' | 'validation' | 'security' | 'network';
+}
+
+// Remediation step interface
+export interface RemediationStep {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  category: string;
+  estimatedTime?: number;
+  action?: {
+    type: string;
+    label: string;
+    parameters: any;
+  };
+  isCompleted: boolean;
+  completedAt?: Date;
+}
+
+// Blockchain record interface
+export interface BlockchainRecord {
+  transactionHash: string;
+  blockNumber: number;
+  network: string;
+  timestamp: Date;
+  status: 'pending' | 'confirmed' | 'failed';
+  gasUsed?: number;
+  gasPrice?: string;
+  contractAddress?: string;
+}
+
+// Forensics result interface
+export interface ForensicsResult {
+  status: 'genuine' | 'suspicious' | 'invalid';
+  riskScore: number;
+  confidence: number;
+  processingTime: number; // Processing time in milliseconds
+  modelVersion: string; // Version of the AI model used
+  flags: ForensicsFlag[];
+  analysis: {
+    metadata: any;
+    visual: any;
+    statistical: any;
+  };
+  completedAt: Date;
+}
+
+// Forensics flag interface
+export interface ForensicsFlag {
+  id: string;
+  type: string;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  confidence: number;
+  location?: {
+    page?: number;
+    coordinates?: { x: number; y: number; width: number; height: number };
+  };
+}
+
+// Document status history interface
+export interface DocumentStatusHistory {
+  id: string;
+  documentId: string;
+  previousStatus: DocumentStatus;
+  newStatus: DocumentStatus;
+  reason?: string;
+  triggeredBy: StatusTrigger;
+  userId?: string;
+  metadata?: Record<string, any>;
+  createdAt: Date;
+}
+
+// Status transition interface
+export interface StatusTransition {
+  from: DocumentStatus;
+  to: DocumentStatus;
+  label: string;
+  description?: string;
+  requiresReason: boolean;
+  allowedRoles?: string[];
+  conditions?: Record<string, any>;
+}
+
+// Status trigger enumeration
+export enum StatusTrigger {
+  MANUAL = 'manual',
+  SYSTEM = 'system',
+  SCHEDULED = 'scheduled',
+  API = 'api',
+  WEBHOOK = 'webhook'
+}
+
+// Status notification interface
+export interface StatusNotification {
+  id: string;
+  userId: string;
+  documentId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  status: 'read' | 'unread';
+  priority: 'low' | 'medium' | 'high';
+  metadata?: Record<string, any>;
+  createdAt: Date;
+  readAt?: Date;
+  expiresAt?: Date;
+}
+
+// Notification type enumeration
+export enum NotificationType {
+  STATUS_CHANGED = 'status_changed',
+  VERIFICATION_COMPLETED = 'verification_completed',
+  VERIFICATION_FAILED = 'verification_failed',
+  DOCUMENT_SHARED = 'document_shared',
+  DOCUMENT_EXPIRED = 'document_expired',
+  SYSTEM_ALERT = 'system_alert'
+}
+
+// Verification stage enumeration
+export enum VerificationStage {
+  PENDING = 'pending',
+  PREPROCESSING = 'preprocessing',
+  FORENSIC_ANALYSIS = 'forensic_analysis',
+  BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
+  FINAL_VALIDATION = 'final_validation',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
 }
 
 // Zod Schemas for Runtime Validation
@@ -378,6 +537,49 @@ export const DocumentPermissionsSchema = z.object({
   sharedWith: z.array(SharedUserSchema).optional()
 });
 
+// Blockchain record schema
+export const BlockchainRecordSchema = z.object({
+  transactionHash: z.string(),
+  blockNumber: z.number(),
+  network: z.string(),
+  timestamp: z.string().datetime(),
+  status: z.enum(['pending', 'confirmed', 'failed']),
+  gasUsed: z.number().optional(),
+  gasPrice: z.string().optional(),
+  contractAddress: z.string().optional()
+});
+
+// Forensics result schema
+export const ForensicsResultSchema = z.object({
+  status: z.enum(['genuine', 'suspicious', 'invalid']),
+  riskScore: z.number().min(0).max(100),
+  confidence: z.number().min(0).max(100),
+  processingTime: z.number().min(0),
+  modelVersion: z.string(),
+  flags: z.array(z.object({
+    id: z.string(),
+    type: z.string(),
+    severity: z.enum(['low', 'medium', 'high']),
+    description: z.string(),
+    confidence: z.number().min(0).max(100),
+    location: z.object({
+      page: z.number().optional(),
+      coordinates: z.object({
+        x: z.number(),
+        y: z.number(),
+        width: z.number(),
+        height: z.number()
+      }).optional()
+    }).optional()
+  })),
+  analysis: z.object({
+    metadata: z.any(),
+    visual: z.any(),
+    statistical: z.any()
+  }),
+  completedAt: z.string().datetime()
+});
+
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
@@ -388,12 +590,16 @@ export const DocumentSchema = z.object({
   mimeType: z.string(),
   size: z.number().min(0),
   hash: z.string(),
+  canonicalHash: z.string(),
   ipfsHash: z.string().optional(),
   documentType: z.nativeEnum(DocumentType),
   metadata: DocumentMetadataSchema,
   status: z.nativeEnum(DocumentStatus),
   verificationStatus: z.nativeEnum(VerificationStatus),
   verificationResults: VerificationResultsSchema.optional(),
+  verifiedAt: z.string().datetime().optional(),
+  blockchainRecord: BlockchainRecordSchema.optional(),
+  forensicsResult: ForensicsResultSchema.optional(),
   sharingSettings: SharingSettingsSchema,
   tags: z.array(z.string()),
   description: z.string().optional(),
@@ -443,7 +649,7 @@ export const DocumentVerificationJobSchema = z.object({
   updatedAt: z.string().datetime()
 });
 
-export const VerificationStageSchema = z.object({
+export const VerificationStageDetailSchema = z.object({
   name: z.string(),
   status: z.enum(['pending', 'in_progress', 'completed', 'failed', 'skipped']),
   progress: z.number().min(0).max(100),
@@ -457,8 +663,10 @@ export const VerificationProgressSchema = z.object({
   documentId: z.string().uuid(),
   status: z.nativeEnum(VerificationStatus),
   progress: z.number().min(0).max(100),
+  stage: z.nativeEnum(VerificationStage),
   currentStage: z.string(),
-  stages: z.array(VerificationStageSchema),
+  stages: z.array(VerificationStageDetailSchema),
+  details: z.array(VerificationStageDetailSchema).optional(),
   startedAt: z.string().datetime(),
   estimatedCompletion: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),

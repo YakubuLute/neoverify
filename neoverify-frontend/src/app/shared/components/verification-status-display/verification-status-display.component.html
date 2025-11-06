@@ -310,7 +310,7 @@
               </div>
               <div class="info-item">
                 <label>Verification ID:</label>
-                <span>{{ document.verificationId }}</span>
+                <span>{{ document.id }}</span>
               </div>
               <div class="info-item">
                 <label>File Hash:</label>
@@ -318,7 +318,7 @@
               </div>
               <div class="info-item">
                 <label>Upload Date:</label>
-                <span>{{ document.uploadedAt | date:'medium' }}</span>
+                <span>{{ document.createdAt | date:'medium' }}</span>
               </div>
             </div>
           </p-card>
