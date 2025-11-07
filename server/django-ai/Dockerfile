@@ -9,11 +9,11 @@ WORKDIR /usr/src/app
 RUN apt-get update && apt-get upgrade -y && apt-get clean
 
 # Install dependencies
-COPY server/python/requirements.txt ./
+COPY server/django-ai/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source
-COPY server/python/ .
+COPY server/django-ai/ .
 
 EXPOSE 8000
 CMD ["gunicorn", "neoverify.wsgi:application", "--bind", "0.0.0.0:8000"]
