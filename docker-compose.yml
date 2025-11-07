@@ -1,39 +1,81 @@
 version: "3.9"
+
 services:
+  # ===========================
+  # FRONTEND: Angular Client
+  # ===========================
   angular-client:
     build:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "4200:4200"
+      - "80:80"   # port 80 for production-like serving
     depends_on:
       - node-backend
       - django-ai
+    networks:
+      - frontend_net
+      - backend_net
 
+    # local dev hot reload:
+    # volumes:
+    #   - ./client:/app
+
+  # ===========================
+  # BACKEND: Node.js Service
+  # ===========================
   node-backend:
     build:
       context: ./server/node-backend
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
-      - MONGO_URL=mongodb://mongo:27017/neoverify
+      - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/neoverify}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
+    networks:
+      - backend_net
+      - db_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ===========================
+  # BACKEND: Django AI Service
+  # ===========================
   django-ai:
     build:
       context: ./server/django-ai
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DJANGO_SETTINGS_MODULE=neoverify.settings
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/neoverify
+      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/neoverify}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend_net
+      - db_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ===========================
+  # DATABASE: MongoDB
+  # ===========================
   mongo:
     image: mongo:6
     restart: always
@@ -41,19 +83,60 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - db_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ===========================
+  # DATABASE: PostgreSQL
+  # ===========================
   postgres:
     image: postgres:15
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: neoverify
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+# ===========================
+# NETWORKS
+# ===========================
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+  db_net:
+    driver: bridge
+
+# ===========================
+# VOLUMES
+# ===========================
 volumes:
   mongo_data:
+    name: neoverify_mongo_data
   postgres_data:
+    name: neoverify_postgres_data
