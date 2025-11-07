@@ -18,7 +18,7 @@ COPY . .
 
 EXPOSE 4200
 
-# Use npx to avoid needing a global @angular/cli
+# used npx to avoid needing a global @angular/cli
 # Bind to 0.0.0.0 so the service is reachable from outside the container
-# Use polling for file change detection inside Docker
+# Used polling for file change detection inside Docker
 CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "4200", "--poll", "2000"]

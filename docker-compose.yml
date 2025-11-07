@@ -2,8 +2,8 @@ version: "3.9"
 services:
   angular-client:
     build:
-      context: .
-      dockerfile: client/Dockerfile
+      context: ./client
+      dockerfile: Dockerfile
     ports:
       - "4200:4200"
     depends_on:
@@ -12,8 +12,8 @@ services:
 
   node-backend:
     build:
-      context: .
-      dockerfile: server/node-backend/Dockerfile
+      context: ./server/node-backend
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
@@ -24,8 +24,8 @@ services:
 
   django-ai:
     build:
-      context: .
-      dockerfile: server/django-ai/Dockerfile
+      context: ./server/django-ai
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
