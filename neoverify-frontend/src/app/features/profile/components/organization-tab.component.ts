@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, ErrorObserver } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SHARED_IMPORTS } from '../../../shared';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -440,7 +440,7 @@ import {
                 </ng-template>
 
                 <div class="space-y-3">
-                  @for (policy of currentContext()?.policies || []; track policy.id) {
+                  @for (policy of currentContext()?.policies || []; track policy?.id) {
                     <div class="policy-item">
                       <div class="flex items-start gap-3">
                         <div class="policy-icon">
@@ -455,11 +455,11 @@ import {
                           </p>
                           <div class="flex items-center gap-2 mt-2">
                             <p-tag 
-                              [value]="getPolicyTypeDisplayName(policy.type)" 
-                              [severity]="getPolicyTypeSeverity(policy.type)"
+                              [value]="getPolicyTypeDisplayName(policy?.type)" 
+                              [severity]="getPolicyTypeSeverity(policy?.type)"
                               size="small"
                             ></p-tag>
-                            @if (policy.isEnforced) {
+                            @if (policy?.isEnforced) {
                               <p-tag value="Enforced" severity="warn" size="small"></p-tag>
                             }
                           </div>
