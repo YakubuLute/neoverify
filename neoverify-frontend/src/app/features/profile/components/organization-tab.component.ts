@@ -444,7 +444,7 @@ import {
                     <div class="policy-item">
                       <div class="flex items-start gap-3">
                         <div class="policy-icon">
-                          <i [class]="getPolicyIcon(policy.type)" class="text-sm"></i>
+                          <i [class]="getPolicyIcon(policy?.type!)" class="text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                           <p class="text-sm font-medium text-surface-900 dark:text-surface-0">
@@ -455,8 +455,8 @@ import {
                           </p>
                           <div class="flex items-center gap-2 mt-2">
                             <p-tag 
-                              [value]="getPolicyTypeDisplayName(policy?.type)" 
-                              [severity]="getPolicyTypeSeverity(policy?.type)"
+                              [value]="getPolicyTypeDisplayName(policy?.type!)" 
+                              [severity]="getPolicyTypeSeverity(policy?.type!)"
                               size="small"
                             ></p-tag>
                             @if (policy?.isEnforced) {
