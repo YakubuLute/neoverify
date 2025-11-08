@@ -12,10 +12,10 @@ const envSchema = Joi.object({
   PORT: Joi.number().port().default(3000),
 
   // Database configuration
-  DB_HOST: Joi.string().required(),
-  DB_PORT: Joi.number().port().default(5432),
-  DB_NAME: Joi.string().required(),
-  DB_USER: Joi.string().required(),
+  POSTGRES_DB_HOST: Joi.string().required(),
+  POSTGRES_DB_PORT: Joi.number().port().default(5432),
+  POSTGRES_DB_NAME: Joi.string().required(),
+  POSTGRES_USER: Joi.string().required(),
   DB_PASSWORD: Joi.string().required(),
   DB_SSL: Joi.boolean().default(false),
 
@@ -141,10 +141,10 @@ const config: Config = {
     baseUrl: envVars.SERVER_BASE_URL,
   },
   database: {
-    host: envVars.DB_HOST,
-    port: envVars.DB_PORT,
-    name: envVars.DB_NAME,
-    user: envVars.DB_USER,
+    host: envVars.POSTGRES_DB_HOST,
+    port: envVars.POSTGRES_DB_PORT,
+    name: envVars.POSTGRES_DB_NAME,
+    user: envVars.POSTGRES_USER,
     password: envVars.DB_PASSWORD,
     ssl: envVars.DB_SSL,
   },
@@ -178,23 +178,23 @@ const config: Config = {
       envVars.AI_FORENSICS_API_KEY &&
       envVars.AI_FORENSICS_API_URL.trim() !== '' &&
       envVars.AI_FORENSICS_API_KEY.trim() !== '' && {
-      aiForensics: {
-        apiUrl: envVars.AI_FORENSICS_API_URL,
-        apiKey: envVars.AI_FORENSICS_API_KEY,
-      },
-    }),
+        aiForensics: {
+          apiUrl: envVars.AI_FORENSICS_API_URL,
+          apiKey: envVars.AI_FORENSICS_API_KEY,
+        },
+      }),
     ...(envVars.BLOCKCHAIN_SERVICE_URL &&
       envVars.BLOCKCHAIN_SERVICE_URL.trim() !== '' && {
-      blockchain: {
-        serviceUrl: envVars.BLOCKCHAIN_SERVICE_URL,
-      },
-    }),
+        blockchain: {
+          serviceUrl: envVars.BLOCKCHAIN_SERVICE_URL,
+        },
+      }),
     ...(envVars.IPFS_API_URL &&
       envVars.IPFS_API_URL.trim() !== '' && {
-      ipfs: {
-        apiUrl: envVars.IPFS_API_URL,
-      },
-    }),
+        ipfs: {
+          apiUrl: envVars.IPFS_API_URL,
+        },
+      }),
   },
   email: {
     service: envVars.EMAIL_SERVICE,

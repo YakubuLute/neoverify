@@ -10,6 +10,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"   # port 80 for production-like serving
+    # env_file:
+    #   - ./client/src/environments/environment.prod.ts
     depends_on:
       - node-backend
       - django-ai
@@ -29,9 +31,9 @@ services:
       context: ./server/node-backend
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5500:5500"
     env_file:
-      - .env
+      - ./server/node-backend/.env
     environment:
       - NODE_ENV=production
       - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/neoverify}
@@ -57,7 +59,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./server/django-ai/.env
     environment:
       - DJANGO_SETTINGS_MODULE=neoverify.settings
       - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/neoverify}
@@ -103,9 +105,9 @@ services:
     image: postgres:15
     restart: always
     env_file:
-      - .env
+      - ./server/django-ai/.env
     ports:
-      - "5432:5432"
+      - "5433:5433"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

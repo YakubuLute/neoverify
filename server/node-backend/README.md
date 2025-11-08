@@ -82,7 +82,7 @@ See `.env.example` for all available configuration options.
 
 ### Required Variables
 
-- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` - Database connection
+- `POSTGRES_DB_HOST`, `POSTGRES_DB_NAME`, `POSTGRES_USER`, `DB_PASSWORD` - Database connection
 - `JWT_SECRET`, `JWT_REFRESH_SECRET` - JWT signing secrets (min 32 chars)
 - `REDIS_HOST` - Redis connection
 

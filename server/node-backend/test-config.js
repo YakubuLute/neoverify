@@ -8,7 +8,7 @@ try {
     console.log('Environment variables loaded:');
     console.log('- NODE_ENV:', process.env.NODE_ENV);
     console.log('- PORT:', process.env.PORT);
-    console.log('- DB_HOST:', process.env.DB_HOST);
+    console.log('- POSTGRES_DB_HOST:', process.env.POSTGRES_DB_HOST);
     console.log('- JWT_SECRET length:', process.env.JWT_SECRET?.length);
 
     // Test config loading

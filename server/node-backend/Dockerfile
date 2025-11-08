@@ -2,11 +2,11 @@ FROM node:18
 WORKDIR /usr/src/app
 
 # Install dependencies
-COPY server/node-backend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Copy source
-COPY server/node-backend/ .
+COPY . .
 
 # Expose app
 EXPOSE 5000

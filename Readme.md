@@ -1794,8 +1794,8 @@ resource "aws_db_instance" "main" {
   storage_type          = "gp3"
   storage_encrypted     = true
   
-  db_name  = "document_verification"
-  username = var.db_username
+  POSTGRES_DB_NAME  = "document_verification"
+  username = var.POSTGRES_USERname
   password = var.db_password
   
   vpc_security_group_ids = [aws_security_group.rds.id]
