@@ -9,19 +9,20 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "4200:4200"   # port 80 for production-like serving
-    # env_file:
-    #   - ./client/src/environments/environment.prod.ts
+      - "4200:4200" # Angular dev server or production on 4200
     depends_on:
       - node-backend
       - django-ai
     networks:
       - frontend_net
       - backend_net
-
-    # local dev hot reload:
-    # volumes:
-    #   - ./client:/app
+    volumes:
+      - ./client:/app # for live reload for dev
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ===========================
   # BACKEND: Node.js Service
@@ -36,10 +37,13 @@ services:
       - ./server/node-backend/.env
     environment:
       - NODE_ENV=production
-      - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/neoverify}
+      # - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/neoverify} # MongoDB disabled
+      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/neoverify}
     depends_on:
-      mongo:
+      postgres:
         condition: service_healthy
+      # mongo: # MongoDB disabled
+      #   condition: service_healthy
     networks:
       - backend_net
       - db_net
@@ -76,7 +80,7 @@ services:
         max-file: "3"
 
   # ===========================
-  # DATABASE: MongoDB
+  # DATABASE: MongoDB (Disabled)
   # ===========================
   # mongo:
   #   image: mongo:6
@@ -138,7 +142,7 @@ networks:
 # VOLUMES
 # ===========================
 volumes:
-  mongo_data:
-    name: neoverify_mongo_data
+  # mongo_data: # MongoDB disabled
+  #   name: neoverify_mongo_data
   postgres_data:
     name: neoverify_postgres_data
