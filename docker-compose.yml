@@ -9,7 +9,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "80:80"   # port 80 for production-like serving
+      - "4200:4200"   # port 80 for production-like serving
     # env_file:
     #   - ./client/src/environments/environment.prod.ts
     depends_on:
@@ -31,7 +31,7 @@ services:
       context: ./server/node-backend
       dockerfile: Dockerfile
     ports:
-      - "5500:5500"
+      - "3000:3000"
     env_file:
       - ./server/node-backend/.env
     environment:
@@ -78,25 +78,25 @@ services:
   # ===========================
   # DATABASE: MongoDB
   # ===========================
-  mongo:
-    image: mongo:6
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - db_net
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+  # mongo:
+  #   image: mongo:6
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db
+  #   networks:
+  #     - db_net
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
 
   # ===========================
   # DATABASE: PostgreSQL
@@ -105,9 +105,9 @@ services:
     image: postgres:15
     restart: always
     env_file:
-      - ./server/django-ai/.env
+      - ./server/node-backend/.env
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
