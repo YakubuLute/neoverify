@@ -935,9 +935,9 @@ export interface AuditEntry {
 export interface BulkIssuanceRequest {
   documents: any[]
   templateId?: string
-  organizationId?: string
-  documentType?: DocumentType
-  template:DocumentTemplate
+  organizationId: string
+  documentType: DocumentType
+  template:DocumentTemplate | null
 }
 
 export interface BulkIssuanceResult {

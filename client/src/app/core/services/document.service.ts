@@ -166,7 +166,7 @@ export class DocumentService {
 
     formData.append('documentType', request.documentType);
     if (request.template) {
-      formData.append('template', request.template);
+      formData.append('template', JSON.stringify(request.template));
     }
 
     return this.apiService.post<BulkIssuanceResult>('documents/bulk-upload', formData).pipe(
