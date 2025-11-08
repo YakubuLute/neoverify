@@ -824,6 +824,7 @@ export interface DocumentUploadProgress {
 // Document templates
 export interface DocumentTemplate {
   id: string
+  organizationId: string
   name: string
   description?: string
   documentType: DocumentType

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -8,7 +9,9 @@ import {
     DocumentTemplate,
     TemplateVersion,
     TemplateField,
-    ValidationRule
+    ValidationRule,
+    DocumentType,
+    FieldType
 } from '../../../shared/models/document.models';
 import { UserRole } from '../../../shared/models/auth.models';
 
@@ -254,8 +257,10 @@ export class TemplateVersionsComponent implements OnInit, OnDestroy {
                 newField: {
                     id: 'new1',
                     name: 'newField',
-                    type: 'text' as any,
+                    type: FieldType.TEXT,
                     required: false,
+                    label: 'New Field',
+                    order: 1,
                     position: { x: 100, y: 300 }
                 }
             },
@@ -265,15 +270,19 @@ export class TemplateVersionsComponent implements OnInit, OnDestroy {
                 oldField: {
                     id: 'existing1',
                     name: 'existingField',
-                    type: 'text' as any,
+                    type: FieldType.TEXT,
                     required: false,
+                    label: 'Existing Field',
+                    order: 1,
                     position: { x: 100, y: 200 }
                 },
                 newField: {
                     id: 'existing1',
                     name: 'existingField',
-                    type: 'text' as any,
+                    type: FieldType.TEXT,
                     required: true,
+                    label: 'Existing Field',
+                    order: 1,
                     position: { x: 100, y: 200 }
                 },
                 changes: ['Required property changed from false to true']
@@ -359,7 +368,8 @@ export class TemplateVersionsComponent implements OnInit, OnDestroy {
             createdAt: new Date('2024-01-01'),
             updatedAt: new Date('2024-01-20'),
             usageCount: 45,
-            organizationId: 'org123'
+            organizationId: 'org123',
+            documentType: DocumentType.PDF
         };
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -75,8 +76,8 @@ import {
                             <p-tag value="Current" severity="success" size="small"></p-tag>
                           }
                           @if (membership.role) {
-                            <p-tag 
-                              [value]="getRoleDisplayName(membership.role)" 
+                            <p-tag
+                              [value]="getRoleDisplayName(membership.role)"
                               [severity]="getRoleSeverity(membership.role)"
                               size="small"
                             ></p-tag>
@@ -108,17 +109,17 @@ import {
                           </div>
                           <div class="flex flex-wrap gap-1">
                             @for (permission of membership.permissions.slice(0, 3); track permission) {
-                              <p-tag 
-                                [value]="getPermissionDisplayName(permission)" 
-                                severity="info" 
+                              <p-tag
+                                [value]="getPermissionDisplayName(permission)"
+                                severity="info"
                                 size="small"
                                 class="text-xs"
                               ></p-tag>
                             }
                             @if (membership.permissions.length > 3) {
-                              <p-tag 
-                                [value]="'+' + (membership.permissions.length - 3) + ' more'" 
-                                severity="secondary" 
+                              <p-tag
+                                [value]="'+' + (membership.permissions.length - 3) + ' more'"
+                                severity="secondary"
                                 size="small"
                                 class="text-xs"
                               ></p-tag>
@@ -231,7 +232,7 @@ import {
                     @if (!preferencesForm.get('verification.inheritFromOrganization')?.value) {
                       <div class="ml-4 space-y-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg">
                         <div>
-                          <label class="block text-sm font-medium mb-2">Default Verification Level</label>
+                          <p class="block text-sm font-medium mb-2">Default Verification Level</p>
                           <p-select
                             formControlName="verification.overrides.defaultVerificationLevel"
                             [options]="verificationLevels"
@@ -255,7 +256,7 @@ import {
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium mb-2">Document Retention (days)</label>
+                          <p class="block text-sm font-medium mb-2">Document Retention (days)</p>
                           <p-inputNumber
                             formControlName="verification.overrides.retentionDays"
                             [min]="1"
@@ -296,7 +297,7 @@ import {
                     @if (!preferencesForm.get('privacy.inheritFromOrganization')?.value) {
                       <div class="ml-4 space-y-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg">
                         <div>
-                          <label class="block text-sm font-medium mb-2">Profile Visibility</label>
+                          <p class="block text-sm font-medium mb-2">Profile Visibility</p>
                           <p-select
                             formControlName="privacy.overrides.profileVisibility"
                             [options]="visibilityOptions"
@@ -309,7 +310,7 @@ import {
                         </div>
 
                         <div>
-                          <label class="block text-sm font-medium mb-2">Activity Visibility</label>
+                          <p class="block text-sm font-medium mb-2">Activity Visibility</p>
                           <p-select
                             formControlName="privacy.overrides.activityVisibility"
                             [options]="activityVisibilityOptions"
@@ -393,8 +394,8 @@ import {
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Your Role</span>
                       @if (currentContext()?.membership?.role) {
-                        <p-tag 
-                          [value]="getRoleDisplayName(currentContext()!.membership!.role)" 
+                        <p-tag
+                          [value]="getRoleDisplayName(currentContext()!.membership!.role)"
                           [severity]="getRoleSeverity(currentContext()!.membership!.role)"
                           size="small"
                         ></p-tag>
@@ -404,8 +405,8 @@ import {
                     <div class="flex items-center justify-between">
                       <span class="text-sm font-medium">Status</span>
                       @if (currentContext()?.membership?.status) {
-                        <p-tag 
-                          [value]="getStatusDisplayName(currentContext()!.membership!.status)" 
+                        <p-tag
+                          [value]="getStatusDisplayName(currentContext()!.membership!.status)"
                           [severity]="getStatusSeverity(currentContext()!.membership!.status)"
                           size="small"
                         ></p-tag>
@@ -454,8 +455,8 @@ import {
                             {{ policy?.description }}
                           </p>
                           <div class="flex items-center gap-2 mt-2">
-                            <p-tag 
-                              [value]="getPolicyTypeDisplayName(policy?.type!)" 
+                            <p-tag
+                              [value]="getPolicyTypeDisplayName(policy?.type!)"
                               [severity]="getPolicyTypeSeverity(policy?.type!)"
                               size="small"
                             ></p-tag>
@@ -519,7 +520,7 @@ import {
                     class="w-full"
                     (onClick)="exportOrganizationSettings()"
                   ></p-button>
-                  
+
                   <p-button
                     label="View Audit Log"
                     icon="pi pi-history"
@@ -529,7 +530,7 @@ import {
                     class="w-full"
                     [disabled]="!organizationService.hasPermission(OrganizationPermission.VIEW_AUDIT_LOGS)"
                   ></p-button>
-                  
+
                   <p-button
                     label="Manage Policies"
                     icon="pi pi-cog"

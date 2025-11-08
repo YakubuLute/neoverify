@@ -122,12 +122,11 @@ export class DocumentService {
     const endpoint = 'verify';
     let body: any = {};
 
+    const formData = new FormData();
     switch (request.type) {
       case 'file':
-        const formData = new FormData();
         formData.append('file', request.file!);
         formData.append('runForensics', String(request.runForensics || false));
-
         return this.apiService.post<VerificationResults>(`${endpoint}/file`, formData);
 
       case 'hash':
