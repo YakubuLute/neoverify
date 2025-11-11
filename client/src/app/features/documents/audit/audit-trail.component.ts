@@ -24,7 +24,7 @@ import { ConfirmationService } from 'primeng/api';
 // Services and Models
 import { AuditService } from '../../../core/services/audit.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { AuditEntry, AuditAction } from '../../../shared/models/document.models';
+import { AuditEntry, AuditAction, ExportFormat, ReportType } from '../../../shared/models/document.models';
 import { PaginatedResponse } from '../../../shared/models/common.models';
 
 interface AuditFilters {
@@ -90,12 +90,13 @@ interface AuditFilters {
         <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Search Query -->
           <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Search</label>
+            <label for="audit-search" class="text-sm font-medium text-gray-300 mb-2">Search</label>
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
               <input
                 pInputText
                 formControlName="query"
+                id="audit-search"
                 placeholder="Search audit entries..."
                 class="w-full"
               />
@@ -104,7 +105,7 @@ interface AuditFilters {
 
           <!-- Actions Filter -->
           <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Actions</label>
+            <label for="audit-actions" class="text-sm font-medium text-gray-300 mb-2">Actions</label>
             <p-multiSelect
               formControlName="actions"
               [options]="actionOptions"
@@ -118,7 +119,7 @@ interface AuditFilters {
 
           <!-- Date Range -->
           <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Start Date</label>
+            <label for="audit-start-date" class="text-sm font-medium text-gray-300 mb-2">Start Date</label>
             <p-calendar
               formControlName="startDate"
               showIcon="true"
@@ -128,7 +129,7 @@ interface AuditFilters {
           </div>
 
           <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">End Date</label>
+            <label for="audit-end-date" class="text-sm font-medium text-gray-300 mb-2">End Date</label>
             <p-calendar
               formControlName="endDate"
               showIcon="true"
@@ -333,36 +334,36 @@ interface AuditFilters {
         <div *ngIf="selectedEntry()" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-sm font-medium text-gray-300">Entry ID</label>
+              <label for="audit-entry-id" class="text-sm font-medium text-gray-300">Entry ID</label>
               <p class="text-sm text-white font-mono">{{ selectedEntry()?.id }}</p>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300">Timestamp</label>
+              <label for="audit-timestamp" class="text-sm font-medium text-gray-300">Timestamp</label>
               <p class="text-sm text-white">{{ selectedEntry()?.timestamp | date:'full' }}</p>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300">Action</label>
+              <label for="audit-action" class="text-sm font-medium text-gray-300">Action</label>
               <p-tag
                 [value]="getActionLabel(selectedEntry()?.action!)"
                 [severity]="getActionSeverity(selectedEntry()?.action!)"
               />
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300">User</label>
+              <label for="audit-user" class="text-sm font-medium text-gray-300">User</label>
               <p class="text-sm text-white">{{ selectedEntry()?.userEmail }}</p>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300">IP Address</label>
+              <label for="audit-ip-address" class="text-sm font-medium text-gray-300">IP Address</label>
               <p class="text-sm text-white">{{ selectedEntry()?.ipAddress || 'N/A' }}</p>
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300">User Agent</label>
+              <label for="audit-user-agent" class="text-sm font-medium text-gray-300">User Agent</label>
               <p class="text-sm text-white break-all">{{ selectedEntry()?.userAgent || 'N/A' }}</p>
             </div>
           </div>
 
           <div *ngIf="selectedEntry()?.details">
-            <label class="text-sm font-medium text-gray-300">Additional Details</label>
+            <label for="audit-details" class="text-sm font-medium text-gray-300">Additional Details</label>
             <pre class="bg-gray-900 p-3 rounded text-sm text-gray-300 overflow-auto max-h-60">{{ formatDetails(selectedEntry()?.details!) }}</pre>
           </div>
         </div>
@@ -379,7 +380,7 @@ interface AuditFilters {
       >
         <div class="space-y-4">
           <div>
-            <label class="text-sm font-medium text-gray-300 mb-2 block">Export Format</label>
+            <label for="audit-export-format" class="text-sm font-medium text-gray-300 mb-2 block">Export Format</label>
             <p-select
               [(ngModel)]="exportFormat"
               [options]="exportFormatOptions"
@@ -416,7 +417,7 @@ interface AuditFilters {
       >
         <div class="space-y-4">
           <div>
-            <label class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
+            <label for="audit-report-type" class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
             <p-select
               [(ngModel)]="reportType"
               [options]="reportTypeOptions"
@@ -429,7 +430,7 @@ interface AuditFilters {
 
           <div *ngIf="reportType === 'custom'" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-sm font-medium text-gray-300 mb-2 block">Start Date</label>
+              <label for="audit-report-start-date" class="text-sm font-medium text-gray-300 mb-2 block">Start Date</label>
               <p-calendar
                 [(ngModel)]="reportStartDate"
                 showIcon="true"
@@ -438,7 +439,7 @@ interface AuditFilters {
               />
             </div>
             <div>
-              <label class="text-sm font-medium text-gray-300 mb-2 block">End Date</label>
+              <label for="audit-report-end-date" class="text-sm font-medium text-gray-300 mb-2 block">End Date</label>
               <p-calendar
                 [(ngModel)]="reportEndDate"
                 showIcon="true"
@@ -548,8 +549,8 @@ export class AuditTrailComponent implements OnInit {
   showReportDialog = false;
 
   // Export/Report options
-  exportFormat = 'csv';
-  reportType = 'monthly';
+  exportFormat: ExportFormat = ExportFormat.CSV;
+  reportType: ReportType = ReportType.MONTHLY;
   reportStartDate: Date | null = null;
   reportEndDate: Date | null = null;
 
@@ -616,7 +617,7 @@ export class AuditTrailComponent implements OnInit {
     ).subscribe({
       next: (response) => {
         this.auditEntries.set(response.items);
-        this.totalRecords.set(response?.totalCount!);
+        this.totalRecords.set(response.totalCount!);
       },
       error: (error) => {
         console.error('Failed to load audit entries:', error);
@@ -683,7 +684,7 @@ export class AuditTrailComponent implements OnInit {
   exportAuditTrail() {
     this.exporting.set(true);
 
-    this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat as any).pipe(
+    this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat).pipe(
       finalize(() => this.exporting.set(false))
     ).subscribe({
       next: (blob) => {

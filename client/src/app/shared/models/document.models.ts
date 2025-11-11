@@ -790,6 +790,13 @@ export enum ExportFormat {
   EXCEL = 'excel'
 }
 
+export enum ReportType {
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  ANNUAL = 'annual',
+  CUSTOM = 'custom'
+}
+
 // Export configuration interface
 export interface ExportConfig {
   type: ExportFormat | string

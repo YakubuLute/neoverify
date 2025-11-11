@@ -105,7 +105,7 @@
                 <h3>Field Types</h3>
                 <div class="field-palette">
                     @for (fieldType of fieldTypeOptions; track fieldType.value) {
-                    <div class="field-type-item" 
+                    <div class="field-type-item"
                          (click)="onAddField(fieldType.value)"
                          (keydown.enter)="onAddField(fieldType.value)"
                          (keydown.space)="$event.preventDefault(); onAddField(fieldType.value)"
