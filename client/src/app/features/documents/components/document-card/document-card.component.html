@@ -1,6 +1,13 @@
-<!-- Document Card -->
-<div class="document-card" [class.selected]="selected" [class.expiring-soon]="isExpiringSoon()"
-    (click)="onCardClick($event)">
+<div class="document-card"
+     [class.selected]="selected"
+     [class.expiring-soon]="isExpiringSoon()"
+     (click)="onCardClick($event)"
+     (keyup.enter)="onCardClick($event)"
+     (keyup.space)="onCardClick($event)"
+     tabindex="0"
+     role="button"
+     [attr.aria-label]="'View document: ' + document.title">
+
 
     <!-- Selection Checkbox -->
     @if (canSelect) {
@@ -17,7 +24,7 @@
         } @else {
         <div class="thumbnail-placeholder">
             <i class="pi pi-file document-icon"></i>
-            <span class="file-extension">{{ getFileExtension(document.originalFileName) }}</span>
+            <span class="file-extension">{{ getFileExtension(document.originalFileName ?? '') }}</span>
         </div>
         }
 
