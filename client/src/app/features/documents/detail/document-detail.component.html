@@ -1,0 +1,173 @@
+    <div class="document-detail-container">
+
+      <!-- Loading State -->
+      <div *ngIf="loading()" class="loading-container">
+        <div class="flex justify-center items-center py-16">
+          <p-progressSpinner></p-progressSpinner>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error()" class="error-container">
+        <div class="text-center py-16">
+          <i class="pi pi-exclamation-triangle text-6xl text-red-400 mb-4 block"></i>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Document Not Found
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mb-8">
+            {{ error() }}
+          </p>
+          <p-button
+            label="Back to Documents"
+            icon="pi pi-arrow-left"
+            routerLink="/documents"
+          ></p-button>
+        </div>
+      </div>
+
+      <!-- Document Content -->
+      <div *ngIf="!loading() && !error() && document()" class="document-content">
+
+        <!-- Header -->
+        <div class="document-header">
+          <div class="header-content">
+            <div class="breadcrumb-section">
+              <p-breadcrumb
+                [model]="breadcrumbItems"
+                [home]="{ icon: 'pi pi-home', routerLink: '/dashboard' }"
+              ></p-breadcrumb>
+            </div>
+
+            <div class="title-section">
+              <h1 class="document-title">{{ document()!.title }}</h1>
+              <p class="document-description" *ngIf="document()!.description">
+                {{ document()!.description }}
+              </p>
+            </div>
+
+            <div class="header-actions">
+              <p-button
+                icon="pi pi-download"
+                severity="secondary"
+                [outlined]="true"
+                pTooltip="Download Document"
+                (onClick)="downloadDocument()"
+              ></p-button>
+
+              <p-button
+                icon="pi pi-share-alt"
+                severity="secondary"
+                [outlined]="true"
+                pTooltip="Share Document"
+                (onClick)="shareDocument()"
+              ></p-button>
+
+              <p-button
+                icon="pi pi-ellipsis-v"
+                severity="secondary"
+                [outlined]="true"
+                pTooltip="More Actions"
+                (onClick)="showActionsMenu = true"
+              ></p-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="document-main-content">
+
+          <!-- Left Column - Document Info -->
+          <div class="document-info-column">
+
+            <!-- Document Preview -->
+            <div class="document-preview-section">
+              <p-card header="Document Preview">
+                <div class="preview-container">
+                  <div *ngIf="document()!.thumbnailUrl" class="document-thumbnail">
+                    <img [src]="document()!.thumbnailUrl" [alt]="document()!.title" />
+                  </div>
+                  <div *ngIf="!document()!.thumbnailUrl" class="document-placeholder">
+                    <i class="pi pi-file text-6xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-2">No preview available</p>
+                  </div>
+                </div>
+
+                <div class="document-metadata">
+                  <div class="metadata-grid">
+                    <div class="metadata-item">
+                      <label for="originalFileName">File Name:</label>
+                      <span id="originalFileName">{{ document()!.originalFileName ?? '' }}</span>
+                    </div>
+                    <div class="metadata-item">
+                      <label for="fileSize">File Size:</label>
+                      <span id="fileSize">{{ formatFileSize(document()!.fileSize ?? 0) }}</span>
+                    </div>
+                    <div class="metadata-item">
+                      <label for="documentType">Type:</label>
+                      <p-tag [value]="document()!.documentType" severity="info"></p-tag>
+                    </div>
+                    <div class="metadata-item">
+                      <label for="uploadedAt">Upload Date:</label>
+                      <span id="uploadedAt">{{ document()!.uploadedAt | date:'medium' }}</span>
+                    </div>
+                    <div class="metadata-item" *ngIf="document()!.metadata.issueDate">
+                      <label for="issueDate">Issue Date:</label>
+                      <span id="issueDate">{{ document()!.metadata.issueDate | date:'mediumDate' }}</span>
+                    </div>
+                    <div class="metadata-item" *ngIf="document()!.metadata.expiryDate">
+                      <label for="expiryDate">Expiry Date:</label>
+                      <span id="expiryDate">{{ document()!.metadata.expiryDate | date:'mediumDate' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </p-card>
+            </div>
+
+            <!-- Document Tags -->
+            <div class="document-tags-section" *ngIf="document()!.tags.length > 0">
+              <p-card header="Tags">
+                <div class="tags-container">
+                  <p-tag
+                    *ngFor="let tag of document()!.tags"
+                    [value]="tag"
+                    severity="secondary"
+                    class="mr-2 mb-2"
+                  ></p-tag>
+                </div>
+              </p-card>
+            </div>
+
+            <!-- Additional Metadata -->
+            <div class="additional-metadata-section" *ngIf="hasAdditionalMetadata()">
+              <p-card header="Additional Information">
+                <div class="metadata-grid">
+                  <div class="metadata-item" *ngIf="document()!.metadata.recipientName">
+                    <label for="recipientName">Recipient:</label>
+                    <span id="recipientName">{{ document()!.metadata.recipientName }}</span>
+                  </div>
+                  <div class="metadata-item" *ngFor="let field of getCustomFields()">
+                    <label for="{{ field.key }}">{{ field.key }}:</label>
+                    <span id="{{ field.key }}">{{ field.value }}</span>
+                  </div>
+                </div>
+              </p-card>
+            </div>
+          </div>
+
+          <!-- Right Column - Verification Status -->
+          <div class="verification-column">
+            <app-verification-status-display
+              [document]="document()!"
+            ></app-verification-status-display>
+          </div>
+        </div>
+
+        <!-- Status History Section -->
+        <div class="status-history-section">
+          <app-status-history
+            [documentId]="document()!.id"
+            [maxItems]="10"
+          ></app-status-history>
+        </div>
+      </div>
+    </div>
