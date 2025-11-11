@@ -32,206 +32,7 @@ import { Document, SharePermissions } from '../../../shared/models/document.mode
     TagModule,
     DividerModule
   ],
-  template: `
-    <div class="shared-document-access">
-      <div class="access-container">
-        
-        <!-- Loading State -->
-        <div class="loading-card" *ngIf="loading()">
-          <p-card>
-            <div class="loading-content">
-              <p-progressSpinner></p-progressSpinner>
-              <h3>Loading shared document...</h3>
-              <p>Please wait while we verify the share link.</p>
-            </div>
-          </p-card>
-        </div>
-
-        <!-- Password Required -->
-        <div class="password-card" *ngIf="!loading() && requiresPassword() && !document()">
-          <p-card>
-            <ng-template pTemplate="header">
-              <div class="card-header">
-                <i class="pi pi-lock header-icon"></i>
-                <h2>Password Required</h2>
-              </div>
-            </ng-template>
-
-            <div class="password-content">
-              <p class="password-message">
-                This shared document is password protected. Please enter the password to access it.
-              </p>
-
-              <div class="password-form">
-                <div class="password-field">
-                  <label for="sharePassword">Password:</label>
-                  <p-password
-                    id="sharePassword"
-                    [(ngModel)]="password"
-                    placeholder="Enter password"
-                    [feedback]="false"
-                    [toggleMask]="true"
-                    class="w-full"
-                    (keyup.enter)="accessDocument()">
-                  </p-password>
-                </div>
-
-                <div class="password-actions">
-                  <p-button 
-                    label="Access Document" 
-                    icon="pi pi-unlock"
-                    (onClick)="accessDocument()"
-                    [loading]="accessing()"
-                    [disabled]="!password"
-                    class="w-full">
-                  </p-button>
-                </div>
-              </div>
-
-              <div class="error-message" *ngIf="error()">
-                <p-message severity="error" [text]="error() || undefined"></p-message>
-              </div>
-            </div>
-          </p-card>
-        </div>
-
-        <!-- Document Access -->
-        <div class="document-card" *ngIf="!loading() && document()">
-          <p-card>
-            <ng-template pTemplate="header">
-              <div class="document-header">
-                <div class="document-icon">
-                  <i class="pi pi-file"></i>
-                </div>
-                <div class="document-info">
-                  <h2>{{ document()?.title }}</h2>
-                  <p class="document-filename">{{ document()?.originalFileName }}</p>
-                  <div class="document-meta">
-                    <p-tag [value]="document()?.documentType" severity="info"></p-tag>
-                    <span class="file-size">{{ formatFileSize(document()?.fileSize || 0) }}</span>
-                  </div>
-                </div>
-              </div>
-            </ng-template>
-
-            <div class="document-content">
-              <div class="document-description" *ngIf="document()?.description">
-                <h4>Description</h4>
-                <p>{{ document()?.description }}</p>
-              </div>
-
-              <div class="document-details">
-                <div class="detail-row">
-                  <span class="detail-label">Document Type:</span>
-                  <span class="detail-value">{{ document()?.documentType }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">File Size:</span>
-                  <span class="detail-value">{{ formatFileSize(document()?.fileSize || 0) }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Upload Date:</span>
-                  <span class="detail-value">{{ document()?.uploadedAt | date:'medium' }}</span>
-                </div>
-                <div class="detail-row" *ngIf="document()?.verificationStatus">
-                  <span class="detail-label">Verification Status:</span>
-                  <p-tag 
-                    [value]="document()?.verificationStatus" 
-                    [severity]="getVerificationSeverity(document()?.verificationStatus)">
-                  </p-tag>
-                </div>
-              </div>
-
-              <p-divider></p-divider>
-
-              <div class="share-permissions">
-                <h4>Your Permissions</h4>
-                <div class="permissions-list">
-                  <div class="permission-item" *ngIf="sharePermissions()?.canView">
-                    <i class="pi pi-eye permission-icon"></i>
-                    <span>View document details</span>
-                  </div>
-                  <div class="permission-item" *ngIf="sharePermissions()?.canDownload">
-                    <i class="pi pi-download permission-icon"></i>
-                    <span>Download document</span>
-                  </div>
-                  <div class="permission-item" *ngIf="sharePermissions()?.canEdit">
-                    <i class="pi pi-pencil permission-icon"></i>
-                    <span>Edit document metadata</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <ng-template pTemplate="footer">
-              <div class="document-actions">
-                <p-button 
-                  label="Download" 
-                  icon="pi pi-download"
-                  (onClick)="downloadDocument()"
-                  [loading]="downloading()"
-                  [disabled]="!sharePermissions()?.canDownload"
-                  severity="success">
-                </p-button>
-
-                <p-button 
-                  label="View Details" 
-                  icon="pi pi-info-circle"
-                  [text]="true"
-                  (onClick)="viewDocumentDetails()"
-                  [disabled]="!sharePermissions()?.canView">
-                </p-button>
-              </div>
-            </ng-template>
-          </p-card>
-        </div>
-
-        <!-- Error State -->
-        <div class="error-card" *ngIf="!loading() && error() && !requiresPassword()">
-          <p-card>
-            <ng-template pTemplate="header">
-              <div class="card-header error-header">
-                <i class="pi pi-exclamation-triangle header-icon"></i>
-                <h2>Access Error</h2>
-              </div>
-            </ng-template>
-
-            <div class="error-content">
-              <p-message severity="error" [text]="error() || undefined"></p-message>
-              
-              <div class="error-actions">
-                <p-button 
-                  label="Try Again" 
-                  icon="pi pi-refresh"
-                  (onClick)="retryAccess()"
-                  [text]="true">
-                </p-button>
-              </div>
-            </div>
-          </p-card>
-        </div>
-
-        <!-- Share Info -->
-        <div class="share-info" *ngIf="document()">
-          <p-card>
-            <div class="share-details">
-              <h4>About This Share</h4>
-              <p class="share-message">
-                This document has been shared with you. You can access it according to the permissions granted by the document owner.
-              </p>
-              
-              <div class="share-warning" *ngIf="isExpiringSoon()">
-                <p-message 
-                  severity="warn" 
-                  text="This share link will expire soon. Make sure to download or view the document before it expires.">
-                </p-message>
-              </div>
-            </div>
-          </p-card>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './shared-document-access.component.html',
   styleUrl: './shared-document-access.component.scss'
 })
 export class SharedDocumentAccessComponent implements OnInit {
@@ -283,7 +84,7 @@ export class SharedDocumentAccessComponent implements OnInit {
       .subscribe({
         next: (document) => {
           this.document.set(document);
-          this.sharePermissions.set(document.permissions);
+          this.sharePermissions.set(document.permissions ?? null);
           this.loading.set(false);
           this.accessing.set(false);
           this.requiresPassword.set(false);
@@ -321,7 +122,7 @@ export class SharedDocumentAccessComponent implements OnInit {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = doc.originalFileName;
+          a.download = doc.originalFileName ?? '';
           a.click();
           window.URL.revokeObjectURL(url);
           this.downloading.set(false);
