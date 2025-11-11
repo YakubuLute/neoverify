@@ -77,7 +77,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
 
     // Preview state
     readonly showPreview = signal(false);
-    readonly previewData = signal<Record<string, any>>({});
+    readonly previewData = signal<Record<string, unknown>>({});
 
     // User permissions
     readonly currentUser = computed(() => this.authService.getCurrentUser());
@@ -466,7 +466,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
 
     onPreviewTemplate(): void {
         // Generate sample data for preview
-        const sampleData: Record<string, any> = {};
+        const sampleData: Record<string, unknown> = {};
         this.fields().forEach(field => {
             sampleData[field.name] = this.generateSampleValue(field);
         });
@@ -495,7 +495,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
             this.templateService.createTemplate(templateData);
 
         saveOperation.subscribe({
-            next: (savedTemplate) => {
+            next: () => {
                 this.isDirty.set(false);
                 this.router.navigate(['/documents/templates']);
             },
@@ -563,7 +563,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
         }
     }
 
-    private generateSampleValue(field: TemplateField): any {
+    private generateSampleValue(field: TemplateField): unknown {
         switch (field.type) {
             case FieldType.TEXT: return 'Sample Text';
             case FieldType.NUMBER: return 42;
