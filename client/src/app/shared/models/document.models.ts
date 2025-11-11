@@ -918,7 +918,7 @@ export interface FieldValidation {
 export interface TemplateVersion {
   id: string
   templateId: string
-  version: string // Changed to string to support semantic versioning
+  version: string 
   changes: string
   createdBy: string
   createdAt: Date

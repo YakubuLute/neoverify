@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
@@ -11,7 +12,7 @@ import {
     ValidationRule,
     SharePermissions
 } from '../../shared/models/document.models';
-import { PaginatedResponse, QueryParams } from '../../shared/models/common.models';
+import { QueryParams } from '../../shared/models/common.models';
 
 @Injectable({
     providedIn: 'root'
@@ -24,9 +25,8 @@ export class TemplateService {
     /**
      * Get all templates with pagination and filtering
      */
-    getTemplates(params?: QueryParams): Observable<PaginatedResponse<DocumentTemplate>> {
-        return this.apiService.get<PaginatedResponse<DocumentTemplate>>('templates', params as any).pipe(
-            map(response => response.data),
+    getTemplates(params?: QueryParams): Observable<{data: DocumentTemplate[], total: number}> {
+        return this.apiService.get<{data: DocumentTemplate[], total: number}>('templates', params as any).pipe(
             catchError(error => {
                 this.notificationService.error('Failed to load templates');
                 return throwError(() => error);
@@ -38,7 +38,7 @@ export class TemplateService {
      * Get template by ID
      */
     getTemplate(templateId: string): Observable<DocumentTemplate> {
-        return this.apiService.get<DocumentTemplate>(`templates/${templateId}`).pipe(
+        return this.apiService.get<{data: DocumentTemplate}>(`templates/${templateId}`).pipe(
             map(response => response.data),
             catchError(error => {
                 this.notificationService.error('Template not found');
@@ -51,7 +51,7 @@ export class TemplateService {
      * Create new template
      */
     createTemplate(template: Partial<DocumentTemplate>): Observable<DocumentTemplate> {
-        return this.apiService.post<DocumentTemplate>('templates', template).pipe(
+        return this.apiService.post<{data: DocumentTemplate }>('templates', template).pipe(
             map(response => response.data),
             tap(createdTemplate => {
                 this.notificationService.success(`Template "${createdTemplate.name}" created successfully`);
@@ -67,7 +67,7 @@ export class TemplateService {
      * Update existing template
      */
     updateTemplate(templateId: string, updates: Partial<DocumentTemplate>): Observable<DocumentTemplate> {
-        return this.apiService.put<DocumentTemplate>(`templates/${templateId}`, updates).pipe(
+        return this.apiService.put<{data: DocumentTemplate}>(`templates/${templateId}`, updates).pipe(
             map(response => response.data),
             tap(updatedTemplate => {
                 this.notificationService.success(`Template "${updatedTemplate.name}" updated successfully`);
@@ -84,7 +84,7 @@ export class TemplateService {
      */
     deleteTemplate(templateId: string): Observable<void> {
         return this.apiService.delete<void>(`templates/${templateId}`).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Template deleted successfully');
             }),
@@ -99,7 +99,7 @@ export class TemplateService {
      * Duplicate template
      */
     duplicateTemplate(templateId: string, name: string): Observable<DocumentTemplate> {
-        return this.apiService.post<DocumentTemplate>(`templates/${templateId}/duplicate`, { name }).pipe(
+        return this.apiService.post<{data: DocumentTemplate}>(`templates/${templateId}/duplicate`, { name }).pipe(
             map(response => response.data),
             tap(duplicatedTemplate => {
                 this.notificationService.success(`Template duplicated as "${duplicatedTemplate.name}"`);
@@ -115,7 +115,7 @@ export class TemplateService {
      * Get template versions
      */
     getTemplateVersions(templateId: string): Observable<TemplateVersion[]> {
-        return this.apiService.get<TemplateVersion[]>(`templates/${templateId}/versions`).pipe(
+        return this.apiService.get<{data: TemplateVersion[]}>(`templates/${templateId}/versions`).pipe(
             map(response => response.data),
             catchError(error => {
                 this.notificationService.error('Failed to load template versions');
@@ -128,7 +128,7 @@ export class TemplateService {
      * Create new template version
      */
     createTemplateVersion(templateId: string, changes: string): Observable<TemplateVersion> {
-        return this.apiService.post<TemplateVersion>(`templates/${templateId}/versions`, { changes }).pipe(
+        return this.apiService.post<{data: TemplateVersion}>(`templates/${templateId}/versions`, { changes }).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('New template version created successfully');
@@ -144,7 +144,7 @@ export class TemplateService {
      * Activate template version
      */
     activateTemplateVersion(templateId: string, versionId: string): Observable<DocumentTemplate> {
-        return this.apiService.post<DocumentTemplate>(`templates/${templateId}/versions/${versionId}/activate`, {}).pipe(
+        return this.apiService.post<{data: DocumentTemplate}>(`templates/${templateId}/versions/${versionId}/activate`, {}).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('Template version activated successfully');
@@ -160,7 +160,7 @@ export class TemplateService {
      * Add field to template
      */
     addTemplateField(templateId: string, field: Omit<TemplateField, 'id'>): Observable<TemplateField> {
-        return this.apiService.post<TemplateField>(`templates/${templateId}/fields`, field).pipe(
+        return this.apiService.post<{data: TemplateField}>(`templates/${templateId}/fields`, field).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('Field added to template successfully');
@@ -176,7 +176,7 @@ export class TemplateService {
      * Update template field
      */
     updateTemplateField(templateId: string, fieldId: string, updates: Partial<TemplateField>): Observable<TemplateField> {
-        return this.apiService.put<TemplateField>(`templates/${templateId}/fields/${fieldId}`, updates).pipe(
+        return this.apiService.put<{data: TemplateField}>(`templates/${templateId}/fields/${fieldId}`, updates).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('Template field updated successfully');
@@ -193,7 +193,7 @@ export class TemplateService {
      */
     removeTemplateField(templateId: string, fieldId: string): Observable<void> {
         return this.apiService.delete<void>(`templates/${templateId}/fields/${fieldId}`).pipe(
-            map(response => response.data),
+            // map(response => response.data),
             tap(() => {
                 this.notificationService.success('Field removed from template successfully');
             }),
@@ -208,7 +208,7 @@ export class TemplateService {
      * Add validation rule to template
      */
     addValidationRule(templateId: string, rule: Omit<ValidationRule, 'id'>): Observable<ValidationRule> {
-        return this.apiService.post<ValidationRule>(`templates/${templateId}/validation-rules`, rule).pipe(
+        return this.apiService.post<{data: ValidationRule}>(`templates/${templateId}/validation-rules`, rule).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('Validation rule added successfully');
@@ -224,7 +224,7 @@ export class TemplateService {
      * Update validation rule
      */
     updateValidationRule(templateId: string, ruleId: string, updates: Partial<ValidationRule>): Observable<ValidationRule> {
-        return this.apiService.put<ValidationRule>(`templates/${templateId}/validation-rules/${ruleId}`, updates).pipe(
+        return this.apiService.put<{data: ValidationRule}>(`templates/${templateId}/validation-rules/${ruleId}`, updates).pipe(
             map(response => response.data),
             tap(() => {
                 this.notificationService.success('Validation rule updated successfully');
@@ -241,7 +241,7 @@ export class TemplateService {
      */
     removeValidationRule(templateId: string, ruleId: string): Observable<void> {
         return this.apiService.delete<void>(`templates/${templateId}/validation-rules/${ruleId}`).pipe(
-            map(response => response.data),
+            // map(response => response.data),
             tap(() => {
                 this.notificationService.success('Validation rule removed successfully');
             }),
@@ -257,7 +257,7 @@ export class TemplateService {
      */
     shareTemplate(templateId: string, userIds: string[], permissions: SharePermissions): Observable<void> {
         return this.apiService.post<void>(`templates/${templateId}/share`, { userIds, permissions }).pipe(
-            map(response => response.data),
+            // map(response => response.data),
             tap(() => {
                 this.notificationService.success('Template shared successfully');
             }),
@@ -271,8 +271,8 @@ export class TemplateService {
     /**
      * Get template usage statistics
      */
-    getTemplateUsageStats(templateId: string): Observable<any> {
-        return this.apiService.get<any>(`templates/${templateId}/usage-stats`).pipe(
+    getTemplateUsageStats(templateId: string): Observable<string[]> {
+        return this.apiService.get<{data: string[]}>(`templates/${templateId}/usage-stats`).pipe(
             map(response => response.data),
             catchError(error => {
                 this.notificationService.error('Failed to load template usage statistics');
@@ -286,7 +286,7 @@ export class TemplateService {
      */
     validateTemplate(template: DocumentTemplate): Observable<{ isValid: boolean; errors: string[] }> {
         return this.apiService.post<{ isValid: boolean; errors: string[] }>('templates/validate', template).pipe(
-            map(response => response.data),
+            // map(response => response.data),
             catchError(error => {
                 this.notificationService.error('Failed to validate template');
                 return throwError(() => error);
@@ -316,7 +316,7 @@ export class TemplateService {
         const formData = new FormData();
         formData.append('file', file);
 
-        return this.apiService.post<DocumentTemplate>('templates/import', formData).pipe(
+        return this.apiService.post<{data:DocumentTemplate}>('templates/import', formData).pipe(
             map(response => response.data),
             tap(importedTemplate => {
                 this.notificationService.success(`Template "${importedTemplate.name}" imported successfully`);

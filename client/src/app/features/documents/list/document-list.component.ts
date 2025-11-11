@@ -22,7 +22,6 @@ import {
   VerificationStatus,
   BulkAction,
   BulkActionType,
-  ExportFormat,
   AuditAction,
   ExportOptions
 } from '../../../shared/models/document.models';
@@ -447,24 +446,24 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onExport(format: ExportFormat, options?: ExportOptions): void {
+onExport(options: ExportOptions) {
     const selectedIds = this.selectedDocuments();
     const documentsToExport = selectedIds.length > 0 ? selectedIds : this.filteredDocuments().map(doc => doc.id);
 
-    this.documentService.exportDocuments(documentsToExport, format, options).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `documents.${format}`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => {
-        console.error('Export failed:', error);
-      }
+    this.documentService.exportDocuments(documentsToExport, options.format, options).subscribe({
+        next: (blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `documents.${options.format}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        },
+        error: (error) => {
+            console.error('Export failed:', error);
+        }
     });
-  }
+}
 
   onDocumentClick(document: Document): void {
     this.router.navigate(['/documents', document.id]);
