@@ -105,8 +105,15 @@
                 <h3>Field Types</h3>
                 <div class="field-palette">
                     @for (fieldType of fieldTypeOptions; track fieldType.value) {
-                    <div class="field-type-item" (click)="onAddField(fieldType.value)"
-                        [pTooltip]="fieldType.description">
+                    <div class="field-type-item" 
+                         (click)="onAddField(fieldType.value)"
+                         (keydown.enter)="onAddField(fieldType.value)"
+                         (keydown.space)="$event.preventDefault(); onAddField(fieldType.value)"
+                         [pTooltip]="fieldType.description"
+                         tabindex="0"
+                         role="button"
+                         [attr.aria-label]="'Add ' + fieldType.label + ' field'"
+                         [attr.aria-describedby]="'tooltip-' + fieldType.value">
                         <i [class]="fieldType.icon"></i>
                         <span>{{ fieldType.label }}</span>
                     </div>
@@ -151,9 +158,15 @@
                         <!-- Template Fields -->
                         @for (field of fields(); track field.id) {
                         <div class="template-field" [class.selected]="selectedField()?.id === field.id"
-                            [style.left.px]="field.position.x" [style.top.px]="field.position.y"
-                            (click)="onFieldClick(field)" draggable="true"
-                            (dragstart)="onFieldDragStart($event, field)">
+                            [style.left.px]="field.position?.x" [style.top.px]="field.position?.y"
+                            (click)="onFieldClick(field)"
+                            (keydown.enter)="onFieldClick(field)"
+                            (keydown.space)="$event.preventDefault(); onFieldClick(field)"
+                            tabindex="0"
+                            role="button"
+                            draggable="true"
+                            (dragstart)="onFieldDragStart($event, field)"
+                            aria-label="Select field {{field.name}}">
 
                             <div class="field-header">
                                 <i [class]="getFieldIcon(field.type)"></i>
@@ -162,7 +175,11 @@
                                 <span class="required-indicator">*</span>
                                 }
                                 <button class="delete-field-btn"
-                                    (click)="onDeleteField(field.id); $event.stopPropagation()" pTooltip="Delete field">
+                                    (click)="onDeleteField(field.id); $event.stopPropagation()"
+                                    (keydown.enter)="onDeleteField(field.id); $event.stopPropagation()"
+                                    (keydown.space)="$event.preventDefault(); onDeleteField(field.id); $event.stopPropagation()"
+                                    pTooltip="Delete field"
+                                    aria-label="Delete field {{field.name}}">
                                     <i class="pi pi-times"></i>
                                 </button>
                             </div>
@@ -355,12 +372,12 @@
             <div class="preview-form">
                 @for (field of fields(); track field.id) {
                 <div class="preview-field">
-                    <label>
+                    <p>
                         {{ field.name }}
                         @if (field.required) {
                         <span class="required">*</span>
                         }
-                    </label>
+                    </p>
 
                     @switch (field.type) {
                     @case (FieldType.TEXT) {
