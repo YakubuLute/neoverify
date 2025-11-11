@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { SHARED_IMPORTS } from '../../../../shared';
-import { BulkActionType, ExportFormat } from '../../../../shared/models/document.models';
+import { BulkActionType, ExportOptions } from '../../../../shared/models/document.models';
 
 export interface BulkOperationConfig {
     type: BulkActionType;
@@ -24,7 +25,7 @@ export class BulkOperationsComponent {
     @Input() canExport = true;
 
     @Output() bulkAction = new EventEmitter<{ type: BulkActionType; data?: any }>();
-    @Output() exportAction = new EventEmitter<ExportFormat>();
+    @Output() exportAction = new EventEmitter<ExportOptions>();
     @Output() clearSelection = new EventEmitter<void>();
 
     readonly showExportDialog = signal(false);
@@ -135,8 +136,8 @@ export class BulkOperationsComponent {
 
     onConfirmExport(): void {
         const options = this.exportOptions();
-        const exportFormat: ExportFormat = {
-            type: options.format,
+        const exportFormat: ExportOptions = {
+            format: options.format,
             includeMetadata: options.includeMetadata,
             includeAuditTrail: options.includeAuditTrail
         };

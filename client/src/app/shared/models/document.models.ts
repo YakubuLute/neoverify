@@ -790,6 +790,12 @@ export enum ExportFormat {
   EXCEL = 'excel'
 }
 
+export interface ExportOptions {
+  format: ExportFormat | string
+  includeMetadata?: boolean
+  includeAuditTrail?: boolean
+}
+
 export enum ReportType {
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
