@@ -938,6 +938,10 @@ export interface AuditEntry {
   details?: Record<string, any>
   ipAddress?: string
   userAgent?: string
+  userEmail?: string
+  previousStatus?: VerificationStatus
+  newStatus?: VerificationStatus
+  reason?: string
 }
 
 export interface BulkIssuanceRequest {
