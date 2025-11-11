@@ -1,0 +1,445 @@
+
+    <div class="compliance-dashboard-container p-6">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-white mb-2">Compliance Dashboard</h1>
+          <p class="text-gray-400">Monitor compliance metrics and audit trail health</p>
+        </div>
+        <div class="flex gap-3">
+          <p-button
+            label="View Audit Trail"
+            icon="pi pi-list"
+            [outlined]="true"
+            (click)="navigateToAuditTrail()"
+          />
+          <p-button
+            label="Settings"
+            icon="pi pi-cog"
+            (click)="showSettingsDialog = true"
+          />
+        </div>
+      </div>
+
+      <!-- Alerts Section -->
+      <div class="mb-6" *ngIf="alerts().length > 0">
+        <h2 class="text-xl font-semibold text-white mb-4">Active Alerts</h2>
+        <div class="grid grid-cols-1 gap-3">
+          <div
+            *ngFor="let alert of alerts()"
+            class="flex items-center justify-between p-4 rounded-lg border"
+            [ngClass]="{
+              'bg-red-900/20 border-red-500/30': alert.type === 'critical',
+              'bg-yellow-900/20 border-yellow-500/30': alert.type === 'warning',
+              'bg-blue-900/20 border-blue-500/30': alert.type === 'info'
+            }"
+          >
+            <div class="flex items-center gap-3">
+              <i
+                class="text-2xl"
+                [ngClass]="{
+                  'pi pi-exclamation-triangle text-red-400': alert.type === 'critical',
+                  'pi pi-exclamation-circle text-yellow-400': alert.type === 'warning',
+                  'pi pi-info-circle text-blue-400': alert.type === 'info'
+                }"
+              ></i>
+              <div>
+                <h3 class="font-semibold text-white">{{ alert.title }}</h3>
+                <p class="text-sm text-gray-300">{{ alert.message }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ alert.timestamp | date:'short' }}</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <p-button
+                label="Acknowledge"
+                size="small"
+                [outlined]="true"
+                (click)="acknowledgeAlert(alert.id)"
+                *ngIf="!alert.acknowledged"
+              />
+              <p-button
+                label="Dismiss"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                (click)="dismissAlert(alert.id)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compliance Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div
+          *ngFor="let metric of complianceMetrics()"
+          class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white">{{ metric.name }}</h3>
+            <i
+              class="text-2xl"
+              [ngClass]="{
+                'pi pi-check-circle text-green-400': metric.status === 'good',
+                'pi pi-exclamation-triangle text-yellow-400': metric.status === 'warning',
+                'pi pi-times-circle text-red-400': metric.status === 'critical'
+              }"
+            ></i>
+          </div>
+
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-2xl font-bold text-white">{{ metric.value | number }}</span>
+              <span class="text-sm text-gray-400">/ {{ metric.target | number }}</span>
+            </div>
+            <p-progressBar
+              [value]="getProgressPercentage(metric)"
+              [showValue]="false"
+              styleClass="h-2"
+              [ngClass]="{
+                'progress-good': metric.status === 'good',
+                'progress-warning': metric.status === 'warning',
+                'progress-critical': metric.status === 'critical'
+              }"
+            />
+          </div>
+
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-400">{{ metric.description }}</p>
+            <div class="flex items-center gap-1">
+              <i
+                class="text-sm"
+                [ngClass]="{
+                  'pi pi-arrow-up text-green-400': metric.trend === 'up',
+                  'pi pi-arrow-down text-red-400': metric.trend === 'down',
+                  'pi pi-minus text-gray-400': metric.trend === 'stable'
+                }"
+              ></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Activity Chart -->
+        <p-card header="Audit Activity Trend" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-chart
+            type="line"
+            [data]="activityChartData()"
+            [options]="chartOptions"
+            width="100%"
+            height="300px"
+          />
+        </p-card>
+
+        <!-- Action Distribution -->
+        <p-card header="Action Distribution" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-chart
+            type="doughnut"
+            [data]="actionDistributionData()"
+            [options]="doughnutOptions"
+            width="100%"
+            height="300px"
+          />
+        </p-card>
+      </div>
+
+      <!-- Compliance Reports -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Recent Reports -->
+        <p-card header="Recent Compliance Reports" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-table [value]="recentReports()" [paginator]="false" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Report Type</th>
+                <th>Generated</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-report>
+              <tr>
+                <td>{{ report.type }}</td>
+                <td>{{ report.generatedAt | date:'short' }}</td>
+                <td>
+                  <p-tag
+                    [value]="report.status"
+                    [severity]="getReportStatusSeverity(report.status)"
+                  />
+                </td>
+                <td>
+                  <p-button
+                    icon="pi pi-download"
+                    [text]="true"
+                    size="small"
+                    (click)="downloadReport(report.id)"
+                    pTooltip="Download report"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="4" class="text-center py-4">
+                  <p class="text-gray-400">No reports generated yet</p>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+          <div class="flex justify-end mt-4">
+            <p-button
+              label="Generate New Report"
+              icon="pi pi-plus"
+              (click)="showReportDialog = true"
+            />
+          </div>
+        </p-card>
+
+        <!-- Retention Policy Status -->
+        <p-card header="Data Retention Policy" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <div class="space-y-4" *ngIf="retentionPolicy()">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-300">Retention Period</span>
+              <span class="text-white font-semibold">{{ retentionPolicy()?.retentionPeriodYears }} years</span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-gray-300">Auto-Delete</span>
+              <p-tag
+                [value]="retentionPolicy()?.autoDeleteEnabled ? 'Enabled' : 'Disabled'"
+                [severity]="retentionPolicy()?.autoDeleteEnabled ? 'success' : 'warn'"
+              />
+            </div>
+
+            <div class="flex justify-between items-center" *ngIf="retentionPolicy()?.lastCleanupDate">
+              <span class="text-gray-300">Last Cleanup</span>
+              <span class="text-white">{{ retentionPolicy()?.lastCleanupDate | date:'short' }}</span>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4">
+              <p-button
+                label="Configure"
+                [outlined]="true"
+                (click)="showRetentionDialog = true"
+              />
+              <p-button
+                label="Run Cleanup"
+                severity="warn"
+                (click)="runCleanup()"
+                [loading]="runningCleanup()"
+              />
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Threshold Monitoring -->
+      <p-card header="Compliance Thresholds" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            *ngFor="let threshold of complianceThresholds()"
+            class="p-4 border border-gray-600 rounded-lg"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold text-white">{{ threshold.name }}</h4>
+              <p-tag
+                [value]="threshold.status"
+                [severity]="getThresholdSeverity(threshold.status)"
+              />
+            </div>
+            <p class="text-sm text-gray-400 mb-3">{{ threshold.description }}</p>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-300">Current: {{ threshold.current }}</span>
+              <span class="text-sm text-gray-300">Limit: {{ threshold.limit }}</span>
+            </div>
+            <p-progressBar
+              [value]="(threshold.current / threshold.limit) * 100"
+              [showValue]="false"
+              styleClass="h-2 mt-2"
+            />
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Settings Dialog -->
+      <p-dialog
+        header="Compliance Settings"
+        [(visible)]="showSettingsDialog"
+        [modal]="true"
+        [style]="{ width: '600px' }"
+        [draggable]="false"
+        [resizable]="false"
+      >
+        <form [formGroup]="settingsForm" class="space-y-4">
+          <div>
+            <label for="failedVerificationThreshold" class="text-sm font-medium text-gray-300 mb-2 block">Alert Thresholds</label>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="failedVerificationThreshold" class="text-xs text-gray-400">Failed Verifications (%)</label>
+                <p-inputNumber
+                  formControlName="failedVerificationThreshold"
+                  [min]="0"
+                  [max]="100"
+                  suffix="%"
+                  styleClass="w-full"
+                />
+              </div>
+              <div>
+                <label for="storageThreshold" class="text-xs text-gray-400">Storage Usage (%)</label>
+                <p-inputNumber
+                  formControlName="storageThreshold"
+                  [min]="0"
+                  [max]="100"
+                  suffix="%"
+                  styleClass="w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="realTimeMonitoring" class="text-sm font-medium text-gray-300 mb-2 block">Monitoring Settings</label>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-300">Real-time Monitoring</span>
+                <p-toggleswitch
+                  formControlName="realTimeMonitoring"
+                />
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-300">Email Alerts</span>
+                <p-toggleswitch
+                  formControlName="emailAlerts"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <p-button
+              label="Cancel"
+              [outlined]="true"
+              (click)="showSettingsDialog = false"
+            />
+            <p-button
+              label="Save Settings"
+              (click)="saveSettings()"
+              [loading]="savingSettings()"
+            />
+          </div>
+        </form>
+      </p-dialog>
+
+      <!-- Retention Policy Dialog -->
+      <p-dialog
+        header="Configure Retention Policy"
+        [(visible)]="showRetentionDialog"
+        [modal]="true"
+        [style]="{ width: '500px' }"
+        [draggable]="false"
+        [resizable]="false"
+      >
+        <form [formGroup]="retentionForm" class="space-y-4">
+          <div>
+            <label for="retentionPeriodYears" class="text-sm font-medium text-gray-300 mb-2 block">Retention Period (Years)</label>
+            <p-inputNumber
+              formControlName="retentionPeriodYears"
+              [min]="1"
+              [max]="50"
+              styleClass="w-full"
+            />
+            <small class="text-gray-400">Audit logs will be retained for this period</small>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <label for="autoDeleteEnabled" class="text-sm font-medium text-gray-300">Auto-Delete Expired Logs</label>
+              <p class="text-xs text-gray-400">Automatically delete logs older than retention period</p>
+            </div>
+            <p-toggleswitch
+              formControlName="autoDeleteEnabled"
+            />
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <p-button
+              label="Cancel"
+              [outlined]="true"
+              (click)="showRetentionDialog = false"
+            />
+            <p-button
+              label="Update Policy"
+              (click)="updateRetentionPolicy()"
+              [loading]="updatingRetention()"
+            />
+          </div>
+        </form>
+      </p-dialog>
+
+      <!-- Report Generation Dialog -->
+      <p-dialog
+        header="Generate Compliance Report"
+        [(visible)]="showReportDialog"
+        [modal]="true"
+        [style]="{ width: '500px' }"
+        [draggable]="false"
+        [resizable]="false"
+      >
+        <form [formGroup]="reportForm" class="space-y-4">
+          <div>
+            <label  for= "reportType" class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
+            <p-select
+              formControlName="reportType"
+              [options]="reportTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select report type"
+              styleClass="w-full"
+            />
+          </div>
+
+          <div *ngIf="reportForm.get('reportType')?.value === 'custom'" class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="startDate" class="text-sm font-medium text-gray-300 mb-2 block">Start Date</label>
+              <p-datepicker
+                formControlName="startDate"
+                [showIcon]="true"
+                placeholder="Start date"
+                styleClass="w-full"
+              />
+            </div>
+            <div>
+              <label for="endDate" class="text-sm font-medium text-gray-300 mb-2 block">End Date</label>
+              <p-datepicker
+                formControlName="endDate"
+                [showIcon]="true"
+                placeholder="End date"
+                styleClass="w-full"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-300">Include Detailed Logs</span>
+            <p-toggleswitch
+              formControlName="includeDetails"
+            />
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <p-button
+              label="Cancel"
+              [outlined]="true"
+              (click)="showReportDialog = false"
+            />
+            <p-button
+              label="Generate"
+              (click)="generateReport()"
+              [loading]="generatingReport()"
+            />
+          </div>
+        </form>
+      </p-dialog>
+    </div>

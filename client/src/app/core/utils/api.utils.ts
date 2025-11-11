@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, timer, throwError } from 'rxjs';
-import { mergeMap, finalize } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { ApiError, ErrorType, ValidationError } from '../types/api.types';
 
 export class ApiUtils {
@@ -26,6 +27,7 @@ export class ApiUtils {
         // Server errors
         const statusCode = error.status;
         let apiError: ApiError;
+        const retryAfter = this.extractRetryAfter(error);
 
         switch (statusCode) {
             case 400:
@@ -78,7 +80,7 @@ export class ApiUtils {
                 break;
 
             case 429:
-                const retryAfter = this.extractRetryAfter(error);
+
                 apiError = {
                     type: ErrorType.RATE_LIMIT_ERROR,
                     code: 'RATE_LIMIT_ERROR',
@@ -161,7 +163,7 @@ export class ApiUtils {
      */
     static retryWithExponentialBackoff<T>(
         source: Observable<T>,
-        maxRetries: number = 3,
+        // maxRetries: number = 3,
         initialDelay: number = 1000,
         maxDelay: number = 30000
     ): Observable<T> {
