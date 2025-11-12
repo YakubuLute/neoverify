@@ -178,7 +178,7 @@ export interface Document {
   // Additional properties for permissions
   uploadedBy?: string // User ID who uploaded the document
   permissions?: DocumentPermissions
-  
+  issuerId?: string
 }
 export interface DocumentModelResponse extends Document {
   data?: string[];
