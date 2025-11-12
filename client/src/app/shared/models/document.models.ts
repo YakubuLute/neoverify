@@ -852,6 +852,7 @@ export interface DocumentTemplate {
   category?: string
   previewUrl?: string
   usageCount?: number
+  
 }
 
 export interface TemplateField {
