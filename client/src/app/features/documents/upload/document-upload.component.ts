@@ -7,7 +7,7 @@ import { DocumentService } from '../../../core/services/document.service';
 import { UploadService } from '../../../core/services/upload.service';
 import { TemplateService } from '../../../core/services/template.service';
 import { SHARED_IMPORTS } from '../../../shared';
-import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus, DocumentTemplate, TemplateField, ValidationRule, ValidationType } from '../../../shared/models/document.models';
+import { DocumentType, DocumentMetadata, DocumentUploadProgress, UploadStatus, DocumentTemplate, TemplateField, ValidationType } from '../../../shared/models/document.models';
 import { FormUtils } from '../../../shared/utils/form.utils';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 

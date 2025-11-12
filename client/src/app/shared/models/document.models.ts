@@ -178,6 +178,7 @@ export interface Document {
   // Additional properties for permissions
   uploadedBy?: string // User ID who uploaded the document
   permissions?: DocumentPermissions
+  
 }
 export interface DocumentModelResponse extends Document {
   data?: string[];
@@ -830,8 +831,8 @@ export interface DocumentUploadProgress {
   progress: number // 0-100
   status: UploadStatus
   error?: string
-  startedAt: Date
-  completedAt?: Date
+  startedAt: Date | null
+  completedAt?: Date | null
 }
 
 // Document templates
@@ -918,7 +919,7 @@ export interface FieldValidation {
 export interface TemplateVersion {
   id: string
   templateId: string
-  version: string 
+  version: string
   changes: string
   createdBy: string
   createdAt: Date
@@ -959,6 +960,7 @@ export interface BulkIssuanceRequest {
 }
 
 export interface BulkIssuanceResult {
+  data: any
   success: boolean
   processedCount: number
   failedCount: number
