@@ -87,7 +87,7 @@ export class DocumentSharingService {
             message: request.message,
             expiresAt: request.expiresAt
         }).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success(
                     `Document shared with ${request.userEmails.length} user(s) successfully`
@@ -111,7 +111,7 @@ export class DocumentSharingService {
         return this.apiService.put<SharedUser>(`documents/${documentId}/share/${userId}`, {
             permissions
         }).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Share permissions updated successfully');
             }),
@@ -127,7 +127,7 @@ export class DocumentSharingService {
      */
     removeUserFromSharing(documentId: string, userId: string): Observable<void> {
         return this.apiService.delete<void>(`documents/${documentId}/share/${userId}`).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('User removed from document sharing');
             }),
@@ -143,7 +143,7 @@ export class DocumentSharingService {
      */
     getDocumentSharedUsers(documentId: string): Observable<SharedUser[]> {
         return this.apiService.get<SharedUser[]>(`documents/${documentId}/shared-users`).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 this.notificationService.error('Failed to load shared users');
                 return throwError(() => error);
@@ -169,7 +169,7 @@ export class DocumentSharingService {
             password: request.password,
             maxDownloads: request.maxDownloads
         }).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Share link created successfully');
             }),
@@ -185,7 +185,7 @@ export class DocumentSharingService {
      */
     getDocumentShareLinks(documentId: string): Observable<ShareLink[]> {
         return this.apiService.get<ShareLink[]>(`documents/${documentId}/share-links`).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 this.notificationService.error('Failed to load share links');
                 return throwError(() => error);
@@ -198,7 +198,7 @@ export class DocumentSharingService {
      */
     revokeShareLink(documentId: string, linkId: string): Observable<void> {
         return this.apiService.delete<void>(`documents/${documentId}/share-links/${linkId}`).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Share link revoked successfully');
             }),
@@ -216,7 +216,7 @@ export class DocumentSharingService {
         return this.apiService.post<Document>(`documents/shared/${token}/access`, {
             password
         }).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 if (error.status === 401) {
                     this.notificationService.error('Invalid password for shared document');
@@ -241,7 +241,7 @@ export class DocumentSharingService {
             limit: 10,
             excludeSelf: true
         } as any).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 console.error('Failed to search users:', error);
                 return throwError(() => error);
@@ -254,7 +254,7 @@ export class DocumentSharingService {
      */
     getSharingNotifications(): Observable<ShareNotification[]> {
         return this.apiService.get<ShareNotification[]>('documents/sharing/notifications').pipe(
-            map(response => response.data),
+
             catchError(error => {
                 console.error('Failed to load sharing notifications:', error);
                 return throwError(() => error);
@@ -267,7 +267,7 @@ export class DocumentSharingService {
      */
     markNotificationAsRead(notificationId: string): Observable<void> {
         return this.apiService.put<void>(`documents/sharing/notifications/${notificationId}/read`, {}).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 console.error('Failed to mark notification as read:', error);
                 return throwError(() => error);
@@ -280,7 +280,7 @@ export class DocumentSharingService {
      */
     getSharedWithMeDocuments(): Observable<Document[]> {
         return this.apiService.get<Document[]>('documents/shared-with-me').pipe(
-            map(response => response.data),
+   
             catchError(error => {
                 this.notificationService.error('Failed to load shared documents');
                 return throwError(() => error);
@@ -293,7 +293,7 @@ export class DocumentSharingService {
      */
     getSharedByMeDocuments(): Observable<Document[]> {
         return this.apiService.get<Document[]>('documents/shared-by-me').pipe(
-            map(response => response.data),
+
             catchError(error => {
                 this.notificationService.error('Failed to load shared documents');
                 return throwError(() => error);
@@ -316,7 +316,7 @@ export class DocumentSharingService {
             permissions,
             message
         }).pipe(
-            map(response => response.data),
+
             tap(result => {
                 this.notificationService.success(
                     `Bulk sharing completed. ${result.successCount} documents shared successfully.`
