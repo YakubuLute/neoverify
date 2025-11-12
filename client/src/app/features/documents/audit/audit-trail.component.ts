@@ -67,7 +67,7 @@ interface Statistics {
     ConfirmDialogModule
   ],
   providers: [ConfirmationService],
-  templateUrl: './audit-trail.component.html',
+  templateUrl: `./audit-trail.component.html`,
   styles: [`
     :host {
       display: block;
