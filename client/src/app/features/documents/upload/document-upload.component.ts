@@ -455,7 +455,7 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.availableTemplates.set(response.items);
+          this.availableTemplates.set(response.data);
         },
         error: (error) => {
           console.error('Failed to load templates:', error);
