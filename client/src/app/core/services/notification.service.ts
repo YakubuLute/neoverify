@@ -84,12 +84,12 @@ export class NotificationService {
   /**
    * Show an error notification
    */
-  error(message: string, title = 'Error', sticky = true): void {
+  error(message: string, title = 'Error', duration = 7000): void {
     this.show({
       type: 'error',
       title,
       message,
-      sticky
+      duration
     });
   }
 
