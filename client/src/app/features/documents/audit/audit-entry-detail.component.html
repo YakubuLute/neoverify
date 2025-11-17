@@ -47,7 +47,7 @@
         <!-- Main Details -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Basic Information -->
-          <p-card header="Basic Information" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Basic Information" class="bg-gray-100 backdrop-blur-sm border border-gray-700">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="entryId" class="text-sm font-medium text-gray-300 mb-2 block">Entry ID</label>
@@ -108,7 +108,7 @@
           @if (auditEntry()?.previousStatus || auditEntry()?.newStatus) {
             <p-card
               header="Status Changes"
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+              class="bg-gray-100 backdrop-blur-sm border border-gray-700"
             >
               <div class="flex items-center justify-center gap-4">
                 @if (auditEntry()?.previousStatus) {
@@ -148,7 +148,7 @@
           }
 
           <!-- Technical Details -->
-          <p-card header="Technical Details" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Technical Details" class="bg-gray-100 backdrop-blur-sm border border-gray-700">
             <div class="space-y-4">
               @if (auditEntry()?.userAgent) {
                 <div>
@@ -173,7 +173,7 @@
           @if (document()) {
             <p-card
               header="Document Information"
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+              class="bg-gray-100 backdrop-blur-sm border border-gray-700"
             >
             <div class="space-y-4">
               <div>
@@ -213,7 +213,7 @@
           @if (relatedEntries().length > 0) {
             <p-card
               header="Related Entries"
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
+              class="bg-gray-100 backdrop-blur-sm border border-gray-700"
             >
             <p-timeline [value]="relatedEntries()" class="w-full">
               <ng-template pTemplate="content" let-entry>
@@ -246,7 +246,7 @@
           }
 
           <!-- Quick Actions -->
-          <p-card header="Quick Actions" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+          <p-card header="Quick Actions" class="bg-gray-100 backdrop-blur-sm border border-gray-700">
             <div class="space-y-3">
               <p-button
                 label="Export Entry"

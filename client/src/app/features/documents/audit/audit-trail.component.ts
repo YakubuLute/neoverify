@@ -25,7 +25,12 @@ import { ConfirmationService } from 'primeng/api';
 // Services and Models
 import { AuditService } from '../../../core/services/audit.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { AuditEntry, AuditAction, ExportFormat, ReportType } from '../../../shared/models/document.models';
+import {
+  AuditEntry,
+  AuditAction,
+  ExportFormat,
+  ReportType,
+} from '../../../shared/models/document.models';
 
 interface AuditFilters {
   query?: string;
@@ -37,7 +42,6 @@ interface AuditFilters {
   userIds?: string[];
   documentIds?: string[];
 }
-
 
 interface Statistics {
   totalEntries: number;
@@ -64,65 +68,246 @@ interface Statistics {
     CardModule,
     PanelModule,
     DialogModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
   ],
   providers: [ConfirmationService],
   templateUrl: `./audit-trail.component.html`,
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    }
+  styles: [
+    `
+/* Page background */
+:host {
+  @apply block min-h-screen bg-gray-50;
+}
 
-    .audit-trail-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+/* Main container */
+.audit-trail-container {
+  @apply max-w-7xl mx-auto px-4 md:px-6 py-6;
+}
 
-    ::ng-deep .p-datatable .p-datatable-tbody > tr {
-      background: rgba(31, 41, 55, 0.5) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
-    }
+/* ------------------------------------------------------------------
+ * Typography & quick color overrides (convert dark text to light theme)
+ * ------------------------------------------------------------------ */
 
-    ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
-      background: rgba(55, 65, 81, 0.5) !important;
-    }
+.audit-trail-container h1.text-3xl {
+  @apply text-3xl md:text-4xl font-semibold text-gray-900 mb-1;
+}
 
-    ::ng-deep .p-datatable .p-datatable-thead > tr > th {
-      background: rgba(17, 24, 39, 0.8) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.5) !important;
-      color: #f3f4f6 !important;
-    }
+.audit-trail-container p.text-gray-400 {
+  @apply text-sm text-gray-500;
+}
 
-    ::ng-deep .p-panel .p-panel-header {
-      background: rgba(31, 41, 55, 0.5) !important;
-      border: 1px solid rgba(75, 85, 99, 0.3) !important;
-      color: #f3f4f6 !important;
-    }
+.audit-trail-container .text-white {
+  @apply text-gray-900;
+}
 
-    ::ng-deep .p-panel .p-panel-content {
-      background: rgba(31, 41, 55, 0.3) !important;
-      border: 1px solid rgba(75, 85, 99, 0.3) !important;
-      border-top: none !important;
-    }
+.audit-trail-container .text-gray-300 {
+  @apply text-gray-600;
+}
 
-    ::ng-deep .p-card .p-card-body {
-      background: transparent !important;
-      border: none !important;
-    }
+/* ------------------------------------------------------------------
+ * Cards: stats + table wrapper (were using bg-gray-800/50)
+ * ------------------------------------------------------------------ */
 
-    ::ng-deep .p-dialog .p-dialog-header {
-      background: rgba(31, 41, 55, 0.95) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
-      color: #f3f4f6 !important;
-    }
+.audit-trail-container .bg-gray-800\/50 {
+  @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+}
 
-    ::ng-deep .p-dialog .p-dialog-content {
-      background: rgba(31, 41, 55, 0.95) !important;
-      color: #f3f4f6 !important;
-    }
-  `]
+.audit-trail-container .border-gray-700 {
+  @apply border-gray-200;
+}
+
+.audit-trail-container .backdrop-blur-sm {
+  @apply backdrop-blur-none;
+}
+
+/* ------------------------------------------------------------------
+ * Buttons (primary cyan, outlined neutral)
+ * ------------------------------------------------------------------ */
+
+:host ::ng-deep .audit-trail-container .p-button:not(.p-button-text):not(.p-button-outlined),
+:host ::ng-deep .audit-trail-container .p-button:not(.p-button-text)[outlined="false"] {
+  @apply bg-cyan-500 border-cyan-500 text-white
+         hover:bg-cyan-600 hover:border-cyan-600;
+}
+
+:host ::ng-deep .audit-trail-container .p-button.p-button-outlined,
+:host ::ng-deep .audit-trail-container .p-button[outlined="true"] {
+  @apply bg-transparent border-gray-300 text-gray-700
+         hover:bg-gray-50 hover:border-gray-400;
+}
+
+/* Export / report icon-only buttons inside table rows */
+:host ::ng-deep .audit-trail-container .p-button.p-button-text {
+  @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+}
+
+/* ------------------------------------------------------------------
+ * Filters panel (p-panel)
+ * ------------------------------------------------------------------ */
+
+:host ::ng-deep .p-panel {
+  @apply bg-transparent border-none;
+}
+
+:host ::ng-deep .p-panel .p-panel-header {
+  @apply bg-white border border-gray-200 rounded-t-2xl text-gray-900
+         px-4 py-3;
+}
+
+:host ::ng-deep .p-panel .p-panel-content {
+  @apply bg-gray-50 border-x border-b border-gray-200 rounded-b-2xl
+         text-gray-800;
+}
+
+/* Inputs in filters */
+:host ::ng-deep
+  .audit-trail-container .p-inputtext,
+:host ::ng-deep
+  .audit-trail-container .p-multiselect,
+:host ::ng-deep
+  .audit-trail-container .p-calendar,
+:host ::ng-deep
+  .audit-trail-container .p-dropdown,
+:host ::ng-deep
+  .audit-trail-container .p-select {
+  @apply w-full bg-white border border-gray-300 text-gray-900 text-sm
+         rounded-lg;
+}
+
+:host ::ng-deep
+  .audit-trail-container .p-inputtext:enabled:focus,
+:host ::ng-deep
+  .audit-trail-container .p-multiselect.p-focus,
+:host ::ng-deep
+  .audit-trail-container .p-calendar .p-inputtext:enabled:focus,
+:host ::ng-deep
+  .audit-trail-container .p-dropdown.p-focus,
+:host ::ng-deep
+  .audit-trail-container .p-select.p-focus {
+  @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+}
+
+:host ::ng-deep
+  .audit-trail-container .p-input-icon-left > i {
+  @apply text-gray-400;
+}
+
+/* Multiselect tokens */
+:host ::ng-deep
+  .audit-trail-container .p-multiselect-token {
+  @apply bg-cyan-500/10 border border-cyan-500/30 text-cyan-700 text-xs;
+}
+
+/* ------------------------------------------------------------------
+ * Statistics cards (they already use the bg-gray-800/50 class,
+ * so background is handled above – only tweak inner text)
+ * ------------------------------------------------------------------ */
+
+.audit-trail-container .grid.grid-cols-1.md\:grid-cols-4.gap-4.mb-6 p {
+  @apply text-sm text-gray-500;
+}
+
+.audit-trail-container .grid.grid-cols-1.md\:grid-cols-4.gap-4.mb-6 p.text-2xl {
+  @apply text-2xl font-semibold text-gray-900;
+}
+
+/* ------------------------------------------------------------------
+ * Audit table (p-card + p-table)
+ * ------------------------------------------------------------------ */
+
+:host ::ng-deep .p-card {
+  @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+}
+
+:host ::ng-deep .p-card .p-card-body {
+  @apply bg-transparent border-none;
+}
+
+/* Table header */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  @apply bg-gray-50 border-b border-gray-200 text-gray-600
+         font-medium text-xs uppercase tracking-wide;
+}
+
+/* Table body rows */
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  @apply bg-white border-b border-gray-100 transition-colors;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  @apply bg-cyan-50/40;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  @apply text-sm text-gray-800 align-top;
+}
+
+/* Sort icons */
+:host ::ng-deep .p-sortable-column .p-sortable-column-icon {
+  @apply text-gray-400 ml-1;
+}
+
+/* Paginator */
+:host ::ng-deep .p-paginator {
+  @apply bg-transparent border-t border-gray-200 mt-2 pt-3 text-xs text-gray-500;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-page {
+  @apply text-gray-600 rounded hover:bg-gray-100;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-page.p-highlight {
+  @apply bg-cyan-500 text-white;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-prev,
+:host ::ng-deep .p-paginator .p-paginator-next {
+  @apply text-gray-600 rounded hover:bg-gray-100;
+}
+
+/* Tags for actions */
+:host ::ng-deep .p-tag {
+  @apply text-xs font-medium rounded-full px-2.5 py-1;
+}
+
+/* Empty state icon & text */
+:host ::ng-deep .p-datatable .p-datatable-emptymessage {
+  @apply bg-white;
+}
+
+/* ------------------------------------------------------------------
+ * Dialogs: details / export / report
+ * ------------------------------------------------------------------ */
+
+:host ::ng-deep .p-dialog {
+  @apply rounded-2xl overflow-hidden;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header {
+  @apply bg-white border-b border-gray-200 text-gray-900 px-4 py-3;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content {
+  @apply bg-white text-gray-800 px-4 py-4;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header-icon {
+  @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+}
+
+/* Buttons inside dialogs reuse global button styles */
+
+/* Details <pre> block */
+:host ::ng-deep pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg text-xs p-3 max-h-60 overflow-auto;
+}
+
+    `,
+  ],
 })
 export class AuditTrailComponent implements OnInit {
   private readonly auditService = inject(AuditService);
@@ -158,22 +343,22 @@ export class AuditTrailComponent implements OnInit {
   reportEndDate: Date | null = null;
 
   // Options
-  actionOptions = Object.values(AuditAction).map(action => ({
+  actionOptions = Object.values(AuditAction).map((action) => ({
     label: this.getActionLabel(action),
-    value: action
+    value: action,
   }));
 
   exportFormatOptions = [
     { label: 'CSV', value: 'csv' },
     { label: 'Excel', value: 'excel' },
-    { label: 'PDF', value: 'pdf' }
+    { label: 'PDF', value: 'pdf' },
   ];
 
   reportTypeOptions = [
     { label: 'Monthly', value: 'monthly' },
     { label: 'Quarterly', value: 'quarterly' },
     { label: 'Annual', value: 'annual' },
-    { label: 'Custom Range', value: 'custom' }
+    { label: 'Custom Range', value: 'custom' },
   ];
 
   private searchSubject = new Subject<string>();
@@ -183,20 +368,17 @@ export class AuditTrailComponent implements OnInit {
       query: [''],
       actions: [[]],
       startDate: [null],
-      endDate: [null]
+      endDate: [null],
     });
 
     // Setup search debouncing
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(query => {
+    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.currentFilters.query = query;
       this.loadAuditEntries();
     });
 
     // Watch for form changes
-    this.filtersForm.get('query')?.valueChanges.subscribe(value => {
+    this.filtersForm.get('query')?.valueChanges.subscribe((value) => {
       this.searchSubject.next(value || '');
     });
   }
@@ -212,21 +394,22 @@ export class AuditTrailComponent implements OnInit {
     const params = {
       page: this.currentPage + 1,
       limit: this.pageSize,
-      ...this.currentFilters
+      ...this.currentFilters,
     };
 
-    this.auditService.searchAuditEntries(this.currentFilters, params).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (response) => {
-        this.auditEntries.set(response.items);
-        this.totalRecords.set(response.totalCount!);
-      },
-      error: (error) => {
-        console.error('Failed to load audit entries:', error);
-        this.notificationService.error('Failed to load audit entries');
-      }
-    });
+    this.auditService
+      .searchAuditEntries(this.currentFilters, params)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.auditEntries.set(response.items);
+          this.totalRecords.set(response.totalCount!);
+        },
+        error: (error) => {
+          console.error('Failed to load audit entries:', error);
+          this.notificationService.error('Failed to load audit entries');
+        },
+      });
   }
 
   loadStatistics() {
@@ -236,7 +419,7 @@ export class AuditTrailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load audit statistics:', error);
-      }
+      },
     });
   }
 
@@ -252,10 +435,13 @@ export class AuditTrailComponent implements OnInit {
     this.currentFilters = {
       query: formValue.query || undefined,
       actions: formValue.actions?.length ? formValue.actions : undefined,
-      dateRange: formValue.startDate && formValue.endDate ? {
-        start: formValue.startDate,
-        end: formValue.endDate
-      } : undefined
+      dateRange:
+        formValue.startDate && formValue.endDate
+          ? {
+              start: formValue.startDate,
+              end: formValue.endDate,
+            }
+          : undefined,
     };
 
     this.currentPage = 0;
@@ -287,56 +473,60 @@ export class AuditTrailComponent implements OnInit {
   exportAuditTrail() {
     this.exporting.set(true);
 
-    this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat).pipe(
-      finalize(() => this.exporting.set(false))
-    ).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${this.exportFormat}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showExportDialog = false;
-      },
-      error: (error) => {
-        console.error('Export failed:', error);
-        this.notificationService.error('Export failed. Please try again.');
-      }
-    });
+    this.auditService
+      .exportAuditTrail(this.currentFilters, this.exportFormat)
+      .pipe(finalize(() => this.exporting.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${
+            this.exportFormat
+          }`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.showExportDialog = false;
+        },
+        error: (error) => {
+          console.error('Export failed:', error);
+          this.notificationService.error('Export failed. Please try again.');
+        },
+      });
   }
 
   generateReport() {
     this.generatingReport.set(true);
 
     const params: any = {
-      reportType: this.reportType
+      reportType: this.reportType,
     };
 
     if (this.reportType === 'custom' && this.reportStartDate && this.reportEndDate) {
       params.dateRange = {
         start: this.reportStartDate,
-        end: this.reportEndDate
+        end: this.reportEndDate,
       };
     }
 
-    this.auditService.generateComplianceReport(params).pipe(
-      finalize(() => this.generatingReport.set(false))
-    ).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showReportDialog = false;
-      },
-      error: (error) => {
-        console.error('Report generation failed:', error);
-        this.notificationService.error('Report generation failed. Please try again.');
-      }
-    });
+    this.auditService
+      .generateComplianceReport(params)
+      .pipe(finalize(() => this.generatingReport.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.showReportDialog = false;
+        },
+        error: (error) => {
+          console.error('Report generation failed:', error);
+          this.notificationService.error('Report generation failed. Please try again.');
+        },
+      });
   }
 
   getActionLabel(action: AuditAction): string {
@@ -357,13 +547,18 @@ export class AuditTrailComponent implements OnInit {
       [AuditAction.UPLOADED]: 'Uploaded',
       [AuditAction.REJECTED]: 'Rejected',
       [AuditAction.ARCHIVED]: 'Archived',
-      [AuditAction.RESTORED]: 'Restored'
+      [AuditAction.RESTORED]: 'Restored',
     };
     return labels[action] || action;
   }
 
-  getActionSeverity(action: AuditAction): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
-    const severities: Record<AuditAction, "success" | "info" | "warn" | "danger" | "secondary" | "contrast"> = {
+  getActionSeverity(
+    action: AuditAction
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    const severities: Record<
+      AuditAction,
+      'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+    > = {
       [AuditAction.CREATED]: 'success',
       [AuditAction.VIEWED]: 'info',
       [AuditAction.UPDATED]: 'warn',
@@ -380,7 +575,7 @@ export class AuditTrailComponent implements OnInit {
       [AuditAction.UPLOADED]: 'info',
       [AuditAction.REJECTED]: 'danger',
       [AuditAction.ARCHIVED]: 'info',
-      [AuditAction.RESTORED]: 'info'
+      [AuditAction.RESTORED]: 'info',
     };
     return severities[action] || 'info';
   }
@@ -428,7 +623,7 @@ export class AuditTrailComponent implements OnInit {
     const actions = Object.entries(stats.actionCounts);
     if (!actions.length) return 'N/A';
 
-    const mostCommon = actions.reduce((a, b) => (a[1] as any )> (b[1] as any )? a : b);
+    const mostCommon = actions.reduce((a, b) => ((a[1] as any) > (b[1] as any) ? a : b));
     return this.getActionLabel(mostCommon[0] as AuditAction);
   }
 }

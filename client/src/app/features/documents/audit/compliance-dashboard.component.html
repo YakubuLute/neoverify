@@ -73,7 +73,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div
           *ngFor="let metric of complianceMetrics()"
-          class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6"
+          class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-6"
         >
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-white">{{ metric.name }}</h3>
@@ -123,7 +123,7 @@
       <!-- Charts Section -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Activity Chart -->
-        <p-card header="Audit Activity Trend" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+        <p-card header="Audit Activity Trend" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
           <p-chart
             type="line"
             [data]="activityChartData()"
@@ -134,7 +134,7 @@
         </p-card>
 
         <!-- Action Distribution -->
-        <p-card header="Action Distribution" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+        <p-card header="Action Distribution" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
           <p-chart
             type="doughnut"
             [data]="actionDistributionData()"
@@ -148,7 +148,7 @@
       <!-- Compliance Reports -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Recent Reports -->
-        <p-card header="Recent Compliance Reports" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+        <p-card header="Recent Compliance Reports" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
           <p-table [value]="recentReports()" [paginator]="false" styleClass="p-datatable-sm">
             <ng-template pTemplate="header">
               <tr>
@@ -198,7 +198,7 @@
         </p-card>
 
         <!-- Retention Policy Status -->
-        <p-card header="Data Retention Policy" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+        <p-card header="Data Retention Policy" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
           <div class="space-y-4" *ngIf="retentionPolicy()">
             <div class="flex justify-between items-center">
               <span class="text-gray-300">Retention Period</span>
@@ -236,7 +236,7 @@
       </div>
 
       <!-- Threshold Monitoring -->
-      <p-card header="Compliance Thresholds" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700 mb-6">
+      <p-card header="Compliance Thresholds" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div
             *ngFor="let threshold of complianceThresholds()"
