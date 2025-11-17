@@ -1,271 +1,337 @@
+/* ---------------- PAGE SHELL ---------------- */
 
-    .document-upload-container {
-      @apply min-h-screen bg-gray-900 text-white;
+.document-upload-container {
+  @apply w-full min-h-screen bg-gray-50;
+
+  /* Header bar */
+  .document-upload-header {
+    @apply bg-white border-b border-gray-200;
+
+    .header-content {
+      @apply max-w-6xl mx-auto px-4 md:px-6 py-4
+             flex flex-col md:flex-row items-start md:items-center
+             justify-between gap-4;
     }
 
-    // Header Section
-    .document-upload-header {
-      @apply bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-6;
+    .title-section {
+      @apply space-y-1;
 
-      .header-content {
-        @apply max-w-7xl mx-auto flex items-center justify-between;
+      .page-title {
+        @apply text-2xl md:text-3xl font-semibold text-gray-900;
+      }
 
-        .title-section {
-          .page-title {
-            @apply text-3xl font-semibold text-white mb-2;
+      .page-subtitle {
+        @apply text-sm text-gray-500;
+      }
+    }
+
+    .header-actions {
+      @apply flex items-center gap-3;
+
+      /* Single/Bulk toggle */
+      .mode-toggle {
+        @apply flex items-center gap-2 px-3 py-1.5 rounded-full
+               bg-gray-100 border border-gray-200;
+
+        .toggle-label {
+          @apply text-xs font-medium text-gray-600;
+        }
+
+        ::ng-deep .p-toggleswitch {
+          @apply scale-90;
+
+          .p-toggleswitch-slider {
+            @apply bg-white border border-gray-300;
           }
 
-          .page-subtitle {
-            @apply text-gray-300 font-normal;
+          &.p-toggleswitch-checked .p-toggleswitch-slider {
+            @apply bg-cyan-500 border-cyan-500;
+          }
+        }
+      }
+
+      ::ng-deep .p-button.p-button-text {
+        @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+      }
+    }
+  }
+
+  /* ---------------- CONTENT LAYOUT ---------------- */
+
+  .upload-content {
+    @apply max-w-6xl mx-auto px-4 md:px-6 py-6;
+
+    .upload-grid {
+      @apply grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6 items-start;
+    }
+
+    /* -------- Left: upload area + progress -------- */
+
+    .upload-section {
+      @apply space-y-4;
+
+      .upload-card {
+        @apply bg-white rounded-2xl border border-gray-200 shadow-sm;
+
+        .upload-card-content {
+          @apply p-5 md:p-6 space-y-5;
+        }
+
+        .upload-field {
+          @apply space-y-2;
+
+          .upload-field-label {
+            @apply text-sm font-medium text-gray-800;
           }
         }
 
-        .header-actions {
-          @apply flex items-center space-x-4;
+        /* Drag & Drop zone (single + bulk) */
+        .drag-drop-zone {
+          @apply relative flex flex-col items-center justify-center text-center
+                 rounded-2xl border-2 border-dashed border-gray-300
+                 bg-gradient-to-b from-gray-50 to-gray-100
+                 px-4 py-10 md:px-6 md:py-12
+                 cursor-pointer transition-all duration-200;
 
-          .mode-toggle {
-            @apply flex items-center space-x-2 px-4 py-2 bg-gray-700/50 rounded-lg;
+          &:hover {
+            @apply border-cyan-400 bg-cyan-50/60 shadow-[0_10px_30px_rgba(15,23,42,0.06)];
+          }
 
-            .toggle-label {
-              @apply text-sm text-gray-300;
+          &.drag-over {
+            @apply border-cyan-500 bg-cyan-50;
+            box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.35);
+          }
+
+          .drop-zone-icon {
+            @apply mb-3 flex items-center justify-center;
+            i {
+              @apply text-3xl text-cyan-500;
             }
+          }
+
+          .drop-zone-text {
+            .drop-zone-title {
+              @apply text-base md:text-lg font-medium text-gray-900;
+            }
+            .drop-zone-subtitle {
+              @apply mt-1 text-xs md:text-sm text-gray-500;
+            }
+          }
+
+          /* Selected file (single mode) */
+          .file-selected-content {
+            @apply flex items-center gap-4 w-full max-w-lg mx-auto text-left;
+
+            .file-selected-icon {
+              @apply flex-shrink-0 w-10 h-10 rounded-full bg-green-50
+                     flex items-center justify-center;
+              i {
+                @apply text-lg text-green-600;
+              }
+            }
+
+            .file-selected-info {
+              @apply flex-1 space-y-0.5;
+
+              .file-selected-name {
+                @apply text-sm font-medium text-gray-900 truncate;
+              }
+
+              .file-selected-size {
+                @apply text-xs text-gray-500;
+              }
+
+              .file-remove-btn {
+                @apply mt-1 text-xs font-medium text-red-600 hover:text-red-700;
+              }
+            }
+          }
+        }
+
+        .error-message {
+          @apply mt-3;
+
+          .error-content {
+            @apply flex items-center gap-2 px-3 py-2 rounded-lg
+                   bg-red-50 border border-red-100;
+          }
+
+          .error-icon {
+            @apply text-red-500 text-sm;
+          }
+
+          .error-text {
+            @apply text-xs text-red-700;
+          }
+        }
+      }
+
+      /* Upload progress card (single + bulk) */
+
+      .progress-card {
+        @apply bg-white rounded-2xl border border-gray-200 shadow-sm;
+
+        .progress-card-content {
+          @apply p-4 md:p-5 space-y-3;
+        }
+
+        .progress-card-header {
+          @apply flex items-center justify-between mb-1;
+
+          .progress-card-title {
+            @apply text-sm font-semibold text-gray-900;
           }
 
           ::ng-deep .p-button.p-button-text {
-            @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
+            @apply text-red-500 hover:text-red-600 hover:bg-red-50;
+          }
+        }
+
+        .progress-details {
+          @apply space-y-3;
+
+          .progress-info {
+            @apply flex items-center justify-between text-xs text-gray-600;
+            .progress-filename {
+              @apply font-medium text-gray-800 truncate;
+            }
+            .progress-percentage {
+              @apply font-semibold text-gray-900;
+            }
+          }
+
+          ::ng-deep .p-progressbar {
+            @apply h-2 rounded-full overflow-hidden bg-gray-100;
+
+            .p-progressbar-value {
+              @apply bg-cyan-500;
+            }
           }
         }
       }
     }
 
-    // Upload Content
+    /* -------- Right: metadata form -------- */
+
+    .metadata-section {
+      @apply h-full;
+
+      .metadata-card {
+        @apply bg-white rounded-2xl border border-gray-200 shadow-sm
+               lg:sticky lg:top-24;
+
+        .metadata-form {
+          @apply p-5 md:p-6 space-y-4;
+        }
+
+        .metadata-card-title {
+          @apply text-sm font-semibold text-gray-900 mb-2;
+        }
+
+        .form-field {
+          @apply space-y-1;
+        }
+
+        .form-field-label {
+          @apply block text-sm font-medium text-gray-800;
+        }
+
+        .form-field-help {
+          @apply text-xs text-gray-500;
+        }
+
+        .template-preview-card {
+          @apply bg-gray-50 rounded-xl border border-gray-200 p-3;
+        }
+
+        .form-actions {
+          @apply flex flex-col sm:flex-row justify-end gap-2 pt-2;
+
+          ::ng-deep .p-button {
+            @apply w-full sm:w-auto;
+          }
+
+          ::ng-deep .p-button.p-button-outlined {
+            @apply border-gray-300 text-gray-700 hover:bg-gray-50;
+          }
+
+          ::ng-deep .p-button-primary {
+            @apply bg-cyan-500 border-cyan-500 text-white
+                   hover:bg-cyan-600 hover:border-cyan-600;
+          }
+        }
+      }
+
+      /* Generic spacing for simple .field blocks */
+      .field {
+        @apply mb-3;
+      }
+    }
+  }
+}
+
+/* ---------------- PRIME-NG INPUT OVERRIDES (LOCAL TO THIS PAGE) ---------------- */
+
+:host {
+  /* Inputs, textareas, chips, etc. */
+  ::ng-deep .document-upload-container .metadata-card
+    .p-inputtext,
+  ::ng-deep .document-upload-container .metadata-card
+    textarea.p-inputtext,
+  ::ng-deep .document-upload-container .metadata-card
+    .p-dropdown,
+  ::ng-deep .document-upload-container .metadata-card
+    .p-multiselect,
+  ::ng-deep .document-upload-container .metadata-card
+    .p-chips .p-inputtext {
+    @apply w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg;
+
+    &:enabled:focus {
+      @apply outline-none border-cyan-500 ring-2 ring-cyan-500/20;
+    }
+  }
+
+  /* Datepicker */
+  ::ng-deep .document-upload-container .metadata-card .p-datepicker {
+    @apply w-full;
+  }
+
+  /* Select + dropdown clear button spacing */
+  ::ng-deep .document-upload-container .metadata-card .p-dropdown,
+  ::ng-deep .document-upload-container .metadata-card .p-select {
+    .p-dropdown-label,
+    .p-select-label {
+      @apply text-sm;
+    }
+  }
+
+  /* Chips */
+  ::ng-deep .document-upload-container .metadata-card .p-chips-token {
+    @apply bg-cyan-50 text-cyan-700 border border-cyan-100 text-xs;
+  }
+
+  /* Checkbox in "auto register" */
+  ::ng-deep .document-upload-container .metadata-card .p-checkbox .p-checkbox-box {
+    @apply bg-white border border-gray-300 rounded;
+  }
+
+  ::ng-deep .document-upload-container .metadata-card .p-checkbox .p-checkbox-box.p-highlight {
+    @apply bg-cyan-500 border-cyan-500;
+  }
+}
+
+/* ---------------- RESPONSIVE TWEAKS ---------------- */
+
+@media (max-width: 1024px) {
+  .document-upload-container {
     .upload-content {
-      @apply max-w-7xl mx-auto p-6;
-
       .upload-grid {
-        @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+        @apply grid-cols-1;
+      }
 
-        .upload-section {
-          @apply space-y-6;
-
-          .upload-card {
-            @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
-
-            .upload-card-content {
-              @apply space-y-6;
-
-              .upload-field {
-                .upload-field-label {
-                  @apply block text-sm font-medium text-gray-300 mb-4;
-                }
-
-                .drag-drop-zone {
-                  @apply border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer;
-                  @apply transition-all duration-200 hover:border-cyan-500 hover:bg-cyan-500/10;
-
-                  &.drag-over {
-                    @apply border-cyan-500 bg-cyan-500/20 transform scale-105;
-                    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
-                  }
-
-                  .drop-zone-content {
-                    @apply space-y-4;
-
-                    .drop-zone-icon {
-                      @apply mx-auto w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center;
-
-                      i {
-                        @apply text-2xl text-gray-400;
-                      }
-                    }
-
-                    .drop-zone-text {
-                      .drop-zone-title {
-                        @apply text-lg font-medium text-white mb-2;
-                      }
-
-                      .drop-zone-subtitle {
-                        @apply text-sm text-gray-400;
-                      }
-                    }
-                  }
-
-                  .file-selected-content {
-                    @apply space-y-4;
-
-                    .file-selected-icon {
-                      @apply mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center;
-
-                      i {
-                        @apply text-2xl text-green-400;
-                      }
-                    }
-
-                    .file-selected-info {
-                      .file-selected-name {
-                        @apply text-lg font-medium text-white mb-1;
-                      }
-
-                      .file-selected-size {
-                        @apply text-sm text-gray-400;
-                      }
-
-                      .file-remove-btn {
-                        @apply mt-2 text-sm text-red-400 hover:text-red-300 transition-colors;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        .metadata-section {
-          @apply space-y-6;
-
-          .metadata-card {
-            @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
-
-            .metadata-card-title {
-              @apply text-lg font-medium text-white mb-6;
-            }
-
-            .metadata-form {
-              @apply space-y-6;
-
-              .form-field {
-                @apply space-y-2;
-
-                .form-field-label {
-                  @apply block text-sm font-medium text-gray-300;
-                }
-
-                .form-field-help {
-                  @apply text-xs text-gray-400 mt-1 block;
-                }
-
-                .template-preview-card {
-                  @apply p-3 bg-gray-700/30 rounded border border-gray-600;
-                }
-              }
-            }
-
-            .progress-card {
-              @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
-
-              .progress-card-content {
-                @apply space-y-4;
-
-                .progress-card-header {
-                  @apply flex items-center justify-between;
-
-                  .progress-card-title {
-                    @apply text-lg font-medium text-white;
-                  }
-                }
-
-                .progress-details {
-                  @apply space-y-3;
-
-                  .progress-info {
-                    @apply flex items-center justify-between text-sm;
-
-                    .progress-filename {
-                      @apply text-gray-400;
-                    }
-
-                    .progress-percentage {
-                      @apply font-medium text-white;
-                    }
-                  }
-
-                  .error-message {
-                    @apply mt-2 p-3 bg-red-500/20 rounded border border-red-500/30;
-
-                    .error-content {
-                      @apply flex items-start;
-
-                      .error-icon {
-                        @apply text-red-400 mr-2 mt-0.5;
-                      }
-
-                      .error-text {
-                        @apply text-sm text-red-300;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+      .metadata-section .metadata-card {
+        @apply lg:static;
       }
     }
-
-    // Form Fields
-    .field {
-      @apply mb-6;
-    }
-
-    // Dark theme glassmorphism effects
-    .document-upload-container {
-      ::ng-deep .p-card {
-        @apply bg-gray-800/50 backdrop-blur-sm border-gray-700;
-      }
-
-      ::ng-deep .p-button:not(.p-button-text) {
-        @apply bg-gray-700/50 border-gray-600 hover:bg-gray-600/50;
-
-        &.p-button-primary {
-          @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
-        }
-      }
-
-      ::ng-deep .p-inputtext,
-      ::ng-deep .p-select,
-      ::ng-deep .p-multiselect,
-      ::ng-deep .p-datepicker input {
-        @apply bg-gray-700/50 border-gray-600 text-white;
-
-        &:enabled:focus {
-          @apply border-cyan-500 ring-2 ring-cyan-500/20;
-        }
-      }
-
-      ::ng-deep .p-progressbar {
-        @apply bg-gray-700/50;
-
-        .p-progressbar-value {
-          @apply bg-cyan-500;
-        }
-      }
-
-      ::ng-deep .p-toggleswitch {
-        .p-toggleswitch-slider {
-          @apply bg-gray-600;
-        }
-
-        &.p-toggleswitch-checked .p-toggleswitch-slider {
-          @apply bg-cyan-500;
-        }
-      }
-
-      // Form Actions
-      .form-actions {
-        @apply flex gap-4 pt-6 border-t border-gray-700;
-
-        ::ng-deep .p-button {
-          @apply flex-1;
-
-          &.p-button-outlined {
-            @apply border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500;
-          }
-
-          &.p-button-primary {
-            @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
-          }
-        }
-      }
-    }
-
+  }
+}

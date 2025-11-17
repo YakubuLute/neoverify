@@ -111,30 +111,57 @@
 @if (!loading() && !error() && filteredDocuments().length > 0) {
 <div class="documents-content">
 
-    <!-- List Header with Selection and Sorting -->
+     <!-- List Header with Selection, Summary and Sorting -->
     <div class="list-header">
-        <div class="selection-controls" *hasPermission="'documents:edit:org'">
-            <p-checkbox [binary]="true" [ngModel]="isAllSelected()" [indeterminate]="hasSelection() && !isAllSelected()"
-                (onChange)="onSelectAll()" label="Select all">
-            </p-checkbox>
+        <div class="list-header-left">
+            <div class="selection-controls" *hasPermission="'documents:edit:org'">
+                <p-checkbox
+                    [binary]="true"
+                    [ngModel]="isAllSelected()"
+                    [indeterminate]="hasSelection() && !isAllSelected()"
+                    (onChange)="onSelectAll()"
+                    label="Select all">
+                </p-checkbox>
+            </div>
+
+            <div class="results-summary">
+                <span class="results-count">
+                    {{ filteredDocuments().length }} document(s)
+                </span>
+
+                @if (getFilterCount() > 0) {
+                <span class="filters-pill">
+                    {{ getFilterCount() }} active filter{{ getFilterCount() > 1 ? 's' : '' }}
+                </span>
+                }
+            </div>
         </div>
 
         <div class="sort-controls">
-            <p-select [options]="[
-              { label: 'Upload Date', value: 'uploadedAt' },
-              { label: 'Title', value: 'title' },
-              { label: 'File Size', value: 'fileSize' },
-              { label: 'Status', value: 'status' }
-            ]" optionLabel="label" optionValue="value" [ngModel]="sortBy()"
-                (onChange)="onSortChange($event.value, sortOrder())" placeholder="Sort by">
+            <p-select
+                [options]="[
+                  { label: 'Upload Date', value: 'uploadedAt' },
+                  { label: 'Title', value: 'title' },
+                  { label: 'File Size', value: 'fileSize' },
+                  { label: 'Status', value: 'status' }
+                ]"
+                optionLabel="label"
+                optionValue="value"
+                [ngModel]="sortBy()"
+                (onChange)="onSortChange($event.value, sortOrder())"
+                placeholder="Sort by">
             </p-select>
 
-            <p-button [icon]="sortOrder() === 'asc' ? 'pi pi-sort-up' : 'pi pi-sort-down'" [text]="true"
+            <p-button
+                [icon]="sortOrder() === 'asc' ? 'pi pi-sort-up' : 'pi pi-sort-down'"
+                [text]="true"
                 (onClick)="onSortChange(sortBy(), sortOrder() === 'asc' ? 'desc' : 'asc')"
                 [pTooltip]="sortOrder() === 'asc' ? 'Sort descending' : 'Sort ascending'">
             </p-button>
         </div>
     </div>
+
+
 
     <!-- Grid View -->
     @if (viewMode() === 'grid') {

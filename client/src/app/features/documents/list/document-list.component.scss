@@ -3,7 +3,7 @@
 .document-list-container {
   @apply w-full bg-gray-50;
 
-  // Header Section
+  /* ---------- Header Section ---------- */
   .document-list-header {
     @apply bg-white border-b border-gray-200;
 
@@ -41,68 +41,71 @@
     }
   }
 
-  // Search & Filters Section
+  /* ---------- Search & Filters Section ---------- */
   .search-filters-section {
     @apply bg-white border-b border-gray-200;
 
-    .search-container {
-      @apply max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-2;
+    /* Reach into <app-document-search> despite view encapsulation */
+    ::ng-deep {
+      .search-container {
+        @apply max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-2;
 
-      .search-input {
-        @apply w-full;
+        .search-input {
+          @apply w-full;
 
-        .search-field {
-          @apply w-full bg-white border border-gray-300 text-gray-900 placeholder-gray-400
-                 rounded-lg px-3 py-2
-                 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15;
-        }
+          .search-field {
+            @apply w-full bg-white border border-gray-300 text-gray-900
+                   placeholder-gray-400 rounded-lg px-3 py-2
+                   focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15;
+          }
 
-        i {
-          @apply text-gray-400;
+          i {
+            @apply text-gray-400;
+          }
         }
       }
-    }
 
-    .filters-panel {
-      @apply max-w-7xl mx-auto px-4 md:px-6 pb-4;
+      .filters-panel {
+        @apply max-w-7xl mx-auto px-4 md:px-6 pb-4;
 
-      .filters-content {
-        @apply bg-gray-50 rounded-xl border border-gray-200 p-4 md:p-6
-               grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+        .filters-content {
+          @apply bg-gray-50 rounded-xl border border-gray-200 p-4 md:p-6
+                 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
 
-        .filter-group {
-          @apply space-y-2;
+          .filter-group {
+            @apply space-y-2;
 
-          label {
-            @apply block text-sm font-medium text-gray-700;
+            label {
+              @apply block text-sm font-medium text-gray-700;
+            }
+
+            .p-multiselect,
+            .p-datepicker,
+            .p-dropdown {
+              @apply w-full;
+
+              .p-multiselect-label,
+              .p-datepicker-input,
+              .p-dropdown-label {
+                @apply bg-white border border-gray-300 text-gray-900 rounded-lg;
+              }
+
+              &:not(.p-disabled):hover {
+                @apply border-gray-400;
+              }
+
+              &.p-focus {
+                @apply border-cyan-500 ring-2 ring-cyan-500/20;
+              }
+            }
           }
 
-          ::ng-deep .p-multiselect,
-          ::ng-deep .p-datepicker,
-          ::ng-deep .p-dropdown {
-            @apply w-full;
+          .filter-actions {
+            @apply col-span-full flex justify-end pt-4 border-t border-gray-200;
 
-            .p-multiselect-label,
-            .p-datepicker-input,
-            .p-dropdown-label {
-              @apply bg-white border border-gray-300 text-gray-900 rounded-lg;
+            .p-button.p-button-text {
+              @apply text-gray-500 hover:text-gray-900;
             }
-
-            &:not(.p-disabled):hover {
-              @apply border-gray-400;
-            }
-
-            &.p-focus {
-              @apply border-cyan-500 ring-2 ring-cyan-500/20;
-            }
-          }
-        }
-
-        .filter-actions {
-          @apply col-span-full flex justify-end pt-4 border-t border-gray-200;
-
-          ::ng-deep .p-button.p-button-text {
-            @apply text-gray-500 hover:text-gray-900;
           }
         }
       }
@@ -110,9 +113,9 @@
   }
 }
 
-/* ---------------- Bulk Actions / States / Content ---------------- */
+/* ---------- Bulk Actions / States / Content ---------- */
 
-// Bulk Actions Bar (sibling of .document-list-container)
+/* Bulk Actions Bar (sibling of .document-list-container) */
 .bulk-actions-bar {
   @apply max-w-7xl mx-auto mt-4 px-4 md:px-6 py-3
          bg-cyan-50 border border-cyan-100 rounded-xl shadow-sm
@@ -135,7 +138,7 @@
   }
 }
 
-// Loading State
+/* Loading State */
 .loading-container {
   @apply flex items-center justify-center py-16;
 
@@ -152,7 +155,7 @@
   }
 }
 
-// Error State
+/* Error State */
 .error-container {
   @apply flex items-center justify-center py-16 px-4;
 
@@ -177,7 +180,7 @@
   }
 }
 
-// Empty State
+/* Empty State */
 .empty-container {
   @apply flex items-center justify-center py-16 px-4;
 
@@ -202,14 +205,19 @@
   }
 }
 
-// Documents Content (grid/list/pagination wrapper)
+/* ---------- Documents Content (grid/list/pagination wrapper) ---------- */
+
 .documents-content {
   @apply max-w-7xl mx-auto px-4 md:px-6 py-6;
 
-  // List Header
+  /* List Header */
   .list-header {
     @apply flex flex-col md:flex-row items-start md:items-center justify-between gap-4
            mb-6 pb-4 border-b border-gray-200;
+
+    .list-header-left {
+      @apply flex items-center flex-wrap gap-4;
+    }
 
     .selection-controls {
       ::ng-deep .p-checkbox {
@@ -224,6 +232,19 @@
         .p-checkbox-label {
           @apply text-sm text-gray-700 ml-2;
         }
+      }
+    }
+
+    .results-summary {
+      @apply flex items-center flex-wrap gap-2 text-sm text-gray-500;
+
+      .results-count {
+        @apply font-medium text-gray-700;
+      }
+
+      .filters-pill {
+        @apply inline-flex items-center px-3 py-1 rounded-full
+               bg-cyan-50 text-cyan-700 text-xs font-semibold;
       }
     }
 
@@ -252,12 +273,12 @@
     }
   }
 
-  // Grid View
+  /* Grid View */
   .documents-grid {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
   }
 
-  // Virtual Scroll Grid
+  /* Virtual Scroll Grid */
   .documents-grid-virtual {
     @apply relative overflow-auto rounded-xl border border-gray-200 bg-white;
     height: 600px;
@@ -292,7 +313,7 @@
     }
   }
 
-  // Table (List) View
+  /* Table (List) View */
   .documents-table {
     @apply bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm;
 
@@ -302,7 +323,8 @@
       }
 
       .p-datatable-thead > tr > th {
-        @apply bg-gray-50 border-b border-gray-200 text-gray-600 font-medium text-xs uppercase tracking-wide;
+        @apply bg-gray-50 border-b border-gray-200 text-gray-600 font-medium
+               text-xs uppercase tracking-wide;
       }
 
       .p-datatable-tbody > tr {
@@ -357,7 +379,7 @@
     }
   }
 
-  // Pagination
+  /* Pagination */
   .pagination-container {
     @apply mt-8 flex justify-center;
 
@@ -384,7 +406,7 @@
   }
 }
 
-/* ---------------- Responsive Tweaks ---------------- */
+/* ---------- Responsive Tweaks ---------- */
 
 @media (max-width: 768px) {
   .document-list-container {
@@ -404,7 +426,7 @@
   }
 }
 
-/* ---------------- PrimeNG Overrides (light theme for this page) ---------------- */
+/* ---------- PrimeNG Overrides (light theme for this page) ---------- */
 
 :host {
   ::ng-deep .p-card,
@@ -429,5 +451,76 @@
     &:enabled:focus {
       @apply border-cyan-500 ring-2 ring-cyan-500/20;
     }
+  }
+}
+
+// Search & Filters Section
+.search-filters-section {
+  @apply bg-white border-b border-gray-200;
+
+  /* Outer padding / alignment for the whole search component */
+  ::ng-deep app-document-search {
+    @apply block max-w-7xl mx-auto px-4 md:px-6 py-4;
+  }
+
+  /* --- SEARCH INPUT ---------------------------------------------------- */
+
+  /* PrimeNG "icon left" wrapper */
+  ::ng-deep app-document-search .p-input-icon-left,
+  ::ng-deep app-document-search .p-inputgroup {
+    @apply w-full;
+  }
+
+  /* Actual text input (covers pInputText + native input) */
+  ::ng-deep app-document-search .p-inputtext,
+  ::ng-deep app-document-search input[type='text'],
+  ::ng-deep app-document-search input[type='search'] {
+    @apply w-full rounded-xl text-sm;
+    @apply px-4 py-2;
+    @apply placeholder-gray-400;
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important; /* gray-300 */
+    color: #111827 !important;            /* gray-900 */
+
+    &:enabled:focus {
+      @apply outline-none;
+      border-color: #06b6d4 !important;   /* cyan-500 */
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+    }
+  }
+
+  /* Search icon alignment */
+  ::ng-deep app-document-search .p-input-icon-left > i,
+  ::ng-deep app-document-search .p-input-icon-left > .pi {
+    @apply text-gray-400;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* --- QUICK FILTER TABS (All documents, Verified, etc.) --------------- */
+
+  /* Container that holds the tabs – this covers most PrimeNG variants */
+  ::ng-deep app-document-search .p-selectbutton,
+  ::ng-deep app-document-search .p-buttonset,
+  ::ng-deep app-document-search .p-tabview-nav,
+  ::ng-deep app-document-search .filters-tabs,
+  ::ng-deep app-document-search .tabs-row {
+    @apply mt-3 flex flex-wrap gap-2 bg-transparent border-none p-0;
+  }
+
+  /* Individual filter “chips” */
+  ::ng-deep app-document-search .p-button {
+    @apply text-xs font-medium rounded-full px-3 py-1 border-none;
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #6b7280 !important;            /* gray-500 */
+  }
+
+  /* Active tab */
+  ::ng-deep app-document-search .p-button.p-highlight,
+  ::ng-deep app-document-search .p-button.p-button-info {
+    background-color: #ecfeff !important; /* cyan-50 */
+    color: #0e7490 !important;            /* cyan-700 */
+    box-shadow: 0 0 0 1px #a5f3fc;
   }
 }
