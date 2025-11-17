@@ -6,31 +6,266 @@ import { SHARED_IMPORTS } from '../../../shared';
   standalone: true,
   imports: SHARED_IMPORTS,
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
-            Verify Document
-          </h1>
-          <p class="text-surface-600 dark:text-surface-400">
-            Upload a document, enter a hash, or use a verification ID to check authenticity
-          </p>
-        </div>
+    <div class="verify-page bg-gray-50 min-h-[calc(100vh-5rem)]">
+      <div class="max-w-6xl mx-auto px-4 lg:px-0 py-8 md:py-10">
 
-        <div class="text-center py-16">
-          <i class="pi pi-shield text-6xl text-surface-400 mb-4 block"></i>
-          <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 mb-4">
-            Document Verification
-          </h2>
-          <p class="text-surface-600 dark:text-surface-400 mb-8">
-            This feature is being implemented. Document verification will be available soon.
+        <!-- Page Header -->
+        <section class="text-center mb-10">
+          <div
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 mb-4 shadow-sm">
+            <i class="pi pi-shield text-2xl"></i>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold text-surface-900 mb-2 tracking-tight">
+            Verify a Document
+          </h1>
+          <p class="text-surface-600 dark:text-surface-400 max-w-2xl mx-auto text-sm md:text-base">
+            Choose a method below to confirm the authenticity of a document using
+            secure, tamper-evident verification.
           </p>
-          <p-button
-            label="Back to Home"
-            icon="pi pi-home"
-            routerLink="/"
-          ></p-button>
+        </section>
+
+        <!-- Main Layout -->
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.25fr)] items-start">
+
+          <!-- Left: Verification Methods -->
+          <section class="verify-card rounded-2xl bg-white shadow-sm border border-gray-100 p-6 md:p-8 space-y-8">
+
+            <!-- Intro -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div class="text-left">
+                <p class="text-xs font-semibold tracking-wide uppercase text-cyan-600 mb-1">
+                  Start a new check
+                </p>
+                <h2 class="text-lg md:text-xl font-semibold text-surface-900">
+                  Choose how you want to verify
+                </h2>
+              </div>
+              <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-xs font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Secure verification preview
+              </span>
+            </div>
+
+            <div class="space-y-6">
+
+              <!-- Option 1: Upload Document -->
+              <article class="method-card rounded-xl border border-gray-100 bg-slate-50/80 p-5 md:p-6 space-y-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="method-label text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Option 1 · Recommended
+                    </p>
+                    <h3 class="text-base md:text-lg font-semibold text-surface-900 mt-1">
+                      Upload document file
+                    </h3>
+                    <p class="text-xs md:text-sm text-surface-600 mt-1">
+                      Upload the original file. We’ll compute a secure hash and compare it with
+                      our records.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Dropzone (design only) -->
+                <div class="dropzone mt-3 rounded-xl border-2 border-dashed border-gray-200 bg-white px-4 py-6 flex flex-col items-center justify-center text-center">
+                  <i class="pi pi-upload text-2xl text-cyan-500 mb-2"></i>
+                  <p class="text-sm font-medium text-surface-800">
+                    Drag & drop a file here
+                  </p>
+                  <p class="text-xs text-surface-500 mb-3">
+                    or click the button below to choose a file from your device
+                  </p>
+                  <p-button
+                    label="Choose file"
+                    icon="pi pi-folder-open"
+                    styleClass="p-button-outlined text-xs md:text-sm">
+                  </p-button>
+                  <p class="text-[11px] text-surface-400 mt-3">
+                    Supported formats: PDF, PNG, JPG · Max size: 10 MB
+                  </p>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+                  <p class="text-[11px] md:text-xs text-surface-500">
+                    Once implemented, this option will give the most accurate verification
+                    by using the original file.
+                  </p>
+                  <p-button
+                    label="Verify document"
+                    icon="pi pi-check-circle"
+                    styleClass="w-full md:w-auto text-xs md:text-sm">
+                  </p-button>
+                </div>
+              </article>
+
+              <!-- Option 2: Hash -->
+              <article class="method-card rounded-xl border border-gray-100 bg-white p-5 md:p-6 space-y-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="method-label text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Option 2
+                    </p>
+                    <h3 class="text-base md:text-lg font-semibold text-surface-900 mt-1">
+                      Verify using document hash
+                    </h3>
+                    <p class="text-xs md:text-sm text-surface-600 mt-1">
+                      Paste a SHA-256 or similar hash generated from the document to check if it
+                      matches a registered record.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <label class="block text-xs font-medium text-surface-700">
+                    Document hash
+                  </label>
+                  <div class="flex flex-col gap-2 md:flex-row md:items-center">
+                    <input
+                      type="text"
+                      pInputText
+                      class="w-full text-sm"
+                      placeholder="e.g. 3f786850e387550fdab836ed7e6dc881de23001b...">
+                    <p-button
+                      label="Check hash"
+                      icon="pi pi-search"
+                      styleClass="md:ml-2 w-full md:w-auto text-xs md:text-sm">
+                    </p-button>
+                  </div>
+                  <p class="text-[11px] text-surface-400">
+                    Hash verification is ideal when you cannot share the full document for privacy or
+                    regulatory reasons.
+                  </p>
+                </div>
+              </article>
+
+              <!-- Option 3: Verification ID -->
+              <article class="method-card rounded-xl border border-dashed border-gray-200 bg-white p-5 md:p-6 space-y-4">
+                <div>
+                  <p class="method-label text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Option 3
+                  </p>
+                  <h3 class="text-base md:text-lg font-semibold text-surface-900 mt-1">
+                    Use a verification ID
+                  </h3>
+                  <p class="text-xs md:text-sm text-surface-600 mt-1">
+                    Enter the verification ID printed or embedded on the document to quickly
+                    confirm its status.
+                  </p>
+                </div>
+
+                <div class="space-y-3">
+                  <label class="block text-xs font-medium text-surface-700">
+                    Verification ID
+                  </label>
+                  <div class="flex flex-col gap-2 md:flex-row md:items-center">
+                    <input
+                      type="text"
+                      pInputText
+                      class="w-full text-sm"
+                      placeholder="e.g. NEO-VER-2024-09-A1B2C3">
+                    <p-button
+                      label="Check ID"
+                      icon="pi pi-qrcode"
+                      styleClass="md:ml-2 w-full md:w-auto text-xs md:text-sm">
+                    </p-button>
+                  </div>
+                  <p class="text-[11px] text-surface-400">
+                    Ideal for certificates and letters that already include a printed verification
+                    code or QR reference.
+                  </p>
+                </div>
+              </article>
+
+            </div>
+          </section>
+
+          <!-- Right: Info Panel -->
+          <aside class="space-y-6">
+
+            <!-- How It Works -->
+            <section class="info-card rounded-2xl bg-white shadow-sm border border-gray-100 p-6 md:p-7">
+              <h3 class="text-sm font-semibold text-surface-900 mb-3 flex items-center gap-2">
+                <span
+                  class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-cyan-50 text-cyan-600 text-xs">
+                  <i class="pi pi-info-circle"></i>
+                </span>
+                How verification will work
+              </h3>
+              <ol class="space-y-3 text-xs md:text-sm text-surface-600">
+                <li class="flex gap-3">
+                  <span class="step-dot">1</span>
+                  <div>
+                    <p class="font-medium text-surface-800">Submit your details</p>
+                    <p>NeoVerify receives the file, hash, or verification ID you provide.</p>
+                  </div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="step-dot">2</span>
+                  <div>
+                    <p class="font-medium text-surface-800">Secure matching</p>
+                    <p>
+                      The system compares your input against cryptographically stored records
+                      in our registry.
+                    </p>
+                  </div>
+                </li>
+                <li class="flex gap-3">
+                  <span class="step-dot">3</span>
+                  <div>
+                    <p class="font-medium text-surface-800">Clear result</p>
+                    <p>
+                      You’ll see whether the document is valid, revoked, or unknown, along with
+                      any relevant metadata.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+            </section>
+
+            <!-- Tips & Status -->
+            <section class="rounded-2xl bg-slate-900 text-slate-50 p-6 md:p-7 space-y-4">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-semibold tracking-wide uppercase text-cyan-300 mb-1">
+                    Coming soon
+                  </p>
+                  <h3 class="text-sm md:text-base font-semibold">
+                    Document verification is in design mode
+                  </h3>
+                </div>
+                <span class="inline-flex items-center gap-2 text-[11px] px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  Preview only
+                </span>
+              </div>
+              <p class="text-[11px] md:text-xs text-slate-300">
+                You’re currently viewing the design for this page. Once implemented, all actions
+                above will perform live verification against the NeoVerify backend.
+              </p>
+              <ul class="space-y-2 text-[11px] md:text-xs text-slate-200">
+                <li class="flex items-start gap-2">
+                  <i class="pi pi-lock text-[11px] mt-0.5 text-cyan-300"></i>
+                  <span>All verification requests will be encrypted in transit and at rest.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i class="pi pi-eye-slash text-[11px] mt-0.5 text-cyan-300"></i>
+                  <span>No document content will be exposed to unauthorized third parties.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i class="pi pi-history text-[11px] mt-0.5 text-cyan-300"></i>
+                  <span>An audit trail will record when and how each verification was run.</span>
+                </li>
+              </ul>
+
+              <div class="pt-2">
+                <a routerLink="/"
+                   class="inline-flex items-center gap-2 text-xs font-medium text-cyan-300 hover:text-cyan-200">
+                  <i class="pi pi-arrow-left text-[11px]"></i>
+                  Back to dashboard
+                </a>
+              </div>
+            </section>
+          </aside>
+
         </div>
       </div>
     </div>
@@ -39,9 +274,62 @@ import { SHARED_IMPORTS } from '../../../shared';
     :host {
       display: block;
     }
-    
-    .field {
-      margin-bottom: 1rem;
+
+    .verify-page {
+      width: 100%;
+    }
+
+    .verify-card {
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+    }
+
+    .verify-card:hover {
+      box-shadow: 0 18px 45px -15px rgba(15, 23, 42, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .method-card {
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    }
+
+    .method-card:hover {
+      border-color: rgba(6, 182, 212, 0.35);
+      box-shadow: 0 12px 30px -20px rgba(15, 23, 42, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .dropzone {
+      cursor: default;
+      transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .dropzone:hover {
+      border-color: rgba(6, 182, 212, 0.45);
+      background-color: #f9fafb;
+      box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.45);
+    }
+
+    .info-card {
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+    }
+
+    .info-card:hover {
+      box-shadow: 0 14px 35px -18px rgba(15, 23, 42, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .step-dot {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
   `]
 })
