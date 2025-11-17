@@ -1,0 +1,163 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Page Header -->
+    <div class="text-center py-16">
+      <i class="pi pi-users text-6xl text-surface-400 mb-4 block"></i>
+      <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+        User Management
+      </h1>
+      <p class="text-surface-600 dark:text-surface-400 mb-8">
+        Manage users, roles, and permissions for your organization.
+      </p>
+
+      <!-- Search Bar and Add User Button -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="w-1/3">
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          />
+        </div>
+
+        <!-- Add User Button -->
+        <p-button
+          label="Add User"
+          icon="pi pi-plus"
+          class="p-button-primary"
+          (click)="addUser()"
+        ></p-button>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="flex justify-between mb-4">
+      <div class="flex space-x-4">
+        <!-- Role Filter -->
+        <div class="w-1/4">
+          <p-dropdown
+            [options]="roles"
+            [(ngModel)]="selectedRole"
+            placeholder="Filter by Role"
+            class="w-full"
+          ></p-dropdown>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="w-1/4">
+          <p-dropdown
+            [options]="statusOptions"
+            [(ngModel)]="selectedStatus"
+            placeholder="Filter by Status"
+            class="w-full"
+          ></p-dropdown>
+        </div>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="flex items-center space-x-4">
+        <p-button
+          label="Bulk Delete"
+          icon="pi pi-trash"
+          class="p-button-danger"
+          (click)="bulkDelete()"
+        ></p-button>
+        <p-button
+          label="Bulk Role Change"
+          icon="pi pi-users"
+          class="p-button-warning"
+          (click)="bulkRoleChange()"
+        ></p-button>
+      </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full bg-white shadow-md rounded-lg">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              <input
+                type="checkbox"
+                class="form-checkbox text-cyan-500"
+                (change)="toggleSelectAll()"
+                [checked]="isAllSelected()"
+              />
+            </th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              Name
+            </th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              Email
+            </th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              Role
+            </th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              Status
+            </th>
+            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dummy Data -->
+          <tr *ngFor="let user of users">
+            <td class="px-6 py-4 text-sm">
+              <input
+                type="checkbox"
+                class="form-checkbox text-cyan-500"
+                (change)="toggleUserSelection(user)"
+                [checked]="isUserSelected(user)"
+              />
+            </td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ user.name }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ user.email }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ user.role }}</td>
+            <td class="px-6 py-4 text-sm">
+              <span
+                class="inline-block px-3 py-1 text-xs font-medium rounded-full"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': user.status === 'Active',
+                  'bg-red-100 text-red-800': user.status === 'Inactive'
+                }"
+                >{{ user.status }}</span
+              >
+            </td>
+            <td class="px-6 py-4 text-sm">
+              <button
+                (click)="viewDetails(user)"
+                class="text-cyan-500 hover:text-cyan-700 mr-2"
+              >
+                View
+              </button>
+              <button
+                (click)="editUser(user)"
+                class="text-yellow-500 hover:text-yellow-700 mr-2"
+              >
+                Edit
+              </button>
+              <button
+                (click)="deleteUser(user)"
+                class="text-red-500 hover:text-red-700"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-4">
+      <p-paginator
+        [rows]="rows"
+        [totalRecords]="totalRecords"
+        [rowsPerPageOptions]="[5, 10, 15]"
+        (onPageChange)="onPageChange($event)"
+      ></p-paginator>
+    </div>
+  </div>
+</div>
