@@ -1,630 +1,626 @@
 // Templates List Component Styles
 .templates-list-container {
-    @apply min-h-screen bg-gray-900 text-white;
+  @apply min-h-screen bg-gray-50 text-gray-900;
 
-    // Header Section
-    .templates-list-header {
-        @apply bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-6;
+  /* ---------------- Header Section ---------------- */
+  .templates-list-header {
+    @apply bg-white border-b border-gray-200;
 
-        .header-content {
-            @apply max-w-7xl mx-auto flex items-center justify-between;
+    .header-content {
+      @apply max-w-7xl mx-auto px-4 md:px-6 py-4
+             flex items-center justify-between gap-4;
 
-            .title-section {
-                .page-title {
-                    @apply text-3xl font-semibold text-white mb-2;
-                }
-
-                .page-subtitle {
-                    @apply text-gray-300 font-normal;
-                }
-            }
-
-            .header-actions {
-                @apply flex items-center space-x-3;
-
-                .create-btn {
-                    ::ng-deep .p-button {
-                        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 hover:border-cyan-600;
-                    }
-                }
-
-                ::ng-deep .p-button.p-button-text {
-                    @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-
-                    &.active {
-                        @apply text-cyan-400 bg-cyan-500/20;
-                    }
-                }
-            }
+      .title-section {
+        .page-title {
+          @apply text-3xl font-semibold text-gray-900 mb-1;
         }
+
+        .page-subtitle {
+          @apply text-sm text-gray-500 font-normal;
+        }
+      }
+
+      .header-actions {
+        @apply flex items-center space-x-2;
+
+        .create-btn {
+          ::ng-deep .p-button {
+            @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 hover:border-cyan-600 text-white;
+          }
+        }
+
+        ::ng-deep .p-button.p-button-text {
+          @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+
+          &.active {
+            @apply text-cyan-700 bg-cyan-50;
+          }
+        }
+      }
+    }
+  }
+
+  /* ---------------- Search & Filters Section ---------------- */
+  .search-filters-section {
+    @apply bg-white border-b border-gray-200;
+
+    .search-container {
+      @apply max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-2;
+
+      .search-input {
+        @apply w-full;
+
+        .search-field {
+          @apply w-full bg-white border border-gray-300 text-gray-900 placeholder-gray-400
+                 rounded-lg px-3 py-2
+                 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 outline-none;
+        }
+
+        i {
+          @apply text-gray-400;
+        }
+      }
     }
 
-    // Search and Filters Section
-    .search-filters-section {
-        @apply bg-gray-800/30 backdrop-blur-sm border-b border-gray-700/50 p-6;
+    .filters-panel {
+      @apply max-w-7xl mx-auto px-4 md:px-6 pb-4;
 
-        .search-container {
-            @apply max-w-7xl mx-auto mb-4;
+      .filters-content {
+        @apply bg-gray-50 rounded-xl border border-gray-200 p-4 md:p-6
+               grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
 
-            .search-input {
-                @apply w-full;
+        .filter-group {
+          @apply space-y-2;
 
-                .search-field {
-                    @apply w-full bg-gray-800/50 border-gray-600 text-white placeholder-gray-400;
-                    @apply focus:border-cyan-500 focus:ring-cyan-500/20;
+          label {
+            @apply block text-sm font-medium text-gray-700;
+          }
+
+          ::ng-deep .p-multiselect,
+          ::ng-deep .p-select,
+          ::ng-deep .p-datepicker {
+            @apply w-full;
+
+            .p-multiselect-label,
+            .p-select-label,
+            .p-datepicker-input {
+              @apply bg-white border border-gray-300 text-gray-900 rounded-lg;
+            }
+
+            &:not(.p-disabled):hover {
+              @apply border-gray-400;
+            }
+
+            &.p-focus {
+              @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+            }
+          }
+        }
+
+        .filter-actions {
+          @apply col-span-full flex justify-end pt-4 border-t border-gray-200;
+
+          ::ng-deep .p-button.p-button-text {
+            @apply text-gray-500 hover:text-gray-900;
+          }
+        }
+      }
+    }
+  }
+
+  /* ---------------- Bulk Actions Bar ---------------- */
+  .bulk-actions-bar {
+    @apply max-w-7xl mx-auto mt-4 px-4 md:px-6 py-3
+           bg-cyan-50 border border-cyan-100 rounded-xl shadow-sm
+           flex flex-col md:flex-row items-start md:items-center justify-between gap-3;
+
+    .selection-info {
+      @apply text-cyan-800 font-medium text-sm;
+    }
+
+    .bulk-actions {
+      @apply flex items-center flex-wrap gap-2;
+
+      ::ng-deep .p-button.p-button-text {
+        @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+
+        &.p-button-danger {
+          @apply text-red-600 hover:text-red-700 hover:bg-red-50;
+        }
+      }
+    }
+  }
+
+  /* ---------------- Loading State ---------------- */
+  .loading-container {
+    @apply flex items-center justify-center py-16;
+
+    .loading-content {
+      @apply text-center text-sm text-gray-600;
+
+      ::ng-deep .p-progress-spinner {
+        @apply mb-4;
+
+        .p-progress-spinner-circle {
+          @apply stroke-cyan-500;
+        }
+      }
+    }
+  }
+
+  /* ---------------- Error State ---------------- */
+  .error-container {
+    @apply flex items-center justify-center py-16 px-4;
+
+    .error-content {
+      @apply text-center max-w-md bg-white border border-red-100 rounded-2xl shadow-sm p-6;
+
+      .error-icon {
+        @apply text-5xl text-red-500 mb-3;
+      }
+
+      h3 {
+        @apply text-lg font-semibold text-gray-900 mb-2;
+      }
+
+      p {
+        @apply text-sm text-gray-600 mb-4;
+      }
+
+      ::ng-deep .p-button {
+        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 text-white;
+      }
+    }
+  }
+
+  /* ---------------- Empty State ---------------- */
+  .empty-container {
+    @apply flex items-center justify-center py-16 px-4;
+
+    .empty-content {
+      @apply text-center max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-6;
+
+      .empty-icon {
+        @apply text-5xl text-gray-400 mb-3;
+      }
+
+      h3 {
+        @apply text-lg font-semibold text-gray-900 mb-2;
+      }
+
+      p {
+        @apply text-sm text-gray-600 mb-4;
+      }
+
+      ::ng-deep .p-button {
+        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 text-white;
+      }
+    }
+  }
+
+  /* ---------------- Templates Content ---------------- */
+  .templates-content {
+    @apply max-w-7xl mx-auto px-4 md:px-6 py-6;
+
+    /* List Header */
+    .list-header {
+      @apply flex flex-col md:flex-row items-start md:items-center justify-between gap-4
+             mb-6 pb-4 border-b border-gray-200;
+
+      .selection-controls {
+        ::ng-deep .p-checkbox {
+          .p-checkbox-box {
+            @apply bg-white border border-gray-300 rounded;
+
+            &.p-highlight {
+              @apply bg-cyan-500 border-cyan-500;
+            }
+          }
+
+          .p-checkbox-label {
+            @apply text-sm text-gray-700 ml-2;
+          }
+        }
+      }
+
+      .sort-controls {
+        @apply flex items-center gap-3;
+
+        ::ng-deep .p-select,
+        ::ng-deep .p-dropdown {
+          .p-select-label,
+          .p-dropdown-label {
+            @apply bg-white border border-gray-300 text-gray-900 rounded-lg;
+          }
+
+          &:not(.p-disabled):hover {
+            @apply border-gray-400;
+          }
+
+          &.p-focus {
+            @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+          }
+        }
+
+        ::ng-deep .p-button.p-button-text {
+          @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+        }
+      }
+    }
+
+    /* Grid View */
+    .templates-grid {
+      @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+
+      .template-card {
+        @apply bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden
+               hover:border-gray-300 hover:shadow-md transition-all duration-200;
+
+        .template-card-header {
+          @apply flex items-center justify-between p-4 pb-2;
+
+          .template-selection {
+            ::ng-deep .p-checkbox {
+              .p-checkbox-box {
+                @apply bg-white border border-gray-300 rounded;
+
+                &.p-highlight {
+                  @apply bg-cyan-500 border-cyan-500;
                 }
+              }
+            }
+          }
+
+          .template-status {
+            ::ng-deep .p-tag {
+              @apply text-xs;
+            }
+          }
+        }
+
+        .template-preview {
+          @apply relative h-32 bg-gray-100 cursor-pointer overflow-hidden
+                 hover:bg-gray-200 transition-colors duration-200;
+
+          .preview-image {
+            @apply w-full h-full object-cover;
+          }
+
+          .preview-placeholder {
+            @apply w-full h-full flex items-center justify-center;
+
+            i {
+              @apply text-4xl text-gray-400;
+            }
+          }
+        }
+
+        .template-info {
+          @apply p-4;
+
+          .template-name {
+            @apply text-lg font-semibold text-gray-900 mb-2 cursor-pointer truncate
+                   hover:text-cyan-600 transition-colors duration-200;
+          }
+
+          .template-description {
+            @apply text-sm text-gray-600 mb-3 line-clamp-2;
+          }
+
+          .template-meta {
+            @apply space-y-1 mb-3;
+
+            .meta-item {
+              @apply flex items-center text-xs text-gray-500;
+
+              i {
+                @apply mr-2 text-gray-400;
+              }
+            }
+          }
+
+          .usage-stats {
+            @apply bg-gray-50 rounded-lg p-3 space-y-2;
+
+            .usage-item {
+              @apply flex items-center justify-between text-xs;
+
+              .usage-label {
+                @apply text-gray-500;
+              }
+
+              .usage-value {
+                @apply text-gray-900 font-medium flex items-center;
 
                 i {
-                    @apply text-gray-400;
+                  @apply ml-1 text-xs;
                 }
+              }
             }
+          }
         }
 
-        .filters-panel {
-            @apply max-w-7xl mx-auto;
+        .template-actions {
+          @apply flex items-center justify-between p-4 pt-0 border-t border-gray-200;
 
-            .filters-content {
-                @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6;
-                @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+          ::ng-deep .p-button.p-button-text {
+            @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
 
-                .filter-group {
-                    @apply space-y-2;
-
-                    label {
-                        @apply block text-sm font-medium text-gray-300;
-                    }
-
-                    ::ng-deep .p-multiselect,
-                    ::ng-deep .p-select,
-                    ::ng-deep .p-datepicker {
-                        @apply w-full;
-
-                        .p-multiselect-label,
-                        .p-select-label,
-                        .p-datepicker-input {
-                            @apply bg-gray-700/50 border-gray-600 text-white;
-                        }
-
-                        &:not(.p-disabled):hover {
-                            @apply border-gray-500;
-                        }
-
-                        &.p-focus {
-                            @apply border-cyan-500 ring-2 ring-cyan-500/20;
-                        }
-                    }
-                }
-
-                .filter-actions {
-                    @apply col-span-full flex justify-end pt-4 border-t border-gray-700;
-
-                    ::ng-deep .p-button.p-button-text {
-                        @apply text-gray-400 hover:text-white;
-                    }
-                }
+            &.p-button-danger {
+              @apply text-red-600 hover:text-red-700 hover:bg-red-50;
             }
+          }
         }
+      }
     }
 
-    // Bulk Actions Bar
-    .bulk-actions-bar {
-        @apply bg-cyan-500/10 backdrop-blur-sm border-b border-cyan-500/20 p-4;
-        @apply flex items-center justify-between max-w-7xl mx-auto;
+    /* Table View */
+    .templates-table {
+      @apply bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm;
 
-        .selection-info {
-            @apply text-cyan-400 font-medium;
+      ::ng-deep .p-datatable {
+        .p-datatable-header {
+          @apply bg-white border-b border-gray-200;
         }
 
-        .bulk-actions {
-            @apply flex items-center space-x-3;
-
-            ::ng-deep .p-button.p-button-text {
-                @apply text-gray-300 hover:text-white;
-
-                &.p-button-danger {
-                    @apply text-red-400 hover:text-red-300 hover:bg-red-500/20;
-                }
-            }
+        .p-datatable-thead > tr > th {
+          @apply bg-gray-50 border-b border-gray-200 text-gray-600 font-medium text-xs uppercase tracking-wide;
         }
+
+        .p-datatable-tbody > tr {
+          @apply bg-white border-b border-gray-100 hover:bg-gray-50;
+
+          > td {
+            @apply border-none text-sm text-gray-800 align-top;
+          }
+        }
+
+        .p-checkbox .p-checkbox-box {
+          @apply bg-white border border-gray-300 rounded;
+
+          &.p-highlight {
+            @apply bg-cyan-500 border-cyan-500;
+          }
+        }
+      }
+
+      .template-info {
+        @apply flex items-center space-x-3;
+
+        .template-thumbnail {
+          @apply w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden;
+
+          img {
+            @apply w-full h-full object-cover;
+          }
+
+          .template-icon {
+            @apply text-gray-400;
+          }
+        }
+
+        .template-details {
+          .template-title {
+            @apply font-medium text-gray-900 cursor-pointer
+                   hover:text-cyan-600 transition-colors duration-200;
+          }
+
+          .template-description {
+            @apply text-sm text-gray-500 truncate max-w-xs;
+          }
+        }
+      }
+
+      .usage-display {
+        @apply flex items-center space-x-1;
+
+        i {
+          @apply text-xs;
+        }
+      }
+
+      .action-buttons {
+        @apply flex items-center space-x-1;
+
+        ::ng-deep .p-button.p-button-text {
+          @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+        }
+      }
     }
 
-    // Loading State
-    .loading-container {
-        @apply flex items-center justify-center py-16;
+    /* Pagination */
+    .pagination-container {
+      @apply mt-8 flex justify-center;
 
-        .loading-content {
-            @apply text-center;
+      ::ng-deep .p-paginator {
+        @apply bg-white border border-gray-200 rounded-lg shadow-sm px-3 py-2;
 
-            ::ng-deep .p-progress-spinner {
-                @apply mb-4;
+        .p-paginator-pages .p-paginator-page {
+          @apply text-gray-600 rounded hover:bg-gray-100;
 
-                .p-progress-spinner-circle {
-                    @apply stroke-cyan-500;
-                }
-            }
-
-            p {
-                @apply text-gray-300;
-            }
+          &.p-highlight {
+            @apply bg-cyan-500 text-white;
+          }
         }
+
+        .p-paginator-prev,
+        .p-paginator-next {
+          @apply text-gray-600 rounded hover:bg-gray-100;
+        }
+
+        .p-paginator-current {
+          @apply text-xs text-gray-500;
+        }
+      }
     }
-
-    // Error State
-    .error-container {
-        @apply flex items-center justify-center py-16;
-
-        .error-content {
-            @apply text-center max-w-md;
-
-            .error-icon {
-                @apply text-6xl text-red-400 mb-4;
-            }
-
-            h3 {
-                @apply text-xl font-semibold text-white mb-2;
-            }
-
-            p {
-                @apply text-gray-300 mb-6;
-            }
-
-            ::ng-deep .p-button {
-                @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
-            }
-        }
-    }
-
-    // Empty State
-    .empty-container {
-        @apply flex items-center justify-center py-16;
-
-        .empty-content {
-            @apply text-center max-w-md;
-
-            .empty-icon {
-                @apply text-6xl text-gray-500 mb-4;
-            }
-
-            h3 {
-                @apply text-xl font-semibold text-white mb-2;
-            }
-
-            p {
-                @apply text-gray-300 mb-6;
-            }
-
-            ::ng-deep .p-button {
-                @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
-            }
-        }
-    }
-
-    // Templates Content
-    .templates-content {
-        @apply max-w-7xl mx-auto p-6;
-
-        // List Header
-        .list-header {
-            @apply flex items-center justify-between mb-6 pb-4 border-b border-gray-700;
-
-            .selection-controls {
-                ::ng-deep .p-checkbox {
-                    .p-checkbox-box {
-                        @apply bg-gray-700/50 border-gray-600;
-
-                        &.p-highlight {
-                            @apply bg-cyan-500 border-cyan-500;
-                        }
-                    }
-
-                    .p-checkbox-label {
-                        @apply text-gray-300 ml-2;
-                    }
-                }
-            }
-
-            .sort-controls {
-                @apply flex items-center space-x-3;
-
-                ::ng-deep .p-select {
-                    .p-select-label {
-                        @apply bg-gray-700/50 border-gray-600 text-white;
-                    }
-
-                    &:not(.p-disabled):hover {
-                        @apply border-gray-500;
-                    }
-
-                    &.p-focus {
-                        @apply border-cyan-500 ring-2 ring-cyan-500/20;
-                    }
-                }
-
-                ::ng-deep .p-button.p-button-text {
-                    @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-                }
-            }
-        }
-
-        // Grid View
-        .templates-grid {
-            @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
-
-            .template-card {
-                @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden;
-                @apply hover:border-gray-600 hover:bg-gray-800/70 transition-all duration-200;
-
-                .template-card-header {
-                    @apply flex items-center justify-between p-4 pb-2;
-
-                    .template-selection {
-                        ::ng-deep .p-checkbox {
-                            .p-checkbox-box {
-                                @apply bg-gray-700/50 border-gray-600;
-
-                                &.p-highlight {
-                                    @apply bg-cyan-500 border-cyan-500;
-                                }
-                            }
-                        }
-                    }
-
-                    .template-status {
-                        ::ng-deep .p-tag {
-                            @apply text-xs;
-                        }
-                    }
-                }
-
-                .template-preview {
-                    @apply relative h-32 bg-gray-700/30 cursor-pointer overflow-hidden;
-                    @apply hover:bg-gray-700/50 transition-colors duration-200;
-
-                    .preview-image {
-                        @apply w-full h-full object-cover;
-                    }
-
-                    .preview-placeholder {
-                        @apply w-full h-full flex items-center justify-center;
-
-                        i {
-                            @apply text-4xl text-gray-500;
-                        }
-                    }
-                }
-
-                .template-info {
-                    @apply p-4;
-
-                    .template-name {
-                        @apply text-lg font-semibold text-white mb-2 cursor-pointer;
-                        @apply hover:text-cyan-400 transition-colors duration-200;
-                        @apply truncate;
-                    }
-
-                    .template-description {
-                        @apply text-sm text-gray-300 mb-3 line-clamp-2;
-                    }
-
-                    .template-meta {
-                        @apply space-y-1 mb-3;
-
-                        .meta-item {
-                            @apply flex items-center text-xs text-gray-400;
-
-                            i {
-                                @apply mr-2 text-gray-500;
-                            }
-                        }
-                    }
-
-                    .usage-stats {
-                        @apply bg-gray-700/30 rounded-lg p-3 space-y-2;
-
-                        .usage-item {
-                            @apply flex items-center justify-between text-xs;
-
-                            .usage-label {
-                                @apply text-gray-400;
-                            }
-
-                            .usage-value {
-                                @apply text-white font-medium flex items-center;
-
-                                i {
-                                    @apply ml-1 text-xs;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                .template-actions {
-                    @apply flex items-center justify-between p-4 pt-0 border-t border-gray-700/50;
-
-                    ::ng-deep .p-button.p-button-text {
-                        @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
-
-                        &.p-button-danger {
-                            @apply hover:text-red-300 hover:bg-red-500/20;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Table View
-        .templates-table {
-            @apply bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden;
-
-            ::ng-deep .p-datatable {
-                .p-datatable-header {
-                    @apply bg-gray-800/50 border-gray-700;
-                }
-
-                .p-datatable-thead>tr>th {
-                    @apply bg-gray-800/50 border-gray-700 text-gray-300 font-medium;
-                }
-
-                .p-datatable-tbody>tr {
-                    @apply bg-gray-800/30 border-gray-700 hover:bg-gray-700/30;
-
-                    >td {
-                        @apply border-gray-700 text-gray-300;
-                    }
-                }
-
-                .p-checkbox .p-checkbox-box {
-                    @apply bg-gray-700/50 border-gray-600;
-
-                    &.p-highlight {
-                        @apply bg-cyan-500 border-cyan-500;
-                    }
-                }
-            }
-
-            .template-info {
-                @apply flex items-center space-x-3;
-
-                .template-thumbnail {
-                    @apply w-10 h-10 bg-gray-700/50 rounded-lg flex items-center justify-center overflow-hidden;
-
-                    img {
-                        @apply w-full h-full object-cover;
-                    }
-
-                    .template-icon {
-                        @apply text-gray-400;
-                    }
-                }
-
-                .template-details {
-                    .template-title {
-                        @apply font-medium text-white cursor-pointer;
-                        @apply hover:text-cyan-400 transition-colors duration-200;
-                    }
-
-                    .template-description {
-                        @apply text-sm text-gray-400 truncate max-w-xs;
-                    }
-                }
-            }
-
-            .usage-display {
-                @apply flex items-center space-x-1;
-
-                i {
-                    @apply text-xs;
-                }
-            }
-
-            .action-buttons {
-                @apply flex items-center space-x-1;
-
-                ::ng-deep .p-button.p-button-text {
-                    @apply text-gray-400 hover:text-white hover:bg-gray-700/50;
-                }
-            }
-        }
-
-        // Pagination
-        .pagination-container {
-            @apply mt-8 flex justify-center;
-
-            ::ng-deep .p-paginator {
-                @apply bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg;
-
-                .p-paginator-pages .p-paginator-page {
-                    @apply text-gray-300 hover:bg-gray-700/50;
-
-                    &.p-highlight {
-                        @apply bg-cyan-500 text-white;
-                    }
-                }
-
-                .p-paginator-prev,
-                .p-paginator-next {
-                    @apply text-gray-300 hover:bg-gray-700/50;
-                }
-
-                .p-paginator-current {
-                    @apply text-gray-300;
-                }
-            }
-        }
-    }
+  }
 }
 
-// Dialog Styles
+/* ---------------- Dialog Styles ---------------- */
 ::ng-deep .p-dialog {
-    .p-dialog-header {
-        @apply bg-gray-800 border-gray-700 text-white;
-    }
+  .p-dialog-header {
+    @apply bg-white border-b border-gray-200 text-gray-900;
+  }
 
-    .p-dialog-content {
-        @apply bg-gray-800 text-white;
-    }
+  .p-dialog-content {
+    @apply bg-white text-gray-800;
+  }
 
-    .p-dialog-footer {
-        @apply bg-gray-800 border-gray-700;
-    }
+  .p-dialog-footer {
+    @apply bg-gray-50 border-t border-gray-200;
+  }
 }
 
+/* ---------------- Share / Versions Dialog Content ---------------- */
 .share-dialog-content,
 .versions-dialog-content {
+  @apply space-y-4;
+
+  h4 {
+    @apply text-lg font-semibold text-gray-900;
+  }
+
+  p {
+    @apply text-sm text-gray-600;
+  }
+
+  .share-form {
     @apply space-y-4;
 
-    h4 {
-        @apply text-lg font-semibold text-white;
-    }
+    .form-group {
+      @apply space-y-2;
 
-    p {
-        @apply text-gray-300;
-    }
+      label {
+        @apply block text-sm font-medium text-gray-700;
+      }
 
-    .share-form {
-        @apply space-y-4;
+      .permission-checkboxes {
+        @apply space-y-2;
 
-        .form-group {
-            @apply space-y-2;
+        ::ng-deep .p-checkbox {
+          @apply block;
 
-            label {
-                @apply block text-sm font-medium text-gray-300;
+          .p-checkbox-box {
+            @apply bg-white border border-gray-300 rounded;
+
+            &.p-highlight {
+              @apply bg-cyan-500 border-cyan-500;
             }
+          }
 
-            .permission-checkboxes {
-                @apply space-y-2;
-
-                ::ng-deep .p-checkbox {
-                    @apply block;
-
-                    .p-checkbox-box {
-                        @apply bg-gray-700/50 border-gray-600;
-
-                        &.p-highlight {
-                            @apply bg-cyan-500 border-cyan-500;
-                        }
-                    }
-
-                    .p-checkbox-label {
-                        @apply text-gray-300 ml-2;
-                    }
-                }
-            }
+          .p-checkbox-label {
+            @apply text-sm text-gray-700 ml-2;
+          }
         }
+      }
     }
+  }
 
-    .versions-list {
-        @apply space-y-3 max-h-96 overflow-y-auto;
+  .versions-list {
+    @apply space-y-3 max-h-96 overflow-y-auto;
 
-        .version-item {
-            @apply bg-gray-700/30 rounded-lg p-4 border border-gray-700;
+    .version-item {
+      @apply bg-gray-50 rounded-lg p-4 border border-gray-200;
 
-            &.active {
-                @apply border-cyan-500/50 bg-cyan-500/10;
-            }
+      &.active {
+        @apply border-cyan-500 bg-cyan-50;
+      }
 
-            .version-info {
-                @apply space-y-2;
+      .version-info {
+        @apply space-y-2;
 
-                .version-header {
-                    @apply flex items-center justify-between;
+        .version-header {
+          @apply flex items-center justify-between;
 
-                    .version-number {
-                        @apply font-semibold text-white;
-                    }
-                }
-
-                .version-changes {
-                    @apply text-sm text-gray-300;
-                }
-
-                .version-meta {
-                    @apply flex items-center space-x-4 text-xs text-gray-400;
-                }
-            }
-
-            .version-actions {
-                @apply flex items-center space-x-2 mt-3;
-
-                ::ng-deep .p-button {
-                    &.p-button-sm {
-                        @apply text-xs;
-                    }
-                }
-            }
+          .version-number {
+            @apply font-semibold text-gray-900;
+          }
         }
+
+        .version-changes {
+          @apply text-sm text-gray-600;
+        }
+
+        .version-meta {
+          @apply flex items-center space-x-4 text-xs text-gray-500;
+        }
+      }
+
+      .version-actions {
+        @apply flex items-center space-x-2 mt-3;
+
+        ::ng-deep .p-button.p-button-sm {
+          @apply text-xs;
+        }
+      }
     }
+  }
 }
 
-// Utility Classes - Remove circular dependencies
-// These utilities are already available from Tailwind CSS
-
-// Responsive Design
-@media (max-width: 768px) {
-    .templates-list-container {
-        .templates-list-header .header-content {
-            @apply flex-col items-start space-y-4;
-        }
-
-        .search-filters-section .filters-content {
-            @apply grid-cols-1;
-        }
-
-        .bulk-actions-bar {
-            @apply flex-col items-start space-y-3;
-        }
-
-        .templates-content {
-            .list-header {
-                @apply flex-col items-start space-y-4;
-            }
-
-            .templates-grid {
-                @apply grid-cols-1;
-            }
-        }
-    }
-}
-
-// Dark theme glassmorphism effects
+/* ---------------- Global PrimeNG overrides in this context ---------------- */
 .templates-list-container {
+  ::ng-deep .p-card,
+  ::ng-deep .p-panel,
+  ::ng-deep .p-dialog {
+    @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+  }
 
-    ::ng-deep .p-card,
-    ::ng-deep .p-panel,
-    ::ng-deep .p-dialog {
-        @apply bg-gray-800/50 backdrop-blur-sm border-gray-700;
+  ::ng-deep .p-button:not(.p-button-text) {
+    @apply bg-cyan-500 border-cyan-500 text-white hover:bg-cyan-600 hover:border-cyan-600;
+
+    &.p-button-secondary {
+      @apply bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200;
+    }
+  }
+
+  ::ng-deep .p-inputtext,
+  ::ng-deep .p-select,
+  ::ng-deep .p-multiselect {
+    @apply bg-white border border-gray-300 text-gray-900 rounded-lg;
+
+    &:enabled:focus {
+      @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+    }
+  }
+
+  ::ng-deep .p-tag {
+    &.p-tag-success {
+      @apply bg-green-50 text-green-700 border border-green-200;
     }
 
-    ::ng-deep .p-button:not(.p-button-text) {
-        @apply bg-gray-700/50 border-gray-600 hover:bg-gray-600/50;
-
-        &.p-button-primary {
-            @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
-        }
+    &.p-tag-info {
+      @apply bg-blue-50 text-blue-700 border border-blue-200;
     }
 
-    ::ng-deep .p-inputtext,
-    ::ng-deep .p-select,
-    ::ng-deep .p-multiselect {
-        @apply bg-gray-700/50 border-gray-600 text-white;
+    &.p-tag-secondary {
+      @apply bg-gray-50 text-gray-700 border border-gray-200;
+    }
+  }
+}
 
-        &:enabled:focus {
-            @apply border-cyan-500 ring-2 ring-cyan-500/20;
-        }
+/* ---------------- Responsive Tweaks ---------------- */
+@media (max-width: 768px) {
+  .templates-list-container {
+    .templates-list-header .header-content {
+      @apply flex-col items-start gap-3;
     }
 
-    ::ng-deep .p-tag {
-        &.p-tag-success {
-            @apply bg-green-500/20 text-green-400 border-green-500/30;
-        }
-
-        &.p-tag-info {
-            @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
-        }
-
-        &.p-tag-secondary {
-            @apply bg-gray-500/20 text-gray-400 border-gray-500/30;
-        }
+    .search-filters-section .filters-content {
+      @apply grid-cols-1;
     }
+
+    .bulk-actions-bar {
+      @apply flex-col items-start;
+    }
+
+    .templates-content {
+      .list-header {
+        @apply flex-col items-start;
+      }
+
+      .templates-grid {
+        @apply grid-cols-1;
+      }
+    }
+  }
 }

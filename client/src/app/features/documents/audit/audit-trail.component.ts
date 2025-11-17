@@ -88,17 +88,7 @@ interface Statistics {
  * Typography & quick color overrides (convert dark text to light theme)
  * ------------------------------------------------------------------ */
 
-.audit-trail-container h1.text-3xl {
-  @apply text-3xl md:text-4xl font-semibold text-gray-900 mb-1;
-}
 
-.audit-trail-container p.text-gray-400 {
-  @apply text-sm text-gray-500;
-}
-
-.audit-trail-container .text-white {
-  @apply text-gray-900;
-}
 
 .audit-trail-container .text-gray-300 {
   @apply text-gray-600;
@@ -108,7 +98,7 @@ interface Statistics {
  * Cards: stats + table wrapper (were using bg-gray-800/50)
  * ------------------------------------------------------------------ */
 
-.audit-trail-container .bg-gray-800\/50 {
+.audit-trail-container .bg-gray-800 {
   @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
 }
 
@@ -207,7 +197,7 @@ interface Statistics {
   @apply text-sm text-gray-500;
 }
 
-.audit-trail-container .grid.grid-cols-1.md\:grid-cols-4.gap-4.mb-6 p.text-2xl {
+.audit-trail-container .grid.grid-cols-1.md:grid-cols-4.gap-4.mb-6 p {
   @apply text-2xl font-semibold text-gray-900;
 }
 

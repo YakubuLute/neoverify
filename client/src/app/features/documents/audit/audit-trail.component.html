@@ -4,8 +4,8 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-3xl font-bold text-white mb-2">Audit Trail</h1>
-          <p class="text-gray-400">Track all document activities and compliance events</p>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Audit Trail</h1>
+          <p class="text-gray-500">Track all document activities and compliance events</p>
         </div>
         <div class="flex gap-3">
           <p-button
@@ -29,7 +29,7 @@
         <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Search Query -->
           <div class="flex flex-col">
-            <label for="audit-search" class="text-sm font-medium text-gray-300 mb-2">Search</label>
+            <label for="audit-search" class="text-sm font-medium text-gray-500 mb-2">Search</label>
             <span class="p-input-icon-left">
               <i class="pi pi-search"></i>
               <input
@@ -95,41 +95,41 @@
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" *ngIf="statistics()">
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
+        <div class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-400">Total Entries</p>
-              <p class="text-2xl font-bold text-white">{{ statistics()?.totalEntries }}</p>
+              <p class="text-sm text-gray-600">Total Entries</p>
+              <p class="text-2xl font-bold text-cyan-900">{{ statistics().totalEntries || 0 }}</p>
             </div>
             <i class="pi pi-list text-blue-400 text-2xl"></i>
           </div>
         </div>
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
+        <div class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-400">Today's Activity</p>
-              <p class="text-2xl font-bold text-white">{{ getTodayActivity() | number }}</p>
+              <p class="text-sm text-gray-500">Today's Activity</p>
+              <p class="text-2xl font-bold text-cyan-900">{{ getTodayActivity() | number }}</p>
             </div>
             <i class="pi pi-calendar text-green-400 text-2xl"></i>
           </div>
         </div>
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
+        <div class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-400">Most Active User</p>
-              <p class="text-lg font-semibold text-white truncate">{{ getMostActiveUser() }}</p>
+              <p class="text-sm text-gray-600">Most Active User</p>
+              <p class="text-lg font-semibold text-cyan-900 truncate">{{ getMostActiveUser() }}</p>
             </div>
             <i class="pi pi-user text-purple-400 text-2xl"></i>
           </div>
         </div>
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
+        <div class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-400">Most Common Action</p>
-              <p class="text-lg font-semibold text-white">{{ getMostCommonAction() }}</p>
+              <p class="text-sm text-gray-600">Most Common Action</p>
+              <p class="text-lg font-semibold text-cyan-900">{{ getMostCommonAction() }}</p>
             </div>
             <i class="pi pi-cog text-orange-400 text-2xl"></i>
           </div>
@@ -137,7 +137,7 @@
       </div>
 
       <!-- Audit Entries Table -->
-      <p-card styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+      <p-card styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
         <p-table
           [value]="auditEntries()"
           [loading]="loading()"
@@ -181,7 +181,7 @@
                   <span class="text-sm font-medium text-white">
                     {{ entry.timestamp | date:'short' }}
                   </span>
-                  <span class="text-xs text-gray-400">
+                  <span class="text-xs text-gray-600">
                     {{ getRelativeTime(entry.timestamp) }}
                   </span>
                 </div>
@@ -195,7 +195,7 @@
               <td>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-white">{{ entry.userEmail }}</span>
-                  <span class="text-xs text-gray-400">{{ entry.userId }}</span>
+                  <span class="text-xs text-gray-600">{{ entry.userId }}</span>
                 </div>
               </td>
               <td>
@@ -205,7 +205,7 @@
                     Document {{ entry.documentId.substring(0, 8) }}...
                   </span>
                 </div>
-                <span class="text-sm text-gray-400" *ngIf="!entry.documentId">N/A</span>
+                <span class="text-sm text-gray-600" *ngIf="!entry.documentId">N/A</span>
               </td>
               <td>
                 <span class="text-sm text-gray-300">{{ entry.ipAddress || 'N/A' }}</span>
@@ -220,7 +220,7 @@
                     pTooltip="View details"
                     *ngIf="entry.details && hasDetails(entry.details)"
                   />
-                  <span class="text-sm text-gray-400" *ngIf="!entry.details || !hasDetails(entry.details)">
+                  <span class="text-sm text-gray-600" *ngIf="!entry.details || !hasDetails(entry.details)">
                     No details
                   </span>
                 </div>
@@ -252,7 +252,7 @@
               <td colspan="7" class="text-center py-8">
                 <div class="flex flex-col items-center gap-3">
                   <i class="pi pi-search text-4xl text-gray-500"></i>
-                  <p class="text-gray-400">No audit entries found</p>
+                  <p class="text-gray-600">No audit entries found</p>
                   <p class="text-sm text-gray-500">Try adjusting your filters or search criteria</p>
                 </div>
               </td>
