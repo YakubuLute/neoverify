@@ -1,0 +1,197 @@
+
+:host {
+  display: block;
+}
+
+.container {
+  @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+.page-header {
+  @apply mb-8;
+
+  .page-title {
+    @apply text-3xl font-semibold text-gray-900 mb-2;
+  }
+
+  .page-subtitle {
+    @apply text-gray-500 font-normal;
+  }
+}
+
+p-card {
+  @apply bg-white shadow-md rounded-lg border border-gray-200;
+}
+
+.card-header {
+  @apply bg-gray-50 border-b border-gray-200 p-4;
+
+  .header-title {
+    @apply text-xl font-semibold text-gray-900;
+  }
+}
+
+form {
+  @apply space-y-6;
+}
+
+.field {
+  @apply mb-4;
+
+  label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  input,
+  textarea {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-cyan-500;
+  }
+
+  .p-error {
+    @apply text-red-500 text-xs mt-1;
+  }
+}
+
+.p-inputSwitch {
+  @apply bg-gray-200 rounded-full;
+}
+
+.p-button {
+  &.p-button-primary {
+    @apply bg-cyan-500 text-white hover:bg-cyan-600;
+  }
+
+  &.p-button-outlined {
+    @apply border-gray-300 text-gray-700 hover:bg-gray-100;
+  }
+
+  &.p-button-text {
+    @apply text-gray-600 hover:text-gray-800;
+  }
+}
+
+.p-inputNumber {
+  @apply w-full;
+  .p-inputtext {
+    @apply border-gray-300 text-gray-800;
+  }
+}
+
+.p-table {
+  @apply w-full border-collapse;
+
+  .p-datatable-header {
+    @apply bg-gray-100 text-gray-700;
+
+    th {
+      @apply font-semibold text-sm border-b border-gray-300 p-3;
+    }
+
+    td {
+      @apply text-sm text-gray-600 p-3;
+    }
+  }
+
+  .p-datatable-tbody > tr {
+    @apply hover:bg-gray-50;
+
+    td {
+      @apply border-b border-gray-200;
+    }
+  }
+
+  .p-datatable-tfoot {
+    @apply bg-gray-100;
+  }
+}
+
+.danger-zone {
+  @apply bg-red-50 border border-red-500 rounded-lg p-6 mt-6;
+
+  h2 {
+    @apply text-xl font-semibold text-red-600;
+  }
+
+  .danger-action {
+    @apply bg-red-500 text-white hover:bg-red-600 rounded-lg p-2 text-sm;
+  }
+}
+
+.statistics {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6;
+
+  .stat-card {
+    @apply p-6 bg-white rounded-lg border border-gray-200 shadow-sm;
+
+    .stat-title {
+      @apply text-sm font-medium text-gray-500;
+    }
+
+    .stat-value {
+      @apply text-xl font-semibold text-gray-900;
+    }
+
+    .stat-icon {
+      @apply text-gray-500 text-3xl;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    @apply px-6 py-4;
+  }
+
+  .statistics {
+    @apply grid-cols-1;
+  }
+
+  .field {
+    @apply mb-4;
+  }
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+input[type="checkbox"] {
+  margin-left: 0.5rem;
+  accent-color: #06b6d4; /* Tailwind cyan color */
+}
+
+label {
+  font-size: 1rem;
+  color: #4b5563; /* Gray-700 */
+  font-weight: 500;
+}
+
+button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  background-color: #06b6d4; /* Tailwind cyan color */
+}
+
+button:hover {
+  background-color: #0891b2; /* Hover state */
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-gray-700 {
+  color: #374151; /* Dark Gray */
+}
+
+.text-cyan-500 {
+  color: #06b6d4;
+}
+
+.text-cyan-600:hover {
+  color: #0891b2;
+}
