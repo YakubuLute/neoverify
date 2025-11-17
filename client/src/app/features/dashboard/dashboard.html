@@ -1,412 +1,552 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
 <!-- Dashboard Content -->
 <div class="dashboard-content">
 
-    <!-- Welcome Section -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-semibold text-white mb-2">{{ dashboardTitle() }}</h1>
-        <p class="text-gray-300 font-normal">{{ welcomeMessage() }}</p>
-    </div>
+  <!-- Welcome Section -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+      {{ dashboardTitle() }}
+    </h1>
+    <p class="text-gray-600 font-normal">
+      {{ welcomeMessage() }}
+    </p>
+  </div>
 
-    <!-- Stats Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @for (stat of currentStats(); track stat.title) {
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
-            (click)="stat.route && navigateTo(stat.route)">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-3">
-                    <div
-                        class="w-12 h-12 bg-gray-700/50 rounded-lg flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-                        <i [class]="stat.icon + ' text-xl ' + stat.color"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-400 text-sm font-normal">{{ stat.title }}</p>
-                        <p class="text-2xl font-semibold text-white">{{ stat.value }}</p>
-                    </div>
-                </div>
+  <!-- Stats Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    @for (stat of currentStats(); track stat.title) {
+      <div
+        class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-cyan-500/40 transition-all duration-300 cursor-pointer group"
+        (click)="stat.route && navigateTo(stat.route)"
+        (keyup)="stat.route && navigateTo(stat.route)"
+        (keydown)="stat.route && navigateTo(stat.route)"
+        >
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+              <i [class]="stat.icon + ' text-xl ' + stat.color"></i>
             </div>
-            @if (stat.trend) {
-            <div class="flex items-center space-x-2">
-                <i [class]="stat.trendIcon + ' text-sm ' + stat.color"></i>
-                <span [class]="'text-sm font-normal ' + stat.color">{{ stat.trend }}</span>
-                <span class="text-gray-500 text-sm">vs last period</span>
+            <div>
+              <p class="text-gray-500 text-sm font-medium">
+                {{ stat.title }}
+              </p>
+              <p class="text-2xl font-semibold text-gray-900">
+                {{ stat.value }}
+              </p>
             </div>
-            }
+          </div>
         </div>
+        @if (stat.trend) {
+          <div class="flex items-center space-x-2">
+            <i [class]="stat.trendIcon + ' text-sm ' + stat.color"></i>
+            <span [class]="'text-sm font-medium ' + stat.color">
+              {{ stat.trend }}
+            </span>
+            <span class="text-gray-400 text-sm">
+              vs last period
+            </span>
+          </div>
         }
-    </div>
+      </div>
+    }
+  </div>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- Quick Actions -->
-        <div class="lg:col-span-2">
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">Quick Actions</h2>
-                    <i class="pi pi-bolt text-cyan-400"></i>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @for (action of currentActions(); track action.title) {
-                    <div class="bg-gray-900/50 rounded-lg border border-gray-700 p-4 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 cursor-pointer group"
-                        (click)="navigateTo(action.route)">
-                        <div class="flex items-start space-x-4">
-                            <div
-                                [class]="'w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform ' + action.color">
-                                <i [class]="action.icon + ' text-white text-xl'"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3
-                                    class="text-white font-semibold text-base mb-1 group-hover:text-cyan-400 transition-colors">
-                                    {{ action.title }}</h3>
-                                <p class="text-gray-400 text-sm font-normal leading-relaxed">{{ action.description }}
-                                </p>
-                            </div>
-                            <i class="pi pi-arrow-right text-gray-500 group-hover:text-cyan-400 transition-colors"></i>
-                        </div>
-                    </div>
-                    }
-                </div>
-            </div>
+    <!-- Quick Actions -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Quick Actions
+          </h2>
+          <i class="pi pi-bolt text-cyan-500"></i>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="lg:col-span-1">
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-white">Recent Activity</h2>
-                    <i class="pi pi-history text-purple-400"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @for (action of currentActions(); track action.title) {
+            <div
+              class="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:bg-cyan-50 hover:border-cyan-500/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
+              (click)="navigateTo(action.route)"
+              (keyup)="navigateTo(action.route)"
+              (keydown)="navigateTo(action.route)"
+              >
+              <div class="flex items-start space-x-4">
+                <div
+                  [class]="'w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ' + action.color">
+                  <i [class]="action.icon + ' text-white text-xl'"></i>
                 </div>
-
-                <div class="space-y-4">
-                    @for (activity of recentActivities(); track activity.title) {
-                    <div class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-900/50 transition-colors">
-                        <div
-                            [class]="'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ' + getActivityTypeClass(activity.type)">
-                            <i [class]="activity.icon + ' text-sm'"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-white text-sm font-medium">{{ activity.title }}</p>
-                            <p class="text-gray-400 text-xs font-normal mt-1 leading-relaxed">{{ activity.description }}
-                            </p>
-                            <p class="text-gray-500 text-xs font-normal mt-2">{{ activity.time }}</p>
-                        </div>
-                    </div>
-                    }
+                <div class="flex-1">
+                  <h3
+                    class="text-gray-900 font-semibold text-base mb-1 group-hover:text-cyan-700 transition-colors">
+                    {{ action.title }}
+                  </h3>
+                  <p class="text-gray-600 text-sm font-normal leading-relaxed">
+                    {{ action.description }}
+                  </p>
                 </div>
-
-                <div class="mt-6 pt-4 border-t border-gray-700">
-                    <button class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
-                        View All Activity
-                        <i class="pi pi-arrow-right ml-2"></i>
-                    </button>
-                </div>
+                <i
+                  class="pi pi-arrow-right text-gray-400 group-hover:text-cyan-600 transition-colors">
+                </i>
+              </div>
             </div>
+          }
         </div>
+      </div>
     </div>
 
-    <!-- Additional Role-Specific Sections -->
-    @if (userRole() === UserRole.PLATFORM_ADMIN) {
+    <!-- Recent Activity -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Recent Activity
+          </h2>
+          <i class="pi pi-history text-purple-500"></i>
+        </div>
+
+        <div class="space-y-4">
+          @for (activity of recentActivities(); track activity.title) {
+            <div
+              class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <div
+                [class]="'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ' + getActivityTypeClass(activity.type)">
+                <i [class]="activity.icon + ' text-sm'"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-gray-900 text-sm font-medium">
+                  {{ activity.title }}
+                </p>
+                <p class="text-gray-600 text-xs font-normal mt-1 leading-relaxed">
+                  {{ activity.description }}
+                </p>
+                <p class="text-gray-400 text-xs font-normal mt-2">
+                  {{ activity.time }}
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <button
+            class="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View All Activity
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Role-Specific Sections -->
+
+  @if (userRole() === UserRole.PLATFORM_ADMIN) {
     <!-- Platform Admin Specific Content -->
     <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- System Health -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">System Health</h2>
-                <i class="pi pi-heart text-cyan-400"></i>
-            </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">API Response Time</span>
-                    <span class="text-cyan-400 font-medium">127ms</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Database Performance</span>
-                    <span class="text-cyan-400 font-medium">Optimal</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Active Connections</span>
-                    <span class="text-cyan-400 font-medium">2,847</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Top Organizations -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Top Organizations</h2>
-                <i class="pi pi-building text-purple-400"></i>
-            </div>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                            <span class="text-gray-900 font-semibold text-sm">TC</span>
-                        </div>
-                        <span class="text-white font-medium">TechCorp Industries</span>
-                    </div>
-                    <span class="text-cyan-400 font-medium">12.5K docs</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-semibold text-sm">GF</span>
-                        </div>
-                        <span class="text-white font-medium">Global Finance Ltd</span>
-                    </div>
-                    <span class="text-purple-400 font-medium">8.3K docs</span>
-                </div>
-            </div>
+      <!-- System Health -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            System Health
+          </h2>
+          <i class="pi pi-heart text-cyan-500"></i>
         </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">API Response Time</span>
+            <span class="text-cyan-600 font-medium">127ms</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Database Performance</span>
+            <span class="text-cyan-600 font-medium">Optimal</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Active Connections</span>
+            <span class="text-cyan-600 font-medium">2,847</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Organizations -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Top Organizations
+          </h2>
+          <i class="pi pi-building text-purple-500"></i>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+                <span class="text-gray-900 font-semibold text-sm">TC</span>
+              </div>
+              <span class="text-gray-900 font-medium">
+                TechCorp Industries
+              </span>
+            </div>
+            <span class="text-cyan-600 font-medium">
+              12.5K docs
+            </span>
+          </div>
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <span class="text-white font-semibold text-sm">GF</span>
+              </div>
+              <span class="text-gray-900 font-medium">
+                Global Finance Ltd
+              </span>
+            </div>
+            <span class="text-purple-600 font-medium">
+              8.3K docs
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-    }
+  }
 
-    @if (userRole() === UserRole.ORG_ADMIN) {
+  @if (userRole() === UserRole.ORG_ADMIN) {
     <!-- Organization Admin Specific Content -->
     <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Document Analytics -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Document Analytics</h2>
-                <i class="pi pi-chart-bar text-cyan-400"></i>
-            </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Documents Issued This Month</span>
-                    <span class="text-cyan-400 font-medium">{{ documentStats()?.totalDocuments || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Pending Verifications</span>
-                    <span class="text-purple-400 font-medium">{{ documentStats()?.pendingVerifications || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Templates Available</span>
-                    <span class="text-cyan-400 font-medium">{{ documentStats()?.templatesCount || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Storage Used</span>
-                    <span class="text-purple-400 font-medium">{{ documentStats()?.storageUsed || '0 MB' }}</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents/audit')"
-                    class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
-                    View Detailed Analytics
-                    <i class="pi pi-arrow-right ml-2"></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- Document Activity Feed -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Document Activity</h2>
-                <i class="pi pi-file text-purple-400"></i>
-            </div>
-            <div class="space-y-3">
-                @if (documentStats()?.documentsToday && documentStats()!.documentsToday > 0) {
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-file-plus text-gray-900 text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">{{ documentStats()!.documentsToday }} documents
-                            uploaded today</p>
-                        <p class="text-gray-400 text-xs">Latest activity</p>
-                    </div>
-                </div>
-                }
-                @if (documentStats()?.pendingVerifications && documentStats()!.pendingVerifications > 0) {
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-clock text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">{{ documentStats()!.pendingVerifications }} documents
-                            awaiting verification</p>
-                        <p class="text-gray-400 text-xs">Requires attention</p>
-                    </div>
-                </div>
-                }
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-verified text-gray-900 text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">{{ documentStats()?.verifiedDocuments || 0 }}
-                            documents verified</p>
-                        <p class="text-gray-400 text-xs">All time</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents')"
-                    class="w-full text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors">
-                    View All Documents
-                    <i class="pi pi-arrow-right ml-2"></i>
-                </button>
-            </div>
+      <!-- Document Analytics -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Document Analytics
+          </h2>
+          <i class="pi pi-chart-bar text-cyan-500"></i>
         </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Documents Issued This Month</span>
+            <span class="text-cyan-600 font-medium">
+              {{ documentStats()?.totalDocuments || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Pending Verifications</span>
+            <span class="text-purple-600 font-medium">
+              {{ documentStats()?.pendingVerifications || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Templates Available</span>
+            <span class="text-cyan-600 font-medium">
+              {{ documentStats()?.templatesCount || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Storage Used</span>
+            <span class="text-purple-600 font-medium">
+              {{ documentStats()?.storageUsed || '0 MB' }}
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents/audit')"
+            class="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View Detailed Analytics
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Document Activity Feed -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Document Activity
+          </h2>
+          <i class="pi pi-file text-purple-500"></i>
+        </div>
+        <div class="space-y-3">
+          @if (documentStats()?.documentsToday && documentStats()!.documentsToday > 0) {
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div
+                class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+                <i class="pi pi-file-plus text-gray-900 text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-900 text-sm font-medium">
+                  {{ documentStats()!.documentsToday }} documents uploaded today
+                </p>
+                <p class="text-gray-600 text-xs">
+                  Latest activity
+                </p>
+              </div>
+            </div>
+          }
+          @if (documentStats()?.pendingVerifications && documentStats()!.pendingVerifications > 0) {
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div
+                class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <i class="pi pi-clock text-white text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-900 text-sm font-medium">
+                  {{ documentStats()!.pendingVerifications }} documents awaiting verification
+                </p>
+                <p class="text-gray-600 text-xs">
+                  Requires attention
+                </p>
+              </div>
+            </div>
+          }
+          <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div
+              class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+              <i class="pi pi-verified text-gray-900 text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                {{ documentStats()?.verifiedDocuments || 0 }} documents verified
+              </p>
+              <p class="text-gray-600 text-xs">
+                All time
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents')"
+            class="w-full text-purple-600 hover:text-purple-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View All Documents
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
     </div>
-    }
+  }
 
-    @if (userRole() === UserRole.ISSUER) {
+  @if (userRole() === UserRole.ISSUER) {
     <!-- Issuer Specific Content -->
     <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- My Document Stats -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">My Document Stats</h2>
-                <i class="pi pi-file text-cyan-400"></i>
-            </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Total Documents</span>
-                    <span class="text-cyan-400 font-medium">{{ documentStats()?.totalDocuments || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Verified Documents</span>
-                    <span class="text-cyan-400 font-medium">{{ documentStats()?.verifiedDocuments || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Pending Verification</span>
-                    <span class="text-purple-400 font-medium">{{ documentStats()?.pendingVerifications || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Templates Used</span>
-                    <span class="text-cyan-400 font-medium">{{ documentStats()?.templatesCount || 0 }}</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents/upload')"
-                    class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
-                    Upload New Document
-                    <i class="pi pi-upload ml-2"></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- Quick Templates -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Quick Templates</h2>
-                <i class="pi pi-bookmark text-purple-400"></i>
-            </div>
-            <div class="space-y-3">
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors"
-                    (click)="navigateTo('/documents/templates')">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-                        <i class="pi pi-file text-gray-900 text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">Certificate Template</p>
-                        <p class="text-gray-400 text-xs">Most used template</p>
-                    </div>
-                    <i class="pi pi-arrow-right text-gray-500"></i>
-                </div>
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors"
-                    (click)="navigateTo('/documents/templates')">
-                    <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                        <i class="pi pi-file-edit text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">Transcript Template</p>
-                        <p class="text-gray-400 text-xs">Academic documents</p>
-                    </div>
-                    <i class="pi pi-arrow-right text-gray-500"></i>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents/templates')"
-                    class="w-full text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors">
-                    View All Templates
-                    <i class="pi pi-arrow-right ml-2"></i>
-                </button>
-            </div>
+      <!-- My Document Stats -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            My Document Stats
+          </h2>
+          <i class="pi pi-file text-cyan-500"></i>
         </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Total Documents</span>
+            <span class="text-cyan-600 font-medium">
+              {{ documentStats()?.totalDocuments || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Verified Documents</span>
+            <span class="text-cyan-600 font-medium">
+              {{ documentStats()?.verifiedDocuments || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Pending Verification</span>
+            <span class="text-purple-600 font-medium">
+              {{ documentStats()?.pendingVerifications || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Templates Used</span>
+            <span class="text-cyan-600 font-medium">
+              {{ documentStats()?.templatesCount || 0 }}
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents/upload')"
+            class="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            Upload New Document
+            <i class="pi pi-upload text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Templates -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Quick Templates
+          </h2>
+          <i class="pi pi-bookmark text-purple-500"></i>
+        </div>
+        <div class="space-y-3">
+          // eslint-disable-next-line @angular-eslint/template/interactive-supports-focus
+          <div
+            class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+            (click)="navigateTo('/documents/templates')"
+            (keyup)="navigateTo('/documents/templates')"
+            (keydown)="navigateTo('/documents/templates')"
+
+            >
+            <div
+              class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+              <i class="pi pi-file text-gray-900 text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                Certificate Template
+              </p>
+              <p class="text-gray-600 text-xs">
+                Most used template
+              </p>
+            </div>
+            <i class="pi pi-arrow-right text-gray-400"></i>
+          </div>
+          <div
+            class="flex items-middle space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+            (click)="navigateTo('/documents/templates')"
+            (keyup)="navigateTo('/documents/templates')"
+            (keydown)="navigateTo('/documents/templates')"
+            >
+            <div
+              class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+              <i class="pi pi-file-edit text-white text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                Transcript Template
+              </p>
+              <p class="text-gray-600 text-xs">
+                Academic documents
+              </p>
+            </div>
+            <i class="pi pi-arrow-right text-gray-400"></i>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents/templates')"
+            class="w-full text-purple-600 hover:text-purple-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View All Templates
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
     </div>
-    }
+  }
 
-    @if (userRole() === UserRole.AUDITOR) {
+  @if (userRole() === UserRole.AUDITOR) {
     <!-- Auditor Specific Content -->
     <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Compliance Overview -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Compliance Overview</h2>
-                <i class="pi pi-shield text-cyan-400"></i>
-            </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Compliance Score</span>
-                    <span class="text-cyan-400 font-medium">98.2%</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Audit Entries</span>
-                    <span class="text-cyan-400 font-medium">{{ (documentStats()?.totalDocuments || 0) * 3 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Policy Violations</span>
-                    <span class="text-purple-400 font-medium">{{ documentStats()?.rejectedDocuments || 0 }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-300 font-normal">Last Audit</span>
-                    <span class="text-cyan-400 font-medium">2 days ago</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents/audit/compliance')"
-                    class="w-full text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
-                    View Compliance Dashboard
-                    <i class="pi pi-arrow-right ml-2"></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- Recent Audit Activity -->
-        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-white">Recent Audit Activity</h2>
-                <i class="pi pi-history text-purple-400"></i>
-            </div>
-            <div class="space-y-3">
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-check text-gray-900 text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">Document verification audit completed</p>
-                        <p class="text-gray-400 text-xs">2 hours ago</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-file-export text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">Compliance report generated</p>
-                        <p class="text-gray-400 text-xs">1 day ago</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3 p-3 bg-gray-900/50 rounded-lg">
-                    <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
-                        <i class="pi pi-exclamation-triangle text-gray-900 text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-white text-sm font-medium">Policy violation detected</p>
-                        <p class="text-gray-400 text-xs">3 days ago</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-700">
-                <button (click)="navigateTo('/documents/audit')"
-                    class="w-full text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors">
-                    View Full Audit Trail
-                    <i class="pi pi-arrow-right ml-2"></i>
-                </button>
-            </div>
+      <!-- Compliance Overview -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Compliance Overview
+          </h2>
+          <i class="pi pi-shield text-cyan-500"></i>
         </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Compliance Score</span>
+            <span class="text-cyan-600 font-medium">98.2%</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Audit Entries</span>
+            <span class="text-cyan-600 font-medium">
+              {{ (documentStats()?.totalDocuments || 0) * 3 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Policy Violations</span>
+            <span class="text-purple-600 font-medium">
+              {{ documentStats()?.rejectedDocuments || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600 font-normal">Last Audit</span>
+            <span class="text-cyan-600 font-medium">2 days ago</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents/audit/compliance')"
+            class="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View Compliance Dashboard
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Audit Activity -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Recent Audit Activity
+          </h2>
+          <i class="pi pi-history text-purple-500"></i>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div
+              class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+              <i class="pi pi-check text-gray-900 text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                Document verification audit completed
+              </p>
+              <p class="text-gray-600 text-xs">
+                2 hours ago
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div
+              class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+              <i class="pi pi-file-export text-white text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                Compliance report generated
+              </p>
+              <p class="text-gray-600 text-xs">
+                1 day ago
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div
+              class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center">
+              <i class="pi pi-exclamation-triangle text-gray-900 text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-900 text-sm font-medium">
+                Policy violation detected
+              </p>
+              <p class="text-gray-600 text-xs">
+                3 days ago
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            (click)="navigateTo('/documents/audit')"
+            class="w-full text-purple-600 hover:text-purple-700 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            View Full Audit Trail
+            <i class="pi pi-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
     </div>
-    }
+  }
 
 </div>
