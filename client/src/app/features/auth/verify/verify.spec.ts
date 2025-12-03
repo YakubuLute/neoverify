@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Verify } from './verify';
+import { Verify } from '../../documents/verify/verify';
 
 describe('Verify', () => {
   let component: Verify;

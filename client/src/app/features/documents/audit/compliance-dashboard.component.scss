@@ -1,0 +1,55 @@
+    :host {
+      display: block;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+
+    .compliance-dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    ::ng-deep .progress-good .p-progressbar-value {
+      background: #10b981 !important;
+    }
+
+    ::ng-deep .progress-warning .p-progressbar-value {
+      background: #f59e0b !important;
+    }
+
+    ::ng-deep .progress-critical .p-progressbar-value {
+      background: #ef4444 !important;
+    }
+
+    ::ng-deep .p-card .p-card-header {
+      background: rgba(31, 41, 55, 0.5) !important;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
+      color: #f3f4f6 !important;
+    }
+
+    ::ng-deep .p-card .p-card-body {
+      background: transparent !important;
+      color: #f3f4f6 !important;
+    }
+
+    ::ng-deep .p-datatable .p-datatable-tbody > tr {
+      background: rgba(31, 41, 55, 0.3) !important;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.2) !important;
+    }
+
+    ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+      background: rgba(17, 24, 39, 0.5) !important;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
+      color: #f3f4f6 !important;
+    }
+
+    ::ng-deep .p-dialog .p-dialog-header {
+      background: rgba(31, 41, 55, 0.95) !important;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
+      color: #f3f4f6 !important;
+    }
+
+    ::ng-deep .p-dialog .p-dialog-content {
+      background: rgba(31, 41, 55, 0.95) !important;
+      color: #f3f4f6 !important;
+    }

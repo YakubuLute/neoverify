@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from 'zod';
 import { ApiUtils } from './api.utils';
 import { ApiError, ErrorType } from '../types/api.types';
@@ -186,10 +187,9 @@ export class ResponseTransformer {
         }
 
         const items = Array.isArray(response.items) ? response.items : [];
-        const transformedItems = itemSchema
-            ? items.map(item => this.transform(item, itemSchema))
-            : items.map(item => this.transformDates(item)) as T[];
-
+      const transformedItems = itemSchema
+    ? items.map((item: unknown) => this.transform(item, itemSchema))
+    : items.map((item: unknown) => this.transformDates(item as any)) as T[];
         return {
             items: transformedItems,
             total: response.total || 0,
@@ -260,7 +260,7 @@ export class EndpointTransformers {
     /**
      * Transform document upload request
      */
-    static transformDocumentUpload(file: File, metadata?: any): FormData {
+    static transformDocumentUpload(file: File, metadata?: Record<string, any>): FormData {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -320,19 +320,19 @@ export class EndpointTransformers {
         const params: Record<string, string> = {};
 
         if (page !== undefined && page > 0) {
-            params.page = page.toString();
+            params['page'] = page.toString();
         }
 
         if (limit !== undefined && limit > 0) {
-            params.limit = limit.toString();
+            params['limit'] = limit.toString();
         }
 
         if (sortBy) {
-            params.sortBy = sortBy;
+            params['sortBy'] = sortBy;
         }
 
         if (sortOrder) {
-            params.sortOrder = sortOrder;
+            params['sortOrder'] = sortOrder;
         }
 
         return params;

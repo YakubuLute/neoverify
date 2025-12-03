@@ -8,6 +8,11 @@ export enum SubscriptionTier {
     ENTERPRISE = 'enterprise',
 }
 
+export interface InviteUserRequest {
+  email: string;
+  role: string;
+}
+
 export interface OrganizationSettingsResponse {
     success: boolean;
     message: string;

@@ -1,13 +1,23 @@
-FROM node:18
+# =============================================
+# Node Backend - Development Dockerfile
+# =============================================
+
+FROM node:20.19.1-alpine
+
+# Set working directory
 WORKDIR /usr/src/app
 
-# Install dependencies
-COPY server/nodejs/package*.json ./
+# Copy package files first (for dependency install)
+COPY package*.json ./
+
+# Install all dependencies (including dev)
 RUN npm install
 
-# Copy source
-COPY server/nodejs/ .
+# Copy the rest of your code
+COPY . .
 
-# Expose app
-EXPOSE 5000
-CMD ["npm", "start"]
+# Expose backend port 
+EXPOSE 3000
+
+# Run development mode with hot reload
+CMD ["npm", "run", "dev"]

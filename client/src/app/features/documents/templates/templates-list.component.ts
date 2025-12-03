@@ -6,6 +6,7 @@ import { TemplateService } from '../../../core/services/template.service';
 import { AuthService } from '../../../core/services/auth.service';
 import {
     DocumentTemplate,
+    DocumentType,
     TemplateVersion
 } from '../../../shared/models/document.models';
 import { UserRole } from '../../../shared/models/auth.models';
@@ -91,15 +92,15 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
         if (query) {
             templates = templates.filter(template =>
                 template.name.toLowerCase().includes(query) ||
-                template.description.toLowerCase().includes(query) ||
-                template.category.toLowerCase().includes(query)
+                template?.description?.toLowerCase().includes(query) ||
+                template?.category?.toLowerCase().includes(query)
             );
         }
 
         // Apply filters
         if (currentFilters.category?.length) {
             templates = templates.filter(template =>
-                currentFilters.category!.includes(template.category)
+                currentFilters.category!.includes(template.category!)
             );
         }
         if (currentFilters.isActive !== undefined) {
@@ -148,7 +149,11 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
     });
 
     readonly availableCategories = computed(() => {
-        const categories = new Set(this.templates().map(t => t.category));
+        const categories = new Set(
+            this.templates()
+                .map(t => t.category)
+                .filter((c): c is string => !!c && c.trim().length > 0)
+        );
         return Array.from(categories).sort();
     });
 
@@ -552,7 +557,7 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
     }
 
     getCategoryOptions(): { label: string; value: string }[] {
-        return this.availableCategories().map(cat => ({ label: cat, value: cat }));
+        return this.availableCategories().map(cat => ({ label: cat, value: cat })) || [];
     }
 
     getCreatorOptions(): { label: string; value: string }[] {
@@ -591,136 +596,156 @@ export class TemplatesListComponent implements OnInit, OnDestroy {
     private getMockTemplates(): DocumentTemplate[] {
         return [
             {
-                id: '1',
-                name: 'University Degree Certificate',
-                description: 'Standard template for university degree certificates with academic honors',
-                category: 'Education',
-                version: '1.2.0',
-                isActive: true,
-                fields: [
-                    {
-                        id: 'f1',
-                        name: 'recipientName',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 200 },
-                        placeholder: 'Full Name'
-                    },
-                    {
-                        id: 'f2',
-                        name: 'degreeTitle',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 250 },
-                        placeholder: 'Degree Title'
-                    }
-                ],
-                validationRules: [],
-                previewUrl: '/api/templates/1/preview',
-                createdBy: 'admin@university.edu',
-                createdAt: new Date('2024-01-15'),
-                updatedAt: new Date('2024-01-20'),
-                usageCount: 45,
-                organizationId: 'org123'
+              id: '1',
+              name: 'University Degree Certificate',
+              description: 'Standard template for university degree certificates with academic honors',
+              category: 'Education',
+              version: '1.2.0',
+              isActive: true,
+              fields: [
+                {
+                  id: 'f1',
+                  name: 'recipientName',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'Recipient Name',
+                  order: 1,
+                  position: { x: 100, y: 200 },
+                  placeholder: 'Full Name'
+                },
+                {
+                  id: 'f2',
+                  name: 'degreeTitle',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'Degree Title',
+                  order: 2,
+                  position: { x: 100, y: 250 },
+                  placeholder: 'Degree Title'
+                }
+              ],
+              validationRules: [],
+              previewUrl: '/api/templates/1/preview',
+              createdBy: 'admin@university.edu',
+              createdAt: new Date('2024-01-15'),
+              updatedAt: new Date('2024-01-20'),
+              usageCount: 45,
+              organizationId: 'org123',
+              documentType: DocumentType.PDF
             },
             {
-                id: '2',
-                name: 'Professional Certification',
-                description: 'Template for professional certifications and training completions',
-                category: 'Professional',
-                version: '1.0.0',
-                isActive: true,
-                fields: [
-                    {
-                        id: 'f3',
-                        name: 'recipientName',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 200 },
-                        placeholder: 'Full Name'
-                    },
-                    {
-                        id: 'f4',
-                        name: 'certificationTitle',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 250 },
-                        placeholder: 'Certification Title'
-                    }
-                ],
-                validationRules: [],
-                previewUrl: '/api/templates/2/preview',
-                createdBy: 'training@company.com',
-                createdAt: new Date('2024-01-10'),
-                updatedAt: new Date('2024-01-10'),
-                usageCount: 23,
-                organizationId: 'org123'
+              id: '2',
+              name: 'Professional Certification',
+              description: 'Template for professional certifications and training completions',
+              category: 'Professional',
+              version: '1.0.0',
+              isActive: true,
+              fields: [
+                {
+                  id: 'f3',
+                  name: 'recipientName',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'Recipient Name',
+                  order: 1,
+                  position: { x: 100, y: 200 },
+                  placeholder: 'Full Name'
+                },
+                {
+                  id: 'f4',
+                  name: 'certificationTitle',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'Certification Title',
+                  order: 2,
+                  position: { x: 100, y: 250 },
+                  placeholder: 'Certification Title'
+                }
+              ],
+              validationRules: [],
+              previewUrl: '/api/templates/2/preview',
+              createdBy: 'training@company.com',
+              createdAt: new Date('2024-01-10'),
+              updatedAt: new Date('2024-01-10'),
+              usageCount: 23,
+              organizationId: 'org123',
+              documentType: DocumentType.PDF
             },
             {
-                id: '3',
-                name: 'Government License',
-                description: 'Official template for government-issued licenses and permits',
-                category: 'Government',
-                version: '2.1.0',
-                isActive: true,
-                fields: [
-                    {
-                        id: 'f5',
-                        name: 'licenseHolder',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 200 },
-                        placeholder: 'License Holder Name'
-                    },
-                    {
-                        id: 'f6',
-                        name: 'licenseType',
-                        type: 'dropdown' as any,
-                        required: true,
-                        position: { x: 100, y: 250 },
-                        options: ['Driver License', 'Business License', 'Professional License']
-                    }
-                ],
-                validationRules: [],
-                previewUrl: '/api/templates/3/preview',
-                createdBy: 'gov@state.gov',
-                createdAt: new Date('2023-12-01'),
-                updatedAt: new Date('2024-01-18'),
-                usageCount: 67,
-                organizationId: 'org456'
+              id: '3',
+              name: 'Government License',
+              description: 'Official template for government-issued licenses and permits',
+              category: 'Government',
+              version: '2.1.0',
+              isActive: true,
+              fields: [
+                {
+                  id: 'f5',
+                  name: 'licenseHolder',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'License Holder',
+                  order: 1,
+                  position: { x: 100, y: 200 },
+                  placeholder: 'License Holder Name'
+                },
+                {
+                  id: 'f6',
+                  name: 'licenseType',
+                  type: 'dropdown' as any,
+                  required: true,
+                  label: 'License Type',
+                  order: 2,
+                  position: { x: 100, y: 250 },
+                  options: ['Driver License', 'Business License', 'Professional License']
+                }
+              ],
+              validationRules: [],
+              previewUrl: '/api/templates/3/preview',
+              createdBy: 'gov@state.gov',
+              createdAt: new Date('2023-12-01'),
+              updatedAt: new Date('2024-01-18'),
+              usageCount: 67,
+              organizationId: 'org456',
+              documentType: DocumentType.PDF
             },
             {
-                id: '4',
-                name: 'Medical Certificate',
-                description: 'Template for medical certificates and health records',
-                category: 'Healthcare',
-                version: '1.0.0',
-                isActive: false,
-                fields: [
-                    {
-                        id: 'f7',
-                        name: 'patientName',
-                        type: 'text' as any,
-                        required: true,
-                        position: { x: 100, y: 200 },
-                        placeholder: 'Patient Name'
-                    },
-                    {
-                        id: 'f8',
-                        name: 'diagnosis',
-                        type: 'textarea' as any,
-                        required: true,
-                        position: { x: 100, y: 250 },
-                        placeholder: 'Medical Diagnosis'
-                    }
-                ],
-                validationRules: [],
-                previewUrl: '/api/templates/4/preview',
-                createdBy: 'medical@hospital.com',
-                createdAt: new Date('2024-01-05'),
-                updatedAt: new Date('2024-01-05'),
-                usageCount: 12,
-                organizationId: 'org789'
+              id: '4',
+              name: 'Medical Certificate',
+              description: 'Template for medical certificates and health records',
+              category: 'Healthcare',
+              version: '1.0.0',
+              isActive: false,
+              fields: [
+                {
+                  id: 'f7',
+                  name: 'patientName',
+                  type: 'text' as any,
+                  required: true,
+                  label: 'Patient Name',
+                  order: 1,
+                  position: { x: 100, y: 200 },
+                  placeholder: 'Patient Name'
+                },
+                {
+                  id: 'f8',
+                  name: 'diagnosis',
+                  type: 'textarea' as any,
+                  required: true,
+                  label: 'Diagnosis',
+                  order: 2,
+                  position: { x: 100, y: 250 },
+                  placeholder: 'Medical Diagnosis'
+                }
+              ],
+              validationRules: [],
+              previewUrl: '/api/templates/4/preview',
+              createdBy: 'medical@hospital.com',
+              createdAt: new Date('2024-01-05'),
+              updatedAt: new Date('2024-01-05'),
+              usageCount: 12,
+              organizationId: 'org789',
+              documentType: DocumentType.PDF
             }
         ];
     }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, BehaviorSubject, throwError, timer } from 'rxjs';
 import { map, catchError, tap, switchMap, takeUntil } from 'rxjs/operators';
@@ -12,8 +13,6 @@ import {
     VerificationStage,
     VerificationHistoryEntry,
     StatusNotification,
-    NotificationType,
-    VerificationError,
     RemediationStep
 } from '../../shared/models/document.models';
 
@@ -82,7 +81,7 @@ export class DocumentStatusService {
         };
 
         return this.apiService.put<void>(`documents/${documentId}/status`, updateData).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Document status updated successfully');
                 this.refreshStatusHistory(documentId);
@@ -99,7 +98,7 @@ export class DocumentStatusService {
      */
     getDocumentStatusHistory(documentId: string): Observable<DocumentStatusHistory[]> {
         return this.apiService.get<DocumentStatusHistory[]>(`documents/${documentId}/status-history`).pipe(
-            map(response => response.data),
+
             tap(history => {
                 this.statusHistorySubject.next(history);
             }),
@@ -117,7 +116,7 @@ export class DocumentStatusService {
         return this.apiService.get<StatusTransition[]>(`documents/${documentId}/allowed-transitions`, {
             currentStatus
         } as any).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 console.error('Failed to load allowed transitions:', error);
                 return throwError(() => error);
@@ -130,7 +129,7 @@ export class DocumentStatusService {
      */
     startVerification(documentId: string, options?: { forensicsEnabled?: boolean }): Observable<string> {
         return this.apiService.post<{ verificationId: string }>(`documents/${documentId}/verify`, options || {}).pipe(
-            map(response => response.data.verificationId),
+            map(response => response.verificationId),
             tap(verificationId => {
                 this.notificationService.info('Verification process started');
                 this.startVerificationTracking(documentId, verificationId);
@@ -147,7 +146,7 @@ export class DocumentStatusService {
      */
     getVerificationProgress(documentId: string): Observable<VerificationProgress | null> {
         return this.apiService.get<VerificationProgress>(`documents/${documentId}/verification-progress`).pipe(
-            map(response => response.data),
+
             tap(progress => {
                 if (progress) {
                     const currentProgress = this.verificationProgressSubject.value;
@@ -168,7 +167,7 @@ export class DocumentStatusService {
      */
     getVerificationHistory(documentId: string): Observable<VerificationHistoryEntry[]> {
         return this.apiService.get<VerificationHistoryEntry[]>(`documents/${documentId}/verification-history`).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 this.notificationService.error('Failed to load verification history');
                 return throwError(() => error);
@@ -181,7 +180,7 @@ export class DocumentStatusService {
      */
     retryVerification(documentId: string, verificationId: string): Observable<string> {
         return this.apiService.post<{ verificationId: string }>(`documents/${documentId}/verification/${verificationId}/retry`, {}).pipe(
-            map(response => response.data.verificationId),
+            map(response => response.verificationId),
             tap(newVerificationId => {
                 this.notificationService.info('Verification retry initiated');
                 this.startVerificationTracking(documentId, newVerificationId);
@@ -198,7 +197,7 @@ export class DocumentStatusService {
      */
     cancelVerification(documentId: string, verificationId: string): Observable<void> {
         return this.apiService.post<void>(`documents/${documentId}/verification/${verificationId}/cancel`, {}).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Verification cancelled');
                 this.stopVerificationTracking(documentId);
@@ -217,7 +216,7 @@ export class DocumentStatusService {
         return this.apiService.get<RemediationStep[]>(`documents/${documentId}/remediation`, {
             errorCode
         } as any).pipe(
-            map(response => response.data),
+
             catchError(error => {
                 console.error('Failed to get remediation steps:', error);
                 return throwError(() => error);
@@ -230,7 +229,7 @@ export class DocumentStatusService {
      */
     executeRemediationAction(documentId: string, actionId: string, parameters?: Record<string, any>): Observable<void> {
         return this.apiService.post<void>(`documents/${documentId}/remediation/${actionId}/execute`, parameters || {}).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.notificationService.success('Remediation action executed successfully');
             }),
@@ -246,7 +245,7 @@ export class DocumentStatusService {
      */
     getStatusNotifications(): Observable<StatusNotification[]> {
         return this.apiService.get<StatusNotification[]>('notifications/status').pipe(
-            map(response => response.data),
+
             tap(notifications => {
                 this.notificationsSubject.next(notifications);
                 this.updateUnreadCount(notifications);
@@ -263,7 +262,7 @@ export class DocumentStatusService {
      */
     markNotificationAsRead(notificationId: string): Observable<void> {
         return this.apiService.put<void>(`notifications/${notificationId}/read`, {}).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.refreshNotifications();
             }),
@@ -279,7 +278,7 @@ export class DocumentStatusService {
      */
     dismissNotification(notificationId: string): Observable<void> {
         return this.apiService.put<void>(`notifications/${notificationId}/dismiss`, {}).pipe(
-            map(response => response.data),
+
             tap(() => {
                 this.refreshNotifications();
             }),
@@ -306,7 +305,7 @@ export class DocumentStatusService {
         };
 
         return this.apiService.post<{ successCount: number; failureCount: number; errors: any[] }>('documents/bulk-status-update', updateData).pipe(
-            map(response => response.data),
+
             tap(result => {
                 this.notificationService.success(`Bulk status update completed. ${result.successCount} documents updated successfully.`);
             }),
@@ -342,7 +341,7 @@ export class DocumentStatusService {
 
     private pollVerificationProgress(): Observable<any> {
         return this.apiService.get<Map<string, VerificationProgress>>('documents/verification-progress/active').pipe(
-            map(response => response.data),
+
             tap(progressMap => {
                 this.verificationProgressSubject.next(progressMap);
                 this.activeVerifications.set(progressMap);

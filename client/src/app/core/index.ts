@@ -4,7 +4,7 @@ export * from './services/auth.service';
 export * from './services/enhanced-request-manager.service';
 
 // Types
-export * from './types/api.types';
+export type { ApiResponse } from './types/api.types';
 export * from './types/api-endpoints.types';
 
 // Utils

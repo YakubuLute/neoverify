@@ -160,16 +160,19 @@ export class DocumentSearchComponent implements OnInit, OnDestroy {
     }
 
     // Helper methods for getting current filter values
-    getCurrentDocumentTypes(): DocumentType[] {
-        return this.filters().documentType || [];
-    }
+getCurrentDocumentTypes(): DocumentType[] {
+    const docType = this.filters().documentType;
+    return docType ? (Array.isArray(docType) ? docType : [docType]) : [];
+}
 
     getCurrentStatuses(): DocumentStatus[] {
-        return this.filters().status || [];
+        const status = this.filters().status;
+        return status ? (Array.isArray(status) ? status : [status]) : [];
     }
 
     getCurrentVerificationStatuses(): VerificationStatus[] {
-        return this.filters().verificationStatus || [];
+        const verificationStatus = this.filters().verificationStatus;
+        return verificationStatus ? (Array.isArray(verificationStatus) ? verificationStatus : [verificationStatus]) : [];
     }
 
     getCurrentDateRange(): Date[] | null {

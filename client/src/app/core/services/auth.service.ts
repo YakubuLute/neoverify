@@ -65,7 +65,7 @@ export class AuthService {
     this.setLoading(true);
 
     return this.apiService.post<{ message: string }>('auth/signup', request).pipe(
-      map(response => response.data),
+
       tap(() => {
         this.notificationService.success('Account created! Please check your email to verify your account.');
       }),
@@ -89,7 +89,7 @@ export class AuthService {
     }
 
     return this.apiService.post<AuthResponse>('auth/login', credentials).pipe(
-      map(response => response.data),
+
       tap(authData => {
         if (authData.requiresMfa) {
           this.setMfaRequired(true, authData.sessionToken);
@@ -162,7 +162,7 @@ export class AuthService {
     this.setLoading(true);
 
     return this.apiService.post<AuthResponse>('auth/mfa/verify', request).pipe(
-      map(response => response.data),
+
       tap(authData => {
         this.setAuthData(authData);
         this.setMfaRequired(false);
@@ -197,7 +197,7 @@ export class AuthService {
     }
 
     return this.apiService.post<AuthResponse>('auth/refresh', { refreshToken }).pipe(
-      map(response => response.data),
+
       tap(authData => {
         this.setAuthData(authData);
       }),
@@ -243,7 +243,7 @@ export class AuthService {
    */
   inviteUser(request: InviteUserRequest): Observable<{ message: string }> {
     return this.apiService.post<{ message: string }>('auth/invite', request).pipe(
-      map(response => response.data),
+
       tap(() => {
         this.notificationService.success(`Invitation sent to ${request.email}`);
       }),

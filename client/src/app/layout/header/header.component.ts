@@ -12,82 +12,86 @@ import { SHARED_IMPORTS } from '../../shared';
       <div class="flex items-center justify-between w-full">
         <!-- Logo and Navigation -->
         <div class="flex items-center space-x-4">
-          <h1 class="text-2xl font-bold text-blue-600 cursor-pointer"
-              (click)="navigateHome()">
+          <a
+            routerLink="/"
+            class="text-2xl font-bold text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+          >
             NeoVerify
-          </h1>
-          
+          </a>
+
           <div class="hidden md:flex items-center space-x-2">
-            <p-button 
-              label="Dashboard" 
-              icon="pi pi-home" 
+            <p-button
+              label="Dashboard"
+              icon="pi pi-home"
               [text]="true"
               (onClick)="navigate('/dashboard')"
-              class="mr-2">
+              class="mr-2"
+            >
             </p-button>
-            
-            <p-button 
-              label="Analytics" 
-              icon="pi pi-chart-line" 
+
+            <p-button
+              label="Analytics"
+              icon="pi pi-chart-line"
               [text]="true"
               (onClick)="navigate('/analytics')"
-              class="mr-2">
+              class="mr-2"
+            >
             </p-button>
           </div>
         </div>
-        
+
         <!-- User Menu -->
         <div class="flex items-center space-x-4">
           <!-- Notifications -->
-          <p-button 
-            icon="pi pi-bell" 
+          <p-button
+            icon="pi pi-bell"
             [text]="true"
             [badge]="notificationCount().toString()"
             badgeClass="p-badge-danger"
             (onClick)="toggleNotifications()"
             pTooltip="Notifications"
-            tooltipPosition="bottom">
+            tooltipPosition="bottom"
+          >
           </p-button>
-          
+
           <!-- User Profile -->
           @if (currentUser(); as user) {
-            <div class="flex items-center space-x-2">
-              <p-avatar 
-                [label]="getUserInitials(user.name)"
-                [image]="user.avatar"
-                shape="circle"
-                size="normal"
-                class="cursor-pointer"
-                (click)="toggleUserMenu()"
-                pTooltip="User Menu"
-                tooltipPosition="bottom">
-              </p-avatar>
-              
-              <div class="hidden md:block">
-                <div class="text-sm font-medium text-surface-900 dark:text-surface-0">
-                  {{ user.name }}
-                </div>
-                <div class="text-xs text-surface-600 dark:text-surface-400">
-                  {{ user.role }}
-                </div>
+          <div class="flex items-center space-x-2">
+            <p-avatar
+              [label]="getUserInitials(user.name)"
+              [image]="user.avatar"
+              shape="circle"
+              size="normal"
+              class="cursor-pointer"
+              (click)="toggleUserMenu()"
+              pTooltip="User Menu"
+              tooltipPosition="bottom"
+            >
+            </p-avatar>
+
+            <div class="hidden md:block">
+              <div class="text-sm font-medium text-surface-900 dark:text-surface-0">
+                {{ user.name }}
+              </div>
+              <div class="text-xs text-surface-600 dark:text-surface-400">
+                {{ user.role }}
               </div>
             </div>
+          </div>
           } @else {
-            <p-button 
-              label="Login" 
-              icon="pi pi-sign-in"
-              (onClick)="navigate('/auth/login')">
-            </p-button>
+          <p-button label="Login" icon="pi pi-sign-in" (onClick)="navigate('/auth/login')">
+          </p-button>
           }
-          
+
           <!-- Mobile Menu Toggle -->
-          <p-button 
+          <p-button
             icon="pi pi-bars"
             [text]="true"
             class="md:hidden"
             (onClick)="toggleMobileMenu()"
             pTooltip="Menu"
-            tooltipPosition="bottom">
+            tooltipPosition="bottom"
+          >
           </p-button>
         </div>
       </div>
@@ -95,63 +99,72 @@ import { SHARED_IMPORTS } from '../../shared';
 
     <!-- Mobile Menu -->
     @if (showMobileMenu()) {
-      <div class="md:hidden bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 p-4">
-        <div class="space-y-2">
-          <p-button 
-            label="Dashboard" 
-            icon="pi pi-home" 
-            [text]="true"
-            class="w-full justify-start"
-            (onClick)="navigate('/dashboard')">
-          </p-button>
-          
-          <p-button 
-            label="Analytics" 
-            icon="pi pi-chart-line" 
-            [text]="true"
-            class="w-full justify-start"
-            (onClick)="navigate('/analytics')">
-          </p-button>
-          
-          @if (currentUser()) {
-            <p-divider></p-divider>
-            <p-button 
-              label="Profile" 
-              icon="pi pi-user" 
-              [text]="true"
-              class="w-full justify-start"
-              (onClick)="navigate('/profile')">
-            </p-button>
-            
-            <p-button 
-              label="Settings" 
-              icon="pi pi-cog" 
-              [text]="true"
-              class="w-full justify-start"
-              (onClick)="navigate('/settings')">
-            </p-button>
-            
-            <p-button 
-              label="Logout" 
-              icon="pi pi-sign-out" 
-              [text]="true"
-              class="w-full justify-start text-red-600"
-              (onClick)="logout()">
-            </p-button>
-          }
-        </div>
+    <div
+      class="md:hidden bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 p-4"
+    >
+      <div class="space-y-2">
+        <p-button
+          label="Dashboard"
+          icon="pi pi-home"
+          [text]="true"
+          class="w-full justify-start"
+          (onClick)="navigate('/dashboard')"
+        >
+        </p-button>
+
+        <p-button
+          label="Analytics"
+          icon="pi pi-chart-line"
+          [text]="true"
+          class="w-full justify-start"
+          (onClick)="navigate('/analytics')"
+        >
+        </p-button>
+
+        @if (currentUser()) {
+        <p-divider></p-divider>
+        <p-button
+          label="Profile"
+          icon="pi pi-user"
+          [text]="true"
+          class="w-full justify-start"
+          (onClick)="navigate('/profile')"
+        >
+        </p-button>
+
+        <p-button
+          label="Settings"
+          icon="pi pi-cog"
+          [text]="true"
+          class="w-full justify-start"
+          (onClick)="navigate('/settings')"
+        >
+        </p-button>
+
+        <p-button
+          label="Logout"
+          icon="pi pi-sign-out"
+          [text]="true"
+          class="w-full justify-start text-red-600"
+          (onClick)="logout()"
+        >
+        </p-button>
+        }
       </div>
+    </div>
     }
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
-    
-    ::ng-deep .p-toolbar {
-      @apply bg-white dark:bg-surface-800 shadow-sm;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      ::ng-deep .p-toolbar {
+        @apply bg-white dark:bg-surface-800 shadow-sm;
+      }
+    `,
+  ],
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
@@ -180,7 +193,7 @@ export class HeaderComponent {
    * Toggle mobile menu
    */
   toggleMobileMenu(): void {
-    this.showMobileMenu.update(show => !show);
+    this.showMobileMenu.update((show) => !show);
   }
 
   /**
@@ -213,7 +226,7 @@ export class HeaderComponent {
   getUserInitials(name: string): string {
     return name
       .split(' ')
-      .map(n => n[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);

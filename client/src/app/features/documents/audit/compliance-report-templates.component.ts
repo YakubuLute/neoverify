@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -111,7 +111,7 @@ interface ReportSection {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div
           *ngFor="let category of templateCategories"
-          class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-700/50 transition-colors"
+          class="bg-gray-100 backdrop-blur-sm border border-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-700/50 transition-colors"
           [class.ring-2]="selectedCategory === category.value"
           [class.ring-blue-500]="selectedCategory === category.value"
           (click)="filterByCategory(category.value)"
@@ -127,7 +127,7 @@ interface ReportSection {
       </div>
 
       <!-- Templates Table -->
-      <p-card header="Report Templates" styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
+      <p-card header="Report Templates" styleClass="bg-gray-100 backdrop-blur-sm border border-gray-700">
         <p-table
           [value]="filteredTemplates()"
           [loading]="loading()"

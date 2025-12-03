@@ -1,0 +1,93 @@
+
+    .document-detail-container {
+      @apply min-h-screen bg-gray-50 dark:bg-gray-900;
+    }
+
+    .document-header {
+      @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4;
+    }
+
+    .header-content {
+      @apply max-w-7xl mx-auto;
+    }
+
+    .breadcrumb-section {
+      @apply mb-4;
+    }
+
+    .title-section {
+      @apply mb-4;
+    }
+
+    .document-title {
+      @apply text-2xl font-bold text-gray-900 dark:text-white mb-2;
+    }
+
+    .document-description {
+      @apply text-gray-600 dark:text-gray-400;
+    }
+
+    .header-actions {
+      @apply flex gap-2;
+    }
+
+    .document-main-content {
+      @apply max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6;
+    }
+
+    .document-info-column {
+      @apply lg:col-span-1 space-y-6;
+    }
+
+    .verification-column {
+      @apply lg:col-span-2;
+    }
+
+    .preview-container {
+      @apply text-center mb-4;
+    }
+
+    .document-thumbnail img {
+      @apply max-w-full h-auto rounded-lg shadow-sm;
+    }
+
+    .document-placeholder {
+      @apply py-8 text-center;
+    }
+
+    .metadata-grid {
+      @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+    }
+
+    .metadata-item {
+      @apply flex flex-col gap-1;
+    }
+
+    .metadata-item label {
+      @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+    }
+
+    .metadata-item span {
+      @apply text-sm text-gray-900 dark:text-white;
+    }
+
+    .tags-container {
+      @apply flex flex-wrap gap-2;
+    }
+
+    .status-history-section {
+      @apply max-w-7xl mx-auto px-6 pb-6;
+    }
+
+    :host ::ng-deep .p-card {
+      @apply shadow-sm;
+    }
+
+    :host ::ng-deep .p-card .p-card-header {
+      @apply bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600;
+    }
+
+    :host ::ng-deep .p-card .p-card-content {
+      @apply p-4;
+    }
+

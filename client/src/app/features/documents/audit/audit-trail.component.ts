@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, finalize } from 'rxjs/operators';
-import { of, Subject, combineLatest } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 // PrimeNG Imports
 import { TableModule } from 'primeng/table';
@@ -24,8 +25,12 @@ import { ConfirmationService } from 'primeng/api';
 // Services and Models
 import { AuditService } from '../../../core/services/audit.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { AuditEntry, AuditAction } from '../../../shared/models/document.models';
-import { PaginatedResponse } from '../../../shared/models/common.models';
+import {
+  AuditEntry,
+  AuditAction,
+  ExportFormat,
+  ReportType,
+} from '../../../shared/models/document.models';
 
 interface AuditFilters {
   query?: string;
@@ -38,6 +43,12 @@ interface AuditFilters {
   documentIds?: string[];
 }
 
+interface Statistics {
+  totalEntries: number;
+  dailyActivity: { date: string; count: number }[];
+  topUsers: { userEmail: string; count: number }[];
+  actionCounts: { [key: string]: number };
+}
 @Component({
   selector: 'app-audit-trail',
   standalone: true,
@@ -57,468 +68,236 @@ interface AuditFilters {
     CardModule,
     PanelModule,
     DialogModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
   ],
   providers: [ConfirmationService],
-  template: `
-    <div class="audit-trail-container p-6">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-white mb-2">Audit Trail</h1>
-          <p class="text-gray-400">Track all document activities and compliance events</p>
-        </div>
-        <div class="flex gap-3">
-          <p-button
-            label="Export"
-            icon="pi pi-download"
-            [outlined]="true"
-            (onClick)="showExportDialog = true"
-            [disabled]="loading()"
-          />
-          <p-button
-            label="Generate Report"
-            icon="pi pi-file-pdf"
-            (onClick)="showReportDialog = true"
-            [disabled]="loading()"
-          />
-        </div>
-      </div>
+  templateUrl: `./audit-trail.component.html`,
+  styles: [
+    `
+/* Page background */
+:host {
+  @apply block min-h-screen bg-gray-50;
+}
 
-      <!-- Filters Panel -->
-      <p-panel header="Filters" [toggleable]="true" [collapsed]="false" styleClass="mb-6">
-        <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Search Query -->
-          <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Search</label>
-            <span class="p-input-icon-left">
-              <i class="pi pi-search"></i>
-              <input
-                pInputText
-                formControlName="query"
-                placeholder="Search audit entries..."
-                class="w-full"
-              />
-            </span>
-          </div>
+/* Main container */
+.audit-trail-container {
+  @apply max-w-7xl mx-auto px-4 md:px-6 py-6;
+}
 
-          <!-- Actions Filter -->
-          <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Actions</label>
-            <p-multiSelect
-              formControlName="actions"
-              [options]="actionOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select actions"
-              [showClear]="true"
-              styleClass="w-full"
-            />
-          </div>
+/* ------------------------------------------------------------------
+ * Typography & quick color overrides (convert dark text to light theme)
+ * ------------------------------------------------------------------ */
 
-          <!-- Date Range -->
-          <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">Start Date</label>
-            <p-calendar
-              formControlName="startDate"
-              showIcon="true"
-              placeholder="Start date"
-              styleClass="w-full"
-            />
-          </div>
 
-          <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-300 mb-2">End Date</label>
-            <p-calendar
-              formControlName="endDate"
-              showIcon="true"
-              placeholder="End date"
-              styleClass="w-full"
-            />
-          </div>
-        </form>
 
-        <div class="flex justify-end gap-2 mt-4">
-          <p-button
-            label="Clear Filters"
-            [outlined]="true"
-            (onClick)="clearFilters()"
-            [disabled]="loading()"
-          />
-          <p-button
-            label="Apply Filters"
-            (onClick)="applyFilters()"
-            [disabled]="loading()"
-          />
-        </div>
-      </p-panel>
+.audit-trail-container .text-gray-300 {
+  @apply text-gray-600;
+}
 
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" *ngIf="statistics()">
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">Total Entries</p>
-              <p class="text-2xl font-bold text-white">{{ statistics()?.totalEntries | number }}</p>
-            </div>
-            <i class="pi pi-list text-blue-400 text-2xl"></i>
-          </div>
-        </div>
+/* ------------------------------------------------------------------
+ * Cards: stats + table wrapper (were using bg-gray-800/50)
+ * ------------------------------------------------------------------ */
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">Today's Activity</p>
-              <p class="text-2xl font-bold text-white">{{ getTodayActivity() | number }}</p>
-            </div>
-            <i class="pi pi-calendar text-green-400 text-2xl"></i>
-          </div>
-        </div>
+.audit-trail-container .bg-gray-800 {
+  @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+}
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">Most Active User</p>
-              <p class="text-lg font-semibold text-white truncate">{{ getMostActiveUser() }}</p>
-            </div>
-            <i class="pi pi-user text-purple-400 text-2xl"></i>
-          </div>
-        </div>
+.audit-trail-container .border-gray-700 {
+  @apply border-gray-200;
+}
 
-        <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">Most Common Action</p>
-              <p class="text-lg font-semibold text-white">{{ getMostCommonAction() }}</p>
-            </div>
-            <i class="pi pi-cog text-orange-400 text-2xl"></i>
-          </div>
-        </div>
-      </div>
+.audit-trail-container .backdrop-blur-sm {
+  @apply backdrop-blur-none;
+}
 
-      <!-- Audit Entries Table -->
-      <p-card styleClass="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
-        <p-table
-          [value]="auditEntries()"
-          [loading]="loading()"
-          [paginator]="true"
-          [rows]="pageSize"
-          [totalRecords]="totalRecords()"
-          [lazy]="true"
-          (onLazyLoad)="onLazyLoad($event)"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-          [rowsPerPageOptions]="[10, 25, 50, 100]"
-          styleClass="p-datatable-sm"
-          [scrollable]="true"
-          scrollHeight="600px"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th pSortableColumn="timestamp">
-                Timestamp
-                <p-sortIcon field="timestamp"></p-sortIcon>
-              </th>
-              <th pSortableColumn="action">
-                Action
-                <p-sortIcon field="action"></p-sortIcon>
-              </th>
-              <th pSortableColumn="userEmail">
-                User
-                <p-sortIcon field="userEmail"></p-sortIcon>
-              </th>
-              <th>Document</th>
-              <th>IP Address</th>
-              <th>Details</th>
-              <th>Actions</th>
-            </tr>
-          </ng-template>
+/* ------------------------------------------------------------------
+ * Buttons (primary cyan, outlined neutral)
+ * ------------------------------------------------------------------ */
 
-          <ng-template pTemplate="body" let-entry>
-            <tr>
-              <td>
-                <div class="flex flex-col">
-                  <span class="text-sm font-medium text-white">
-                    {{ entry.timestamp | date:'short' }}
-                  </span>
-                  <span class="text-xs text-gray-400">
-                    {{ getRelativeTime(entry.timestamp) }}
-                  </span>
-                </div>
-              </td>
-              <td>
-                <p-tag
-                  [value]="getActionLabel(entry.action)"
-                  [severity]="getActionSeverity(entry.action)"
-                />
-              </td>
-              <td>
-                <div class="flex flex-col">
-                  <span class="text-sm font-medium text-white">{{ entry.userEmail }}</span>
-                  <span class="text-xs text-gray-400">{{ entry.userId }}</span>
-                </div>
-              </td>
-              <td>
-                <div class="flex flex-col" *ngIf="entry.documentId">
-                  <span class="text-sm text-blue-400 cursor-pointer hover:underline"
-                        (click)="viewDocument(entry.documentId)">
-                    Document {{ entry.documentId.substring(0, 8) }}...
-                  </span>
-                </div>
-                <span class="text-sm text-gray-400" *ngIf="!entry.documentId">N/A</span>
-              </td>
-              <td>
-                <span class="text-sm text-gray-300">{{ entry.ipAddress || 'N/A' }}</span>
-              </td>
-              <td>
-                <div class="max-w-xs">
-                  <p-button
-                    icon="pi pi-eye"
-                    [text]="true"
-                    size="small"
-                    (onClick)="viewDetails(entry)"
-                    pTooltip="View details"
-                    *ngIf="entry.details && hasDetails(entry.details)"
-                  />
-                  <span class="text-sm text-gray-400" *ngIf="!entry.details || !hasDetails(entry.details)">
-                    No details
-                  </span>
-                </div>
-              </td>
-              <td>
-                <div class="flex gap-1">
-                  <p-button
-                    icon="pi pi-external-link"
-                    [text]="true"
-                    size="small"
-                    (onClick)="viewDocument(entry.documentId)"
-                    pTooltip="View document"
-                    *ngIf="entry.documentId"
-                  />
-                  <p-button
-                    icon="pi pi-copy"
-                    [text]="true"
-                    size="small"
-                    (onClick)="copyEntryId(entry.id)"
-                    pTooltip="Copy entry ID"
-                  />
-                </div>
-              </td>
-            </tr>
-          </ng-template>
+:host ::ng-deep .audit-trail-container .p-button:not(.p-button-text):not(.p-button-outlined),
+:host ::ng-deep .audit-trail-container .p-button:not(.p-button-text)[outlined="false"] {
+  @apply bg-cyan-500 border-cyan-500 text-white
+         hover:bg-cyan-600 hover:border-cyan-600;
+}
 
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="7" class="text-center py-8">
-                <div class="flex flex-col items-center gap-3">
-                  <i class="pi pi-search text-4xl text-gray-500"></i>
-                  <p class="text-gray-400">No audit entries found</p>
-                  <p class="text-sm text-gray-500">Try adjusting your filters or search criteria</p>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </p-card>
+:host ::ng-deep .audit-trail-container .p-button.p-button-outlined,
+:host ::ng-deep .audit-trail-container .p-button[outlined="true"] {
+  @apply bg-transparent border-gray-300 text-gray-700
+         hover:bg-gray-50 hover:border-gray-400;
+}
 
-      <!-- Details Dialog -->
-      <p-dialog
-        header="Audit Entry Details"
-        [(visible)]="showDetailsDialog"
-        [modal]="true"
-        [style]="{ width: '600px' }"
-        [draggable]="false"
-        [resizable]="false"
-      >
-        <div *ngIf="selectedEntry()" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-sm font-medium text-gray-300">Entry ID</label>
-              <p class="text-sm text-white font-mono">{{ selectedEntry()?.id }}</p>
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300">Timestamp</label>
-              <p class="text-sm text-white">{{ selectedEntry()?.timestamp | date:'full' }}</p>
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300">Action</label>
-              <p-tag
-                [value]="getActionLabel(selectedEntry()?.action!)"
-                [severity]="getActionSeverity(selectedEntry()?.action!)"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300">User</label>
-              <p class="text-sm text-white">{{ selectedEntry()?.userEmail }}</p>
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300">IP Address</label>
-              <p class="text-sm text-white">{{ selectedEntry()?.ipAddress || 'N/A' }}</p>
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300">User Agent</label>
-              <p class="text-sm text-white break-all">{{ selectedEntry()?.userAgent || 'N/A' }}</p>
-            </div>
-          </div>
+/* Export / report icon-only buttons inside table rows */
+:host ::ng-deep .audit-trail-container .p-button.p-button-text {
+  @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+}
 
-          <div *ngIf="selectedEntry()?.details">
-            <label class="text-sm font-medium text-gray-300">Additional Details</label>
-            <pre class="bg-gray-900 p-3 rounded text-sm text-gray-300 overflow-auto max-h-60">{{ formatDetails(selectedEntry()?.details!) }}</pre>
-          </div>
-        </div>
-      </p-dialog>
+/* ------------------------------------------------------------------
+ * Filters panel (p-panel)
+ * ------------------------------------------------------------------ */
 
-      <!-- Export Dialog -->
-      <p-dialog
-        header="Export Audit Trail"
-        [(visible)]="showExportDialog"
-        [modal]="true"
-        [style]="{ width: '500px' }"
-        [draggable]="false"
-        [resizable]="false"
-      >
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm font-medium text-gray-300 mb-2 block">Export Format</label>
-            <p-select
-              [(ngModel)]="exportFormat"
-              [options]="exportFormatOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select format"
-              styleClass="w-full"
-            />
-          </div>
+:host ::ng-deep .p-panel {
+  @apply bg-transparent border-none;
+}
 
-          <div class="flex justify-end gap-2 pt-4">
-            <p-button
-              label="Cancel"
-              [outlined]="true"
-              (onClick)="showExportDialog = false"
-            />
-            <p-button
-              label="Export"
-              (onClick)="exportAuditTrail()"
-              [loading]="exporting()"
-            />
-          </div>
-        </div>
-      </p-dialog>
+:host ::ng-deep .p-panel .p-panel-header {
+  @apply bg-white border border-gray-200 rounded-t-2xl text-gray-900
+         px-4 py-3;
+}
 
-      <!-- Report Dialog -->
-      <p-dialog
-        header="Generate Compliance Report"
-        [(visible)]="showReportDialog"
-        [modal]="true"
-        [style]="{ width: '500px' }"
-        [draggable]="false"
-        [resizable]="false"
-      >
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm font-medium text-gray-300 mb-2 block">Report Type</label>
-            <p-select
-              [(ngModel)]="reportType"
-              [options]="reportTypeOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select report type"
-              styleClass="w-full"
-            />
-          </div>
+:host ::ng-deep .p-panel .p-panel-content {
+  @apply bg-gray-50 border-x border-b border-gray-200 rounded-b-2xl
+         text-gray-800;
+}
 
-          <div *ngIf="reportType === 'custom'" class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-sm font-medium text-gray-300 mb-2 block">Start Date</label>
-              <p-calendar
-                [(ngModel)]="reportStartDate"
-                showIcon="true"
-                placeholder="Start date"
-                styleClass="w-full"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-medium text-gray-300 mb-2 block">End Date</label>
-              <p-calendar
-                [(ngModel)]="reportEndDate"
-                showIcon="true"
-                placeholder="End date"
-                styleClass="w-full"
-              />
-            </div>
-          </div>
+/* Inputs in filters */
+:host ::ng-deep
+  .audit-trail-container .p-inputtext,
+:host ::ng-deep
+  .audit-trail-container .p-multiselect,
+:host ::ng-deep
+  .audit-trail-container .p-calendar,
+:host ::ng-deep
+  .audit-trail-container .p-dropdown,
+:host ::ng-deep
+  .audit-trail-container .p-select {
+  @apply w-full bg-white border border-gray-300 text-gray-900 text-sm
+         rounded-lg;
+}
 
-          <div class="flex justify-end gap-2 pt-4">
-            <p-button
-              label="Cancel"
-              [outlined]="true"
-              (onClick)="showReportDialog = false"
-            />
-            <p-button
-              label="Generate"
-              (onClick)="generateReport()"
-              [loading]="generatingReport()"
-            />
-          </div>
-        </div>
-      </p-dialog>
-    </div>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    }
+:host ::ng-deep
+  .audit-trail-container .p-inputtext:enabled:focus,
+:host ::ng-deep
+  .audit-trail-container .p-multiselect.p-focus,
+:host ::ng-deep
+  .audit-trail-container .p-calendar .p-inputtext:enabled:focus,
+:host ::ng-deep
+  .audit-trail-container .p-dropdown.p-focus,
+:host ::ng-deep
+  .audit-trail-container .p-select.p-focus {
+  @apply border-cyan-500 ring-2 ring-cyan-500/20 outline-none;
+}
 
-    .audit-trail-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+:host ::ng-deep
+  .audit-trail-container .p-input-icon-left > i {
+  @apply text-gray-400;
+}
 
-    ::ng-deep .p-datatable .p-datatable-tbody > tr {
-      background: rgba(31, 41, 55, 0.5) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
-    }
+/* Multiselect tokens */
+:host ::ng-deep
+  .audit-trail-container .p-multiselect-token {
+  @apply bg-cyan-500/10 border border-cyan-500/30 text-cyan-700 text-xs;
+}
 
-    ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
-      background: rgba(55, 65, 81, 0.5) !important;
-    }
+/* ------------------------------------------------------------------
+ * Statistics cards (they already use the bg-gray-800/50 class,
+ * so background is handled above – only tweak inner text)
+ * ------------------------------------------------------------------ */
 
-    ::ng-deep .p-datatable .p-datatable-thead > tr > th {
-      background: rgba(17, 24, 39, 0.8) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.5) !important;
-      color: #f3f4f6 !important;
-    }
+.audit-trail-container .grid.grid-cols-1.md\:grid-cols-4.gap-4.mb-6 p {
+  @apply text-sm text-gray-500;
+}
 
-    ::ng-deep .p-panel .p-panel-header {
-      background: rgba(31, 41, 55, 0.5) !important;
-      border: 1px solid rgba(75, 85, 99, 0.3) !important;
-      color: #f3f4f6 !important;
-    }
+.audit-trail-container .grid.grid-cols-1.md:grid-cols-4.gap-4.mb-6 p {
+  @apply text-2xl font-semibold text-gray-900;
+}
 
-    ::ng-deep .p-panel .p-panel-content {
-      background: rgba(31, 41, 55, 0.3) !important;
-      border: 1px solid rgba(75, 85, 99, 0.3) !important;
-      border-top: none !important;
-    }
+/* ------------------------------------------------------------------
+ * Audit table (p-card + p-table)
+ * ------------------------------------------------------------------ */
 
-    ::ng-deep .p-card .p-card-body {
-      background: transparent !important;
-      border: none !important;
-    }
+:host ::ng-deep .p-card {
+  @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+}
 
-    ::ng-deep .p-dialog .p-dialog-header {
-      background: rgba(31, 41, 55, 0.95) !important;
-      border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
-      color: #f3f4f6 !important;
-    }
+:host ::ng-deep .p-card .p-card-body {
+  @apply bg-transparent border-none;
+}
 
-    ::ng-deep .p-dialog .p-dialog-content {
-      background: rgba(31, 41, 55, 0.95) !important;
-      color: #f3f4f6 !important;
-    }
-  `]
+/* Table header */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  @apply bg-gray-50 border-b border-gray-200 text-gray-600
+         font-medium text-xs uppercase tracking-wide;
+}
+
+/* Table body rows */
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  @apply bg-white border-b border-gray-100 transition-colors;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  @apply bg-cyan-50/40;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  @apply text-sm text-gray-800 align-top;
+}
+
+/* Sort icons */
+:host ::ng-deep .p-sortable-column .p-sortable-column-icon {
+  @apply text-gray-400 ml-1;
+}
+
+/* Paginator */
+:host ::ng-deep .p-paginator {
+  @apply bg-transparent border-t border-gray-200 mt-2 pt-3 text-xs text-gray-500;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-page {
+  @apply text-gray-600 rounded hover:bg-gray-100;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-page.p-highlight {
+  @apply bg-cyan-500 text-white;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-prev,
+:host ::ng-deep .p-paginator .p-paginator-next {
+  @apply text-gray-600 rounded hover:bg-gray-100;
+}
+
+/* Tags for actions */
+:host ::ng-deep .p-tag {
+  @apply text-xs font-medium rounded-full px-2.5 py-1;
+}
+
+/* Empty state icon & text */
+:host ::ng-deep .p-datatable .p-datatable-emptymessage {
+  @apply bg-white;
+}
+
+/* ------------------------------------------------------------------
+ * Dialogs: details / export / report
+ * ------------------------------------------------------------------ */
+
+:host ::ng-deep .p-dialog {
+  @apply rounded-2xl overflow-hidden;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header {
+  @apply bg-white border-b border-gray-200 text-gray-900 px-4 py-3;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content {
+  @apply bg-white text-gray-800 px-4 py-4;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header-icon {
+  @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100;
+}
+
+/* Buttons inside dialogs reuse global button styles */
+
+/* Details <pre> block */
+:host ::ng-deep pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg text-xs p-3 max-h-60 overflow-auto;
+}
+
+    `,
+  ],
 })
 export class AuditTrailComponent implements OnInit {
   private readonly auditService = inject(AuditService);
@@ -533,7 +312,7 @@ export class AuditTrailComponent implements OnInit {
   exporting = signal(false);
   generatingReport = signal(false);
   totalRecords = signal(0);
-  statistics = signal<any>(null);
+  statistics = signal<Statistics>({} as Statistics);
   selectedEntry = signal<AuditEntry | null>(null);
 
   // Form and filters
@@ -548,28 +327,28 @@ export class AuditTrailComponent implements OnInit {
   showReportDialog = false;
 
   // Export/Report options
-  exportFormat = 'csv';
-  reportType = 'monthly';
+  exportFormat: ExportFormat = ExportFormat.CSV;
+  reportType: ReportType = ReportType.MONTHLY;
   reportStartDate: Date | null = null;
   reportEndDate: Date | null = null;
 
   // Options
-  actionOptions = Object.values(AuditAction).map(action => ({
+  actionOptions = Object.values(AuditAction).map((action) => ({
     label: this.getActionLabel(action),
-    value: action
+    value: action,
   }));
 
   exportFormatOptions = [
     { label: 'CSV', value: 'csv' },
     { label: 'Excel', value: 'excel' },
-    { label: 'PDF', value: 'pdf' }
+    { label: 'PDF', value: 'pdf' },
   ];
 
   reportTypeOptions = [
     { label: 'Monthly', value: 'monthly' },
     { label: 'Quarterly', value: 'quarterly' },
     { label: 'Annual', value: 'annual' },
-    { label: 'Custom Range', value: 'custom' }
+    { label: 'Custom Range', value: 'custom' },
   ];
 
   private searchSubject = new Subject<string>();
@@ -579,20 +358,17 @@ export class AuditTrailComponent implements OnInit {
       query: [''],
       actions: [[]],
       startDate: [null],
-      endDate: [null]
+      endDate: [null],
     });
 
     // Setup search debouncing
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(query => {
+    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe((query) => {
       this.currentFilters.query = query;
       this.loadAuditEntries();
     });
 
     // Watch for form changes
-    this.filtersForm.get('query')?.valueChanges.subscribe(value => {
+    this.filtersForm.get('query')?.valueChanges.subscribe((value) => {
       this.searchSubject.next(value || '');
     });
   }
@@ -608,21 +384,22 @@ export class AuditTrailComponent implements OnInit {
     const params = {
       page: this.currentPage + 1,
       limit: this.pageSize,
-      ...this.currentFilters
+      ...this.currentFilters,
     };
 
-    this.auditService.searchAuditEntries(this.currentFilters, params).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (response) => {
-        this.auditEntries.set(response.items);
-        this.totalRecords.set(response?.totalCount!);
-      },
-      error: (error) => {
-        console.error('Failed to load audit entries:', error);
-        this.notificationService.error('Failed to load audit entries');
-      }
-    });
+    this.auditService
+      .searchAuditEntries(this.currentFilters, params)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.auditEntries.set(response.items);
+          this.totalRecords.set(response.totalCount!);
+        },
+        error: (error) => {
+          console.error('Failed to load audit entries:', error);
+          this.notificationService.error('Failed to load audit entries');
+        },
+      });
   }
 
   loadStatistics() {
@@ -632,7 +409,7 @@ export class AuditTrailComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load audit statistics:', error);
-      }
+      },
     });
   }
 
@@ -648,10 +425,13 @@ export class AuditTrailComponent implements OnInit {
     this.currentFilters = {
       query: formValue.query || undefined,
       actions: formValue.actions?.length ? formValue.actions : undefined,
-      dateRange: formValue.startDate && formValue.endDate ? {
-        start: formValue.startDate,
-        end: formValue.endDate
-      } : undefined
+      dateRange:
+        formValue.startDate && formValue.endDate
+          ? {
+              start: formValue.startDate,
+              end: formValue.endDate,
+            }
+          : undefined,
     };
 
     this.currentPage = 0;
@@ -683,56 +463,60 @@ export class AuditTrailComponent implements OnInit {
   exportAuditTrail() {
     this.exporting.set(true);
 
-    this.auditService.exportAuditTrail(this.currentFilters, this.exportFormat as any).pipe(
-      finalize(() => this.exporting.set(false))
-    ).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${this.exportFormat}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showExportDialog = false;
-      },
-      error: (error) => {
-        console.error('Export failed:', error);
-        this.notificationService.error('Export failed. Please try again.');
-      }
-    });
+    this.auditService
+      .exportAuditTrail(this.currentFilters, this.exportFormat)
+      .pipe(finalize(() => this.exporting.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `audit-trail-${new Date().toISOString().split('T')[0]}.${
+            this.exportFormat
+          }`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.showExportDialog = false;
+        },
+        error: (error) => {
+          console.error('Export failed:', error);
+          this.notificationService.error('Export failed. Please try again.');
+        },
+      });
   }
 
   generateReport() {
     this.generatingReport.set(true);
 
     const params: any = {
-      reportType: this.reportType
+      reportType: this.reportType,
     };
 
     if (this.reportType === 'custom' && this.reportStartDate && this.reportEndDate) {
       params.dateRange = {
         start: this.reportStartDate,
-        end: this.reportEndDate
+        end: this.reportEndDate,
       };
     }
 
-    this.auditService.generateComplianceReport(params).pipe(
-      finalize(() => this.generatingReport.set(false))
-    ).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showReportDialog = false;
-      },
-      error: (error) => {
-        console.error('Report generation failed:', error);
-        this.notificationService.error('Report generation failed. Please try again.');
-      }
-    });
+    this.auditService
+      .generateComplianceReport(params)
+      .pipe(finalize(() => this.generatingReport.set(false)))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.showReportDialog = false;
+        },
+        error: (error) => {
+          console.error('Report generation failed:', error);
+          this.notificationService.error('Report generation failed. Please try again.');
+        },
+      });
   }
 
   getActionLabel(action: AuditAction): string {
@@ -749,13 +533,22 @@ export class AuditTrailComponent implements OnInit {
       [AuditAction.STATUS_CHANGED]: 'Status Changed',
       [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
       [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
-      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
+      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed',
+      [AuditAction.UPLOADED]: 'Uploaded',
+      [AuditAction.REJECTED]: 'Rejected',
+      [AuditAction.ARCHIVED]: 'Archived',
+      [AuditAction.RESTORED]: 'Restored',
     };
     return labels[action] || action;
   }
 
-  getActionSeverity(action: AuditAction): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" {
-    const severities: Record<AuditAction, "success" | "info" | "warn" | "danger" | "secondary" | "contrast"> = {
+  getActionSeverity(
+    action: AuditAction
+  ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    const severities: Record<
+      AuditAction,
+      'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+    > = {
       [AuditAction.CREATED]: 'success',
       [AuditAction.VIEWED]: 'info',
       [AuditAction.UPDATED]: 'warn',
@@ -768,7 +561,11 @@ export class AuditTrailComponent implements OnInit {
       [AuditAction.STATUS_CHANGED]: 'warn',
       [AuditAction.VERIFICATION_STARTED]: 'info',
       [AuditAction.VERIFICATION_COMPLETED]: 'success',
-      [AuditAction.VERIFICATION_FAILED]: 'danger'
+      [AuditAction.VERIFICATION_FAILED]: 'danger',
+      [AuditAction.UPLOADED]: 'info',
+      [AuditAction.REJECTED]: 'danger',
+      [AuditAction.ARCHIVED]: 'info',
+      [AuditAction.RESTORED]: 'info',
     };
     return severities[action] || 'info';
   }
@@ -816,7 +613,7 @@ export class AuditTrailComponent implements OnInit {
     const actions = Object.entries(stats.actionCounts);
     if (!actions.length) return 'N/A';
 
-    const mostCommon = actions.reduce((a, b) => (a[1] as any )> (b[1] as any )? a : b);
+    const mostCommon = actions.reduce((a, b) => ((a[1] as any) > (b[1] as any) ? a : b));
     return this.getActionLabel(mostCommon[0] as AuditAction);
   }
 }

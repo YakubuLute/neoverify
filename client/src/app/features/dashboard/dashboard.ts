@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared';
 import { AuthService } from '../../core/services/auth.service';
 import { DocumentService } from '../../core/services/document.service';
 import { UserRole } from '../../shared/models/auth.models';
-import { catchError, of } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 interface DashboardCard {
   title: string;
@@ -259,28 +260,28 @@ export class Dashboard implements OnInit {
     this.loadDocumentStats();
   }
 
-  private loadDocumentStats(): void {
-    this.documentService.getDocumentStats()
-      .pipe(
-        catchError(error => {
-          console.error('Failed to load document stats:', error);
-          // Return mock data for development
-          return of({
-            totalDocuments: 156,
-            documentsToday: 8,
-            pendingVerifications: 3,
-            verifiedDocuments: 142,
-            rejectedDocuments: 2,
-            templatesCount: 12,
-            sharedDocuments: 24,
-            storageUsed: '2.3 GB'
-          });
-        })
-      )
-      .subscribe(stats => {
-        this.documentStats.set(stats);
-      });
-  }
+private loadDocumentStats(): void {
+  this.documentService.getDocumentStats()
+    .pipe(
+      catchError((error): Observable<DocumentStats> => {  // Add return type annotation here
+        console.error('Failed to load document stats:', error);
+        // Return mock data for development
+        return of({
+          totalDocuments: 156,
+          documentsToday: 8,
+          pendingVerifications: 3,
+          verifiedDocuments: 142,
+          rejectedDocuments: 2,
+          templatesCount: 12,
+          sharedDocuments: 24,
+          storageUsed: '2.3 GB'
+        });
+      })
+    )
+    .subscribe((stats) => {
+      this.documentStats.set(stats as DocumentStats);
+    });
+}
 
   navigateTo(route: string): void {
     this.router.navigate([route]);

@@ -2,7 +2,7 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { UserRole } from '../../shared/models/auth.models';
+import { User, UserRole } from '../../shared/models/auth.models';
 import { SHARED_IMPORTS } from '../../shared';
 import { filter, map } from 'rxjs/operators';
 
@@ -34,7 +34,7 @@ export class DashboardLayoutComponent implements OnInit {
     readonly router = inject(Router); // Make router available in template
 
     readonly sidebarCollapsed = signal<boolean>(false);
-    readonly currentUser = signal<any>(null);
+    readonly currentUser = signal<User | null>(null);
     readonly userRole = signal<UserRole | null>(null);
     readonly breadcrumbs = signal<BreadcrumbItem[]>([]);
     readonly pageTitle = signal<string>('Dashboard');

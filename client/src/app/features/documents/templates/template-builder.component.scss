@@ -1,565 +1,482 @@
 // Template Builder Component Styles
 .template-builder-container {
-    @apply min-h-screen bg-gray-900 text-white;
+  @apply min-h-screen bg-gray-50 text-gray-900;
 
-    // Header Section
-    .builder-header {
-        @apply bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-6;
+  /* ---------------- Header Section ---------------- */
+  .builder-header {
+    @apply bg-white border-b border-gray-200;
 
-        .header-content {
-            @apply max-w-full mx-auto flex items-center justify-between;
+    .header-content {
+      @apply max-w-full mx-auto flex items-center justify-between px-4 md:px-6 py-4;
 
-            .title-section {
-                .page-title {
-                    @apply text-3xl font-semibold text-white mb-2;
-                }
-
-                .page-subtitle {
-                    @apply text-gray-300 font-normal;
-                }
-            }
-
-            .header-actions {
-                @apply flex items-center space-x-3;
-
-                ::ng-deep .p-button {
-                    &.p-button-primary {
-                        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 hover:border-cyan-600;
-                    }
-
-                    &.p-button-outlined {
-                        @apply border-gray-600 text-gray-300 hover:bg-gray-700/50;
-                    }
-
-                    &.p-button-text {
-                        @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-                    }
-                }
-            }
+      .title-section {
+        .page-title {
+          @apply text-3xl font-semibold text-gray-900 mb-1;
         }
-    }
 
-    // Loading State
-    .loading-container {
-        @apply flex items-center justify-center py-16;
-
-        .loading-content {
-            @apply text-center;
-
-            ::ng-deep .p-progress-spinner {
-                @apply mb-4;
-
-                .p-progress-spinner-circle {
-                    @apply stroke-cyan-500;
-                }
-            }
-
-            p {
-                @apply text-gray-300;
-            }
+        .page-subtitle {
+          @apply text-sm text-gray-500 font-normal;
         }
+      }
+
+      .header-actions {
+        @apply flex items-center space-x-3;
+
+        ::ng-deep .p-button {
+          &.p-button-primary {
+            @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500 hover:border-cyan-600 text-white;
+          }
+
+          &.p-button-outlined {
+            @apply border-gray-300 text-gray-700 hover:bg-gray-100;
+          }
+
+          &.p-button-text {
+            @apply text-gray-700 hover:text-gray-900 hover:bg-gray-200;
+          }
+        }
+      }
     }
+  }
 
-    // Error State
-    .error-container {
-        @apply flex items-center justify-center py-16;
+  /* ---------------- Loading State ---------------- */
+  .loading-container {
+    @apply flex items-center justify-center py-16;
 
-        .error-content {
-            @apply text-center max-w-md;
+    .loading-content {
+      @apply text-center text-sm text-gray-600;
 
-            .error-icon {
-                @apply text-6xl text-red-400 mb-4;
+      ::ng-deep .p-progress-spinner {
+        @apply mb-4;
+
+        .p-progress-spinner-circle {
+          @apply stroke-cyan-500;
+        }
+      }
+
+      p {
+        @apply text-gray-500;
+      }
+    }
+  }
+
+  /* ---------------- Error State ---------------- */
+  .error-container {
+    @apply flex items-center justify-center py-16;
+
+    .error-content {
+      @apply text-center max-w-md bg-white border border-red-100 rounded-2xl shadow-sm p-6;
+
+      .error-icon {
+        @apply text-6xl text-red-500 mb-4;
+      }
+
+      h3 {
+        @apply text-xl font-semibold text-gray-900 mb-2;
+      }
+
+      p {
+        @apply text-sm text-gray-600 mb-6;
+      }
+
+      ::ng-deep .p-button {
+        @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
+      }
+    }
+  }
+
+  /* ---------------- Main Builder Content ---------------- */
+  .builder-content {
+    @apply flex h-[calc(100vh-120px)];
+
+    /* Left Sidebar - Template Settings & Field Palette */
+    .left-sidebar {
+      @apply w-80 bg-white border-r border-gray-200 overflow-y-auto;
+
+      .sidebar-section {
+        @apply p-6 border-b border-gray-200;
+
+        h3 {
+          @apply text-lg font-semibold text-gray-900 mb-4;
+        }
+
+        .template-form,
+        .field-form {
+          @apply space-y-4;
+
+          .form-group {
+            @apply space-y-2;
+
+            label {
+              @apply block text-sm font-medium text-gray-700;
             }
 
-            h3 {
-                @apply text-xl font-semibold text-white mb-2;
+            ::ng-deep .p-inputtext,
+            ::ng-deep .p-inputtextarea,
+            ::ng-deep .p-select {
+              @apply bg-white border-gray-300 text-gray-900;
+
+              &:enabled:focus {
+                @apply border-cyan-500 ring-2 ring-cyan-500/20;
+              }
             }
 
-            p {
-                @apply text-gray-300 mb-6;
+            ::ng-deep .p-checkbox {
+              .p-checkbox-box {
+                @apply bg-white border-gray-300;
+
+                &.p-highlight {
+                  @apply bg-cyan-500 border-cyan-500;
+                }
+              }
+
+              .p-checkbox-label {
+                @apply text-gray-700 ml-2;
+              }
             }
+
+            .p-error {
+              @apply text-red-500 text-xs;
+            }
+          }
+
+          .form-actions {
+            @apply pt-4;
 
             ::ng-deep .p-button {
+              &.p-button-primary {
                 @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
+              }
             }
-        }
-    }
-
-    // Main Builder Content
-    .builder-content {
-        @apply flex h-[calc(100vh-120px)];
-
-        // Left Sidebar - Template Settings & Field Palette
-        .left-sidebar {
-            @apply w-80 bg-gray-800/50 backdrop-blur-sm border-r border-gray-700 overflow-y-auto;
-
-            .sidebar-section {
-                @apply p-6 border-b border-gray-700/50;
-
-                h3 {
-                    @apply text-lg font-semibold text-white mb-4;
-                }
-
-                .template-form,
-                .field-form {
-                    @apply space-y-4;
-
-                    .form-group {
-                        @apply space-y-2;
-
-                        label {
-                            @apply block text-sm font-medium text-gray-300;
-                        }
-
-                        ::ng-deep .p-inputtext,
-                        ::ng-deep .p-inputtextarea,
-                        ::ng-deep .p-select {
-                            @apply bg-gray-700/50 border-gray-600 text-white;
-
-                            &:enabled:focus {
-                                @apply border-cyan-500 ring-2 ring-cyan-500/20;
-                            }
-                        }
-
-                        ::ng-deep .p-checkbox {
-                            .p-checkbox-box {
-                                @apply bg-gray-700/50 border-gray-600;
-
-                                &.p-highlight {
-                                    @apply bg-cyan-500 border-cyan-500;
-                                }
-                            }
-
-                            .p-checkbox-label {
-                                @apply text-gray-300 ml-2;
-                            }
-                        }
-
-                        .p-error {
-                            @apply text-red-400 text-xs;
-                        }
-                    }
-
-                    .form-actions {
-                        @apply pt-4;
-
-                        ::ng-deep .p-button {
-                            &.p-button-primary {
-                                @apply bg-cyan-500 hover:bg-cyan-600 border-cyan-500;
-                            }
-                        }
-                    }
-                }
-
-                .field-palette {
-                    @apply grid grid-cols-1 gap-2;
-
-                    .field-type-item {
-                        @apply flex items-center p-3 bg-gray-700/30 rounded-lg border border-gray-600;
-                        @apply hover:bg-gray-700/50 hover:border-gray-500 cursor-pointer transition-all duration-200;
-
-                        i {
-                            @apply text-cyan-400 mr-3;
-                        }
-
-                        span {
-                            @apply text-gray-300 text-sm;
-                        }
-
-                        &:hover {
-                            @apply text-white;
-
-                            i {
-                                @apply text-cyan-300;
-                            }
-                        }
-                    }
-                }
-            }
+          }
         }
 
-        // Center Canvas - Template Design Area
-        .center-canvas {
-            @apply flex-1 flex flex-col bg-gray-900;
+        .field-palette {
+          @apply grid grid-cols-1 gap-2;
 
-            .canvas-toolbar {
-                @apply flex items-center justify-between p-4 bg-gray-800/30 border-b border-gray-700/50;
+          .field-type-item {
+            @apply flex items-center p-3 bg-gray-100 rounded-lg border border-gray-300;
+            @apply hover:bg-gray-200 hover:border-gray-400 cursor-pointer transition-all duration-200;
 
-                .canvas-controls {
-                    @apply flex items-center space-x-2;
-
-                    .zoom-level {
-                        @apply text-sm text-gray-300 mx-2 min-w-[50px] text-center;
-                    }
-
-                    ::ng-deep .p-button.p-button-text {
-                        @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-                    }
-                }
-
-                .canvas-info {
-                    @apply text-sm text-gray-400;
-                }
+            i {
+              @apply text-cyan-400 mr-3;
             }
 
-            .canvas-container {
-                @apply flex-1 overflow-auto bg-gray-800/20 relative;
-
-                .canvas {
-                    @apply transform-gpu transition-transform duration-200 origin-top-left;
-                    @apply min-w-full min-h-full;
-
-                    .template-background {
-                        @apply bg-white text-gray-900 min-h-[800px] w-[600px] mx-auto my-8 shadow-2xl relative;
-                        @apply border border-gray-300 rounded-lg overflow-hidden;
-
-                        .template-header {
-                            @apply p-6 bg-gray-50 border-b border-gray-200;
-
-                            h2 {
-                                @apply text-2xl font-bold text-gray-900 mb-2;
-                            }
-
-                            p {
-                                @apply text-gray-600;
-                            }
-                        }
-
-                        .template-field {
-                            @apply absolute bg-blue-50 border-2 border-blue-200 rounded-lg p-3 min-w-[200px];
-                            @apply cursor-move hover:border-blue-400 transition-all duration-200;
-
-                            &.selected {
-                                @apply border-cyan-500 bg-cyan-50 shadow-lg;
-                            }
-
-                            .field-header {
-                                @apply flex items-center justify-between mb-2 pb-2 border-b border-gray-200;
-
-                                i {
-                                    @apply text-blue-600 mr-2;
-                                }
-
-                                .field-name {
-                                    @apply font-medium text-gray-900 flex-1;
-                                }
-
-                                .required-indicator {
-                                    @apply text-red-500 font-bold ml-1;
-                                }
-
-                                .delete-field-btn {
-                                    @apply text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-1;
-                                    @apply transition-colors duration-200;
-
-                                    i {
-                                        @apply text-xs;
-                                    }
-                                }
-                            }
-
-                            .field-preview {
-
-                                input,
-                                select,
-                                textarea {
-                                    @apply w-full p-2 border border-gray-300 rounded text-gray-900 bg-white;
-                                    @apply text-sm;
-                                }
-
-                                .checkbox-label {
-                                    @apply flex items-center text-sm text-gray-900;
-
-                                    input[type="checkbox"] {
-                                        @apply mr-2 w-auto;
-                                    }
-                                }
-
-                                .file-upload-preview {
-                                    @apply flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded;
-                                    @apply text-gray-500 text-sm;
-
-                                    i {
-                                        @apply mr-2;
-                                    }
-                                }
-                            }
-
-                            .validation-indicator {
-                                @apply absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1;
-
-                                i {
-                                    @apply text-xs;
-                                }
-                            }
-                        }
-
-                        .empty-canvas {
-                            @apply flex flex-col items-center justify-center h-96 text-gray-400;
-
-                            i {
-                                @apply text-6xl mb-4;
-                            }
-
-                            h3 {
-                                @apply text-xl font-semibold mb-2;
-                            }
-
-                            p {
-                                @apply text-center max-w-md;
-                            }
-                        }
-                    }
-                }
+            span {
+              @apply text-gray-700 text-sm;
             }
+
+            &:hover {
+              @apply text-gray-900;
+
+              i {
+                @apply text-cyan-500;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /* Center Canvas - Template Design Area */
+    .center-canvas {
+      @apply flex-1 flex flex-col bg-gray-50;
+
+      .canvas-toolbar {
+        @apply flex items-center justify-between p-4 bg-gray-100 border-b border-gray-200;
+
+        .canvas-controls {
+          @apply flex items-center space-x-2;
+
+          .zoom-level {
+            @apply text-sm text-gray-500 mx-2 min-w-[50px] text-center;
+          }
+
+          ::ng-deep .p-button.p-button-text {
+            @apply text-gray-500 hover:text-gray-900 hover:bg-gray-200;
+          }
         }
 
-        // Right Sidebar - Field Editor
-        .right-sidebar {
-            @apply w-80 bg-gray-800/50 backdrop-blur-sm border-l border-gray-700 overflow-y-auto;
-
-            .sidebar-section {
-                @apply p-6 border-b border-gray-700/50;
-
-                h3 {
-                    @apply text-lg font-semibold text-white mb-4;
-                }
-
-                .section-header {
-                    @apply flex items-center justify-between mb-4;
-
-                    h3 {
-                        @apply mb-0;
-                    }
-
-                    ::ng-deep .p-button.p-button-text {
-                        @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-                    }
-                }
-
-                .validation-rules-list {
-                    @apply space-y-3;
-
-                    .validation-rule-item {
-                        @apply bg-gray-700/30 rounded-lg p-3 border border-gray-600;
-                        @apply flex items-start justify-between;
-
-                        .rule-info {
-                            @apply flex-1;
-
-                            .rule-type {
-                                @apply font-medium text-cyan-400 text-sm;
-                            }
-
-                            .rule-value {
-                                @apply text-gray-300 text-sm;
-                            }
-
-                            .rule-message {
-                                @apply text-gray-400 text-xs mt-1;
-                            }
-                        }
-
-                        .delete-rule-btn {
-                            @apply text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded p-1;
-                            @apply transition-colors duration-200;
-
-                            i {
-                                @apply text-xs;
-                            }
-                        }
-                    }
-
-                    .no-rules {
-                        @apply text-center py-8 text-gray-400;
-
-                        p {
-                            @apply text-sm;
-                        }
-                    }
-                }
-
-                .no-selection {
-                    @apply text-center py-8 text-gray-400;
-
-                    i {
-                        @apply text-4xl mb-4;
-                    }
-
-                    h3 {
-                        @apply text-lg font-semibold mb-2;
-                    }
-
-                    p {
-                        @apply text-sm;
-                    }
-                }
-            }
+        .canvas-info {
+          @apply text-sm text-gray-500;
         }
-    }
-}
+      }
 
-// Dialog Styles
-::ng-deep .p-dialog {
-    .p-dialog-header {
-        @apply bg-gray-800 border-gray-700 text-white;
-    }
+      .canvas-container {
+        @apply flex-1 overflow-auto bg-gray-100/50 relative;
 
-    .p-dialog-content {
-        @apply bg-gray-800 text-white;
-    }
+        .canvas {
+          @apply transform-gpu transition-transform duration-200 origin-top-left;
+          @apply min-w-full min-h-full;
 
-    .p-dialog-footer {
-        @apply bg-gray-800 border-gray-700;
-    }
-}
+          .template-background {
+            @apply bg-white text-gray-900 min-h-[800px] w-[600px] mx-auto my-8 shadow-2xl relative;
+            @apply border border-gray-300 rounded-lg overflow-hidden;
 
-.preview-content {
-    @apply max-h-[500px] overflow-y-auto;
+            .template-header {
+              @apply p-6 bg-white border-b border-gray-200;
 
-    .preview-template {
-        @apply bg-white text-gray-900 p-6 rounded-lg;
-
-        .preview-header {
-            @apply mb-6 pb-4 border-b border-gray-200;
-
-            h2 {
+              h2 {
                 @apply text-2xl font-bold text-gray-900 mb-2;
+              }
+
+              p {
+                @apply text-gray-700;
+              }
             }
 
-            p {
-                @apply text-gray-600;
-            }
-        }
+            .template-field {
+              @apply absolute bg-blue-50 border-2 border-blue-200 rounded-lg p-3 min-w-[200px];
+              @apply cursor-move hover:border-blue-400 transition-all duration-200;
 
-        .preview-form {
-            @apply space-y-4;
+              &.selected {
+                @apply border-cyan-500 bg-cyan-50 shadow-lg;
+              }
 
-            .preview-field {
-                @apply space-y-2;
+              .field-header {
+                @apply flex items-center justify-between mb-2 pb-2 border-b border-gray-200;
 
-                label {
-                    @apply block font-medium text-gray-900;
-
-                    .required {
-                        @apply text-red-500 ml-1;
-                    }
+                i {
+                  @apply text-blue-600 mr-2;
                 }
+
+                .field-name {
+                  @apply font-medium text-gray-900 flex-1;
+                }
+
+                .required-indicator {
+                  @apply text-red-500 font-bold ml-1;
+                }
+
+                .delete-field-btn {
+                  @apply text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-1;
+                  @apply transition-colors duration-200;
+
+                  i {
+                    @apply text-xs;
+                  }
+                }
+              }
+
+              .field-preview {
 
                 input,
                 select,
                 textarea {
-                    @apply w-full p-3 border border-gray-300 rounded-lg text-gray-900;
-                    @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
+                  @apply w-full p-2 border border-gray-300 rounded text-gray-900 bg-white;
+                  @apply text-sm;
                 }
 
                 .checkbox-label {
-                    @apply flex items-center text-gray-900;
+                  @apply flex items-center text-sm text-gray-900;
 
-                    input[type="checkbox"] {
-                        @apply mr-2 w-auto;
-                    }
+                  input[type="checkbox"] {
+                    @apply mr-2 w-auto;
+                  }
                 }
 
-                .file-upload {
-                    @apply flex items-center space-x-2;
+                .file-upload-preview {
+                  @apply flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded;
+                  @apply text-gray-500 text-sm;
 
-                    input[type="file"] {
-                        @apply flex-1;
-                    }
-
-                    span {
-                        @apply text-gray-600 text-sm;
-                    }
+                  i {
+                    @apply mr-2;
+                  }
                 }
+              }
 
-                .validation-hint {
-                    @apply text-blue-600 text-xs;
+              .validation-indicator {
+                @apply absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1;
+
+                i {
+                  @apply text-xs;
                 }
+              }
             }
+
+            .empty-canvas {
+              @apply flex flex-col items-center justify-center h-96 text-gray-400;
+
+              i {
+                @apply text-6xl mb-4;
+              }
+
+              h3 {
+                @apply text-xl font-semibold mb-2;
+              }
+
+              p {
+                @apply text-center max-w-md;
+              }
+            }
+          }
         }
+      }
     }
+
+    /* Right Sidebar - Field Editor */
+    .right-sidebar {
+      @apply w-80 bg-white border-l border-gray-200 overflow-y-auto;
+
+      .sidebar-section {
+        @apply p-6 border-b border-gray-200;
+
+        h3 {
+          @apply text-lg font-semibold text-gray-900 mb-4;
+        }
+
+        .section-header {
+          @apply flex items-center justify-between mb-4;
+
+          h3 {
+            @apply mb-0;
+          }
+
+          ::ng-deep .p-button.p-button-text {
+            @apply text-gray-500 hover:text-gray-900 hover:bg-gray-200;
+          }
+        }
+
+        .validation-rules-list {
+          @apply space-y-3;
+
+          .validation-rule-item {
+            @apply bg-gray-100 rounded-lg p-3 border border-gray-300;
+            @apply flex items-start justify-between;
+
+            .rule-info {
+              @apply flex-1;
+
+              .rule-type {
+                @apply font-medium text-cyan-400 text-sm;
+              }
+
+              .rule-value {
+                @apply text-gray-700 text-sm;
+              }
+
+              .rule-message {
+                @apply text-gray-500 text-xs mt-1;
+              }
+            }
+
+            .delete-rule-btn {
+              @apply text-red-500 hover:text-red-300 hover:bg-red-500/20 rounded p-1;
+              @apply transition-colors duration-200;
+
+              i {
+                @apply text-xs;
+              }
+            }
+          }
+
+          .no-rules {
+            @apply text-center py-8 text-gray-400;
+
+            p {
+              @apply text-sm;
+            }
+          }
+        }
+
+        .no-selection {
+          @apply text-center py-8 text-gray-400;
+
+          i {
+            @apply text-4xl mb-4;
+          }
+
+          h3 {
+            @apply text-lg font-semibold mb-2;
+          }
+
+          p {
+            @apply text-sm;
+          }
+        }
+      }
+    }
+  }
 }
 
-.validation-form {
-    @apply space-y-4;
+// Dialog Styles
+::ng-deep .p-dialog {
+  .p-dialog-header {
+    @apply bg-white border-b border-gray-200 text-gray-900;
+  }
 
-    .form-group {
+  .p-dialog-content {
+    @apply bg-white text-gray-900;
+  }
+
+  .p-dialog-footer {
+    @apply bg-gray-50 border-t border-gray-200;
+  }
+}
+
+.preview-content {
+  @apply max-h-[500px] overflow-y-auto;
+
+  .preview-template {
+    @apply bg-white text-gray-900 p-6 rounded-lg;
+
+    .preview-header {
+      @apply mb-6 pb-4 border-b border-gray-200;
+
+      h2 {
+        @apply text-2xl font-bold text-gray-900 mb-2;
+      }
+
+      p {
+        @apply text-gray-700;
+      }
+    }
+
+    .preview-form {
+      @apply space-y-4;
+
+      .preview-field {
         @apply space-y-2;
 
         label {
-            @apply block text-sm font-medium text-gray-300;
+          @apply block font-medium text-gray-900;
+
+          .required {
+            @apply text-red-500 ml-1;
+          }
         }
 
-        ::ng-deep .p-inputtext,
-        ::ng-deep .p-select {
-            @apply bg-gray-700/50 border-gray-600 text-white;
-
-            &:enabled:focus {
-                @apply border-cyan-500 ring-2 ring-cyan-500/20;
-            }
+        input,
+        select,
+        textarea {
+          @apply w-full p-3 border border-gray-300 rounded-lg text-gray-900;
+          @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
         }
+
+        .checkbox-label {
+          @apply flex items-center text-gray-900;
+
+          input[type="checkbox"] {
+            @apply mr-2 w-auto;
+          }
+        }
+
+        .file-upload {
+          @apply flex items-center space-x-2;
+
+          input[type="file"] {
+            @apply flex-1;
+          }
+
+          span {
+            @apply text-gray-600 text-sm;
+          }
+        }
+
+        .validation-hint {
+          @apply text-blue-600 text-xs;
+        }
+      }
     }
-}
-
-// Responsive Design
-@media (max-width: 1200px) {
-    .template-builder-container {
-        .builder-content {
-
-            .left-sidebar,
-            .right-sidebar {
-                @apply w-64;
-            }
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .template-builder-container {
-        .builder-header .header-content {
-            @apply flex-col items-start space-y-4;
-        }
-
-        .builder-content {
-            @apply flex-col;
-
-            .left-sidebar,
-            .right-sidebar {
-                @apply w-full h-auto max-h-96;
-            }
-
-            .center-canvas {
-                @apply order-first;
-            }
-        }
-    }
-}
-
-// Dark theme glassmorphism effects
-.template-builder-container {
-
-    ::ng-deep .p-card,
-    ::ng-deep .p-panel,
-    ::ng-deep .p-dialog {
-        @apply bg-gray-800/50 backdrop-blur-sm border-gray-700;
-    }
-
-    ::ng-deep .p-button:not(.p-button-text) {
-        @apply bg-gray-700/50 border-gray-600 hover:bg-gray-600/50;
-
-        &.p-button-primary {
-            @apply bg-cyan-500 border-cyan-500 hover:bg-cyan-600;
-        }
-    }
-
-    ::ng-deep .p-inputtext,
-    ::ng-deep .p-select,
-    ::ng-deep .p-inputtextarea {
-        @apply bg-gray-700/50 border-gray-600 text-white;
-
-        &:enabled:focus {
-            @apply border-cyan-500 ring-2 ring-cyan-500/20;
-        }
-    }
+  }
 }

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { SHARED_IMPORTS, StatusManagementDialogComponent, StatusHistoryComponent, HasPermissionDirective, DocumentSharingDialogComponent } from '../../../shared';
 import { DocumentService } from '../../../core/services/document.service';
 import { DocumentStatusService } from '../../../core/services/document-status.service';
@@ -21,8 +22,8 @@ import {
   VerificationStatus,
   BulkAction,
   BulkActionType,
-  ExportFormat,
-  AuditAction
+  AuditAction,
+  ExportOptions
 } from '../../../shared/models/document.models';
 import { UserRole } from '../../../shared/models/auth.models';
 
@@ -117,7 +118,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       docs = docs.filter(doc =>
         doc.title.toLowerCase().includes(query) ||
         doc.description?.toLowerCase().includes(query) ||
-        doc.originalFileName.toLowerCase().includes(query) ||
+        doc.originalFileName?.toLowerCase().includes(query) ||
         doc.tags.some(tag => tag.toLowerCase().includes(query))
       );
     }
@@ -134,7 +135,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     }
     if (currentFilters.dateRange) {
       docs = docs.filter(doc => {
-        const uploadDate = new Date(doc.uploadedAt);
+        const uploadDate = new Date(doc.uploadedAt || '');
         return uploadDate >= currentFilters.dateRange!.start &&
           uploadDate <= currentFilters.dateRange!.end;
       });
@@ -272,7 +273,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     ];
 
     commonFilters.forEach(filter => {
-      const cacheKey = `documents:1:${this.pageSize()}:${JSON.stringify(filter)}`;
+      // const cacheKey = `documents:1:${this.pageSize()}:${JSON.stringify(filter)}`;
       // Warm up cache in background
       setTimeout(() => {
         this.filters.set(filter);
@@ -445,24 +446,24 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onExport(format: ExportFormat): void {
+onExport(options: ExportOptions) {
     const selectedIds = this.selectedDocuments();
     const documentsToExport = selectedIds.length > 0 ? selectedIds : this.filteredDocuments().map(doc => doc.id);
 
-    this.documentService.exportDocuments(documentsToExport, format.type, format).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `documents.${format.type}`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => {
-        console.error('Export failed:', error);
-      }
+    this.documentService.exportDocuments(documentsToExport, options.format, options).subscribe({
+        next: (blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `documents.${options.format}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        },
+        error: (error) => {
+            console.error('Export failed:', error);
+        }
     });
-  }
+}
 
   onDocumentClick(document: Document): void {
     this.router.navigate(['/documents', document.id]);
@@ -507,7 +508,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     );
   }
 
-  onVirtualScrollPerformanceMetrics(metrics: any): void {
+  onVirtualScrollPerformanceMetrics(metrics: {renderTime: number}): void {
     // Monitor virtual scroll performance
     if (metrics.renderTime > 16) { // More than one frame (60fps)
       console.warn('Virtual scroll render time exceeded 16ms:', metrics.renderTime);
@@ -528,7 +529,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
 
     try {
-      const cacheKey = `documents:${this.currentPage()}:${this.pageSize()}:${JSON.stringify(this.filters())}`;
+      // const cacheKey = `documents:${this.currentPage()}:${this.pageSize()}:${JSON.stringify(this.filters())}`;
 
       // For development, simulate loading more documents
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -776,7 +777,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           const url = window.URL.createObjectURL(blob);
           const a = window.document.createElement('a');
           a.href = url;
-          a.download = document.originalFileName;
+          a.download = document.originalFileName ?? '';
           a.click();
           window.URL.revokeObjectURL(url);
         },
@@ -814,15 +815,25 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     return [
       {
         id: '1',
-        verificationId: 'VER-001',
         title: 'Bachelor of Science Degree',
         description: 'Computer Science degree from University of Technology',
         originalFileName: 'degree-certificate.pdf',
         canonicalHash: 'hash123',
+        userId: 'user123',
+        hash: 'hash123',
+        sharingSettings: {
+          isPublic: true,
+          allowDownload: true,
+        },
+        filename: 'degree-certificate.pdf',
+        isPublic: true,
+        downloadCount: 0,
+        viewCount: 0,
+        filePath: '/api/documents/1/file',
+        size: 2048576,
         documentType: DocumentType.DEGREE,
         status: DocumentStatus.ACTIVE,
         verificationStatus: VerificationStatus.VERIFIED,
-        fileUrl: '/api/documents/1/file',
         thumbnailUrl: '/api/documents/1/thumbnail',
         fileSize: 2048576,
         mimeType: 'application/pdf',
@@ -834,6 +845,10 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           title: 'Bachelor of Science Degree',
           recipientName: 'John Doe',
           issueDate: new Date('2023-06-15'),
+          expiryDate: new Date('2028-06-15'),
+          fileSize: 2048576,
+          mimeType: 'application/pdf',
+          checksum: 'hash123'
         },
         permissions: {
           canView: true,
@@ -842,23 +857,32 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           canShare: true,
           canDownload: true
         },
-        auditTrail: [],
-        issuerId: 'issuer123',
+        originalName: 'degree-certificate.pdf',
         organizationId: 'org123',
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-16')
       },
       {
         id: '2',
-        verificationId: 'VER-002',
+        userId: 'user123',
+        filename: 'aws-cert.pdf',
+        originalName: 'aws-cert.pdf',
+        filePath: '/api/documents/2/file',
+        size: 1024768,
+        hash: 'hash456',
+        sharingSettings: {
+          isPublic:true,
+          allowDownload: true,
+        },
+        downloadCount: 0,
+        viewCount: 0,
+        isPublic: true,
         title: 'Professional Certificate',
         description: 'AWS Solutions Architect Professional Certificate',
-        originalFileName: 'aws-cert.pdf',
         canonicalHash: 'hash456',
         documentType: DocumentType.CERTIFICATE,
         status: DocumentStatus.ACTIVE,
         verificationStatus: VerificationStatus.PENDING,
-        fileUrl: '/api/documents/2/file',
         thumbnailUrl: '/api/documents/2/thumbnail',
         fileSize: 1024768,
         mimeType: 'application/pdf',
@@ -870,6 +894,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           recipientName: 'John Doe',
           issueDate: new Date('2024-01-15'),
           expiryDate: new Date('2027-01-15'),
+          fileSize: 1024768,
+          mimeType: 'application/pdf',
+          checksum: 'hash456'
         },
         permissions: {
           canView: true,
@@ -878,9 +905,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           canShare: true,
           canDownload: true
         },
-        auditTrail: [],
-        issuerId: 'issuer123',
-        organizationId: 'org123',
+
         createdAt: new Date('2024-01-20'),
         updatedAt: new Date('2024-01-20')
       }

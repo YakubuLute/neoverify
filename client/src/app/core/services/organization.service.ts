@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -250,6 +251,37 @@ export class OrganizationService {
             catchError(error => {
                 this.loading.set(false);
                 this.notificationService.error('Failed to load organization context');
+                return throwError(() => error);
+            })
+        );
+    }
+
+    /**
+     * Switch the active organization for the current user
+     */
+    switchOrganization(request: { organizationId: string }): Observable<OrganizationContext> {
+        const { organizationId } = request;
+
+        const memberships = this.userMemberships();
+        const target = memberships.find(m => m.organizationId === organizationId);
+        if (!target) {
+            return throwError(() => new Error('Organization membership not found'));
+        }
+
+        // Update default membership locally
+        const updatedMemberships = memberships.map(m => ({
+            ...m,
+            isDefault: m.organizationId === organizationId
+        }));
+        this.userMemberships.set(updatedMemberships);
+
+        // Refresh organization context and propagate via signal
+        return this.getOrganizationContext(organizationId).pipe(
+            tap(() => {
+                this.notificationService.success('Organization switched');
+            }),
+            catchError(error => {
+                this.notificationService.error('Failed to switch organization');
                 return throwError(() => error);
             })
         );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, OnInit, inject, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -31,301 +32,7 @@ import { AuditEntry, AuditAction, Document } from '../../../shared/models/docume
     DividerModule,
     TimelineModule
   ],
-  template: `
-    <div class="audit-entry-detail-container p-6">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <div class="flex items-center gap-3 mb-2">
-            <p-button
-              icon="pi pi-arrow-left"
-              [text]="true"
-              (onClick)="goBack()"
-              pTooltip="Go back"
-            />
-            <h1 class="text-3xl font-bold text-white">Audit Entry Details</h1>
-          </div>
-          <p class="text-gray-400">Detailed information about this audit entry</p>
-        </div>
-        <div class="flex gap-3">
-          @if (auditEntry()) {
-            <p-button
-              label="Copy Entry ID"
-              icon="pi pi-copy"
-              [outlined]="true"
-              (onClick)="copyEntryId()"
-            />
-          }
-          @if (auditEntry()?.documentId) {
-            <p-button
-              label="View Document"
-              icon="pi pi-external-link"
-              (onClick)="viewDocument()"
-            />
-          }
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      @if (loading()) {
-        <div class="flex justify-center items-center py-12">
-          <p-progressSpinner />
-        </div>
-      }
-
-      <!-- Entry Details -->
-      @if (auditEntry() && !loading()) {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Details -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Basic Information -->
-          <p-card header="Basic Information" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Entry ID</label>
-                <p class="text-white font-mono text-sm bg-gray-900 p-2 rounded">{{ auditEntry()?.id }}</p>
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Timestamp</label>
-                <div class="space-y-1">
-                  <p class="text-white">{{ auditEntry()?.timestamp | date:'full' }}</p>
-                  <p class="text-sm text-gray-400">{{ getRelativeTime(auditEntry()?.timestamp!) }}</p>
-                </div>
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Action</label>
-                <p-tag
-                  [value]="getActionLabel(auditEntry()?.action!)"
-                  [severity]="getActionSeverity(auditEntry()?.action!)"
-                  class="text-sm"
-                />
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">User</label>
-                <div class="space-y-1">
-                  <p class="text-white">{{ auditEntry()?.userEmail }}</p>
-                  <p class="text-sm text-gray-400 font-mono">{{ auditEntry()?.userId }}</p>
-                </div>
-              </div>
-
-              @if (auditEntry()?.documentId) {
-                <div>
-                  <label class="text-sm font-medium text-gray-300 mb-2 block">Document ID</label>
-                  <div class="flex items-center gap-2">
-                    <p class="text-white font-mono text-sm">{{ auditEntry()?.documentId }}</p>
-                    <p-button
-                      icon="pi pi-external-link"
-                      [text]="true"
-                      size="small"
-                      (onClick)="viewDocument()"
-                      pTooltip="View document"
-                    />
-                  </div>
-                </div>
-              }
-
-              @if (auditEntry()?.ipAddress) {
-                <div>
-                  <label class="text-sm font-medium text-gray-300 mb-2 block">IP Address</label>
-                  <p class="text-white font-mono">{{ auditEntry()?.ipAddress }}</p>
-                </div>
-              }
-            </div>
-          </p-card>
-
-          <!-- Status Changes -->
-          @if (auditEntry()?.previousStatus || auditEntry()?.newStatus) {
-            <p-card 
-              header="Status Changes" 
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            >
-              <div class="flex items-center justify-center gap-4">
-                @if (auditEntry()?.previousStatus) {
-                  <div class="text-center">
-                    <label class="text-sm font-medium text-gray-300 mb-2 block">Previous Status</label>
-                    <p-tag
-                      [value]="auditEntry()?.previousStatus!"
-                      severity="secondary"
-                      class="text-sm"
-                    />
-                  </div>
-                }
-
-                @if (auditEntry()?.previousStatus && auditEntry()?.newStatus) {
-                  <i class="pi pi-arrow-right text-gray-400 text-xl"></i>
-                }
-
-                @if (auditEntry()?.newStatus) {
-                  <div class="text-center">
-                    <label class="text-sm font-medium text-gray-300 mb-2 block">New Status</label>
-                    <p-tag
-                      [value]="auditEntry()?.newStatus!"
-                      severity="success"
-                      class="text-sm"
-                    />
-                  </div>
-                }
-              </div>
-
-              @if (auditEntry()?.reason) {
-                <div class="mt-4">
-                  <label class="text-sm font-medium text-gray-300 mb-2 block">Reason</label>
-                  <p class="text-white bg-gray-900 p-3 rounded">{{ auditEntry()?.reason }}</p>
-                </div>
-              }
-            </p-card>
-          }
-
-          <!-- Technical Details -->
-          <p-card header="Technical Details" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
-            <div class="space-y-4">
-              @if (auditEntry()?.userAgent) {
-                <div>
-                  <label class="text-sm font-medium text-gray-300 mb-2 block">User Agent</label>
-                  <p class="text-white text-sm bg-gray-900 p-3 rounded break-all">{{ auditEntry()?.userAgent }}</p>
-                </div>
-              }
-
-              @if (auditEntry()?.details && hasDetails(auditEntry()?.details!)) {
-                <div>
-                  <label class="text-sm font-medium text-gray-300 mb-2 block">Additional Details</label>
-                  <pre class="text-white text-sm bg-gray-900 p-3 rounded overflow-auto max-h-60">{{ formatDetails(auditEntry()?.details!) }}</pre>
-                </div>
-              }
-            </div>
-          </p-card>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-          <!-- Document Information -->
-          @if (document()) {
-            <p-card 
-              header="Document Information" 
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            >
-            <div class="space-y-4">
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Title</label>
-                <p class="text-white">{{ document()?.title }}</p>
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Type</label>
-                <p-tag [value]="document()?.documentType!" severity="info" />
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Status</label>
-                <p-tag [value]="document()?.status!" [severity]="getDocumentStatusSeverity(document()?.status!)" />
-              </div>
-
-              <div>
-                <label class="text-sm font-medium text-gray-300 mb-2 block">Uploaded</label>
-                <p class="text-white text-sm">{{ document()?.uploadedAt | date:'short' }}</p>
-              </div>
-
-              <p-divider />
-
-              <p-button
-                label="View Full Document"
-                icon="pi pi-external-link"
-                [outlined]="true"
-                class="w-full"
-                (onClick)="viewDocument()"
-              />
-              </div>
-            </p-card>
-          }
-
-          <!-- Related Entries -->
-          @if (relatedEntries().length > 0) {
-            <p-card 
-              header="Related Entries" 
-              class="bg-gray-800/50 backdrop-blur-sm border border-gray-700"
-            >
-            <p-timeline [value]="relatedEntries()" class="w-full">
-              <ng-template pTemplate="content" let-entry>
-                <div class="p-3 bg-gray-900/50 rounded cursor-pointer hover:bg-gray-900/70 transition-colors"
-                     (click)="viewRelatedEntry(entry.id)">
-                  <div class="flex items-center justify-between mb-2">
-                    <p-tag
-                      [value]="getActionLabel(entry.action)"
-                      [severity]="getActionSeverity(entry.action)"
-                      class="text-xs"
-                    />
-                    <span class="text-xs text-gray-400">{{ entry.timestamp | date:'short' }}</span>
-                  </div>
-                  <p class="text-sm text-white">{{ entry.userEmail }}</p>
-                </div>
-              </ng-template>
-            </p-timeline>
-
-            @if (relatedEntries().length >= 5) {
-              <div class="mt-4">
-                <p-button
-                  label="View All Related"
-                  [text]="true"
-                  class="w-full"
-                  (onClick)="viewAllRelated()"
-                />
-              </div>
-            }
-            </p-card>
-          }
-
-          <!-- Quick Actions -->
-          <p-card header="Quick Actions" class="bg-gray-800/50 backdrop-blur-sm border border-gray-700">
-            <div class="space-y-3">
-              <p-button
-                label="Export Entry"
-                icon="pi pi-download"
-                [outlined]="true"
-                class="w-full"
-                (onClick)="exportEntry()"
-              />
-
-              @if (auditEntry()?.userId) {
-                <p-button
-                  label="View User Activity"
-                  icon="pi pi-user"
-                  [outlined]="true"
-                  class="w-full"
-                  (onClick)="viewUserActivity()"
-                />
-              }
-
-              <p-button
-                label="Search Similar"
-                icon="pi pi-search"
-                [outlined]="true"
-                class="w-full"
-                (onClick)="searchSimilar()"
-              />
-            </div>
-          </p-card>
-        </div>
-        </div>
-      }
-
-      <!-- Error State -->
-      @if (error() && !loading()) {
-        <div class="text-center py-12">
-          <i class="pi pi-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-          <h3 class="text-xl font-semibold text-white mb-2">Entry Not Found</h3>
-          <p class="text-gray-400 mb-4">The requested audit entry could not be found.</p>
-          <p-button
-            label="Go Back"
-            icon="pi pi-arrow-left"
-            (onClick)="goBack()"
-          />
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './audit-entry-detail.component.html',
   styles: [`
     :host {
       display: block;
@@ -529,7 +236,11 @@ export class AuditEntryDetailComponent implements OnInit {
       [AuditAction.STATUS_CHANGED]: 'Status Changed',
       [AuditAction.VERIFICATION_STARTED]: 'Verification Started',
       [AuditAction.VERIFICATION_COMPLETED]: 'Verification Completed',
-      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed'
+      [AuditAction.VERIFICATION_FAILED]: 'Verification Failed',
+      [AuditAction.UPLOADED]: 'Uploaded',
+      [AuditAction.REJECTED]: 'Rejected',
+      [AuditAction.ARCHIVED]: 'Archived',
+      [AuditAction.RESTORED]: 'Restored'
     };
     return labels[action] || action;
   }
@@ -548,7 +259,11 @@ export class AuditEntryDetailComponent implements OnInit {
       [AuditAction.STATUS_CHANGED]: 'warn',
       [AuditAction.VERIFICATION_STARTED]: 'info',
       [AuditAction.VERIFICATION_COMPLETED]: 'success',
-      [AuditAction.VERIFICATION_FAILED]: 'danger'
+      [AuditAction.VERIFICATION_FAILED]: 'danger',
+      [AuditAction.UPLOADED]: 'info',
+      [AuditAction.REJECTED]: 'danger',
+      [AuditAction.ARCHIVED]: 'secondary',
+      [AuditAction.RESTORED]: 'info'
     };
     return severities[action] || 'info';
   }
@@ -577,11 +292,11 @@ export class AuditEntryDetailComponent implements OnInit {
     return 'Just now';
   }
 
-  hasDetails(details: any): boolean {
+  hasDetails(details: Record<string, any>): boolean {
     return details && Object.keys(details).length > 0;
   }
 
-  formatDetails(details: any): string {
+  formatDetails(details: Record<string, any>): string {
     return JSON.stringify(details, null, 2);
   }
 }

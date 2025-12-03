@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, inject } from '@angular/core';
 import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
 import {
@@ -7,7 +8,6 @@ import {
     map,
     catchError,
     tap,
-    startWith,
     shareReplay
 } from 'rxjs/operators';
 import { CacheService } from './cache.service';

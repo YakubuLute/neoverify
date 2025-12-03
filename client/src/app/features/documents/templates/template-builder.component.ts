@@ -11,7 +11,7 @@ import {
     ValidationRule,
     FieldType,
     ValidationType,
-    FieldValidation
+    DocumentType
 } from '../../../shared/models/document.models';
 import { UserRole } from '../../../shared/models/auth.models';
 
@@ -77,7 +77,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
 
     // Preview state
     readonly showPreview = signal(false);
-    readonly previewData = signal<Record<string, any>>({});
+    readonly previewData = signal<Record<string, unknown>>({});
 
     // User permissions
     readonly currentUser = computed(() => this.authService.getCurrentUser());
@@ -309,11 +309,13 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
     onAddField(fieldType: FieldType): void {
         const newField: TemplateField = {
             id: this.generateFieldId(),
+            label: '',
             name: `field_${this.fields().length + 1}`,
             type: fieldType,
             required: false,
             position: { x: 100, y: 100 + (this.fields().length * 60) },
-            placeholder: this.getDefaultPlaceholder(fieldType)
+            placeholder: this.getDefaultPlaceholder(fieldType),
+            order: this.fields().length
         };
 
         if (fieldType === FieldType.DROPDOWN) {
@@ -464,7 +466,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
 
     onPreviewTemplate(): void {
         // Generate sample data for preview
-        const sampleData: Record<string, any> = {};
+        const sampleData: Record<string, unknown> = {};
         this.fields().forEach(field => {
             sampleData[field.name] = this.generateSampleValue(field);
         });
@@ -493,7 +495,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
             this.templateService.createTemplate(templateData);
 
         saveOperation.subscribe({
-            next: (savedTemplate) => {
+            next: () => {
                 this.isDirty.set(false);
                 this.router.navigate(['/documents/templates']);
             },
@@ -561,7 +563,7 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
         }
     }
 
-    private generateSampleValue(field: TemplateField): any {
+    private generateSampleValue(field: TemplateField): unknown {
         switch (field.type) {
             case FieldType.TEXT: return 'Sample Text';
             case FieldType.NUMBER: return 42;
@@ -600,22 +602,27 @@ export class TemplateBuilderComponent implements OnInit, OnDestroy {
             category: 'Education',
             version: '1.0.0',
             isActive: true,
+            documentType: DocumentType.PDF,
             fields: [
                 {
-                    id: 'field1',
-                    name: 'recipientName',
-                    type: FieldType.TEXT,
-                    required: true,
-                    position: { x: 100, y: 100 },
-                    placeholder: 'Full Name'
+                  id: 'field1',
+                  name: 'recipientName',
+                  type: FieldType.TEXT,
+                  required: true,
+                  position: { x: 100, y: 100 },
+                  placeholder: 'Full Name',
+                  label: '',
+                  order: 0
                 },
                 {
-                    id: 'field2',
-                    name: 'degreeTitle',
-                    type: FieldType.TEXT,
-                    required: true,
-                    position: { x: 100, y: 160 },
-                    placeholder: 'Degree Title'
+                  id: 'field2',
+                  name: 'degreeTitle',
+                  type: FieldType.TEXT,
+                  required: true,
+                  position: { x: 100, y: 160 },
+                  placeholder: 'Degree Title',
+                  label: '',
+                  order: 0
                 }
             ],
             validationRules: [
